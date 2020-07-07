@@ -1,0 +1,212 @@
+// // IMPORTS
+
+@import "library.less";
+@import "main-styles.less";
+
+
+// STYLES
+
+
+.info {
+	height: calc(100% - 4rem);
+	max-height: calc(100% - 4rem);
+    padding: 1rem;
+    // display: grid;
+    grid-template-columns: 1fr 2fr;
+  	grid-template-rows: 100%;
+  	grid-gap: 1rem;
+    grid-template-areas:
+    'addInfoArea addInfoArea'
+    'manageStatsArea manageStatsArea';   
+	
+    section {
+    	border-radius: @thinnest;
+    	padding: @thin;
+    	box-shadow: 0 0 1rem rgba(0,0,0,.5);
+    }
+
+
+	.addInfoArea {
+		grid-area: deckInfo;
+		.flex-col();
+		background: @light;
+		overflow-y: auto;
+
+		h3 {
+			margin: @thin 0;
+			color: @darker;
+		}
+		.nameEntry {
+			font-size: @big;
+			padding: @thin;
+			border: none;			
+		}
+		.descEntry {
+			padding: @thin;
+			border: none;
+		}
+
+
+	}
+
+	.addCardsArea {
+		grid-area: searchArea;
+		display: flex;
+		flex-flow: row nowrap;
+		align-items: stretch;
+		height: 100%;
+		background: @darker;
+		color: @light;
+		h2 {
+			padding-bottom: @thinner;
+			margin-bottom: @thin;
+		}
+		.searchFind {
+			flex-grow: 1;
+			margin-right: @thin;
+			.searchInput {
+				color: @darkest;
+				width: 100%;
+				font-size: @big;
+			}
+			.suggestions {
+				margin-bottom: 1rem;
+				overflow: hidden;
+				.suggestion {
+					.flex-row();
+
+					align-items: center;
+					margin-top: @thinner;
+					background: @light;
+					span {
+						flex-grow: 1;
+						transition: .15s;
+						color:  @darkest;
+						padding: @thinner;
+						&:hover {
+							cursor: pointer;
+							background: @highlight;
+						}
+					}
+				}
+			}
+		}
+		.importList {
+			flex-grow: 1;
+			.flex-col();
+			align-items: stretch;
+			.importTextArea {
+			}
+			input {
+				font-family: @header;
+				font-size: @big;
+				&:hover {
+					cursor: pointer;
+					background: @highlight;
+				}
+			}
+			span {
+				font-size: @smaller;
+			}
+		}
+	}
+
+	.manageListArea {
+		grid-area: deckList;
+		.flex-col();
+		max-height: 100%;
+		padding: 0;
+
+		.listInner {
+			.flex-col();
+			flex-grow: 1;
+			height: 100%;
+			background: @light;
+			color: @darkest;
+			overflow-y: auto;
+			padding: @thin;
+			h3 {
+				font-size: 1.2rem;
+				margin: 1rem 0 @thin;
+				border-bottom: @thinnest solid @darkest;
+				width: 100%;
+			}
+			.item {
+				width: 100%;
+				.flex-row();
+				padding: @thinnest 0;
+				animation: flashIn 1s ease-out;
+				justify-content: space-between;
+				button {
+					background: transparent;
+					font-weight: bold;
+					width: 1rem;
+					&:hover {
+						cursor: pointer;
+						background: @highlight;
+					}
+				}
+				.printing {
+					select {
+						width: 5rem;
+						font-size: 1rem;
+					}
+				}
+			}
+
+		}
+	}
+
+	.manageStatsArea {
+		grid-area: manageDeck;
+		height: 100%;
+		.flex-col();
+		justify-content: space-between;
+		background: @darkest;
+		.exportList {
+			background: @darkest;
+			.flex-row();
+			button {
+				&:hover {
+					background: @highlight;
+				}
+			}
+			.clearList {
+				&:hover {
+					background: @red;
+				}
+			}
+		}
+
+		.dataVis {
+			.colors {
+				.chart {
+					position: fixed;
+					z-index: -1;
+					top: 0;
+					left: 0;
+					height: 100vh;
+					.flex-row();
+				}
+			}
+		}
+		.playTest {
+			font-size: @bigger;
+		}
+	}
+}
+
+@keyframes flashIn {
+	0% {
+		background: @highlight;
+		color: transparent;
+	}
+	30% {
+		color: initial;
+	}
+	100% {
+		background: initial;
+		color: initial;
+	}
+}
+

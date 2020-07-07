@@ -1,0 +1,102 @@
+// // IMPORTS
+
+@import "library.less";
+
+// STYLES
+
+
+.wrapper {
+	color: @light;
+    // width: 100vw;
+    // height: 100vh;
+// 	overflow: hidden;
+}
+
+
+
+.main-header {
+	.flex-centered();
+	justify-content: space-between;
+	background: @darkest;
+	height: 2rem;
+	padding: @thin 1rem;
+	font-size: 120%;
+	.title {
+		.flex-centered();
+		justify-content: flex-start;
+		font-family: @header;
+
+		a {
+			color: @lightest;
+			width: auto;
+			padding-right: @thin;
+			&:hover {
+				opacity: .8;				
+			}
+		}
+	}
+	.nav {
+		.flex-centered();
+		justify-content: flex-end;
+		flex: 0 1 10%;
+		.navItem {
+			color: @lightest;
+			margin-right: @thin;
+			cursor: pointer;
+			&:hover {
+				opacity: .8;
+			}
+		}
+		.active {
+			text-decoration: underline;
+			color: @highlight;
+		}
+	}
+}
+
+
+.notifications {
+	position: fixed;
+	top: 1rem;
+	left: 25%;
+	width: 50%;
+	z-index: 20;
+	pointer-events: none;
+	.notification {
+		.clean-input();
+		.flex-centered();
+		width: 100%;
+		justify-content: space-between;
+		color: @darkest;
+		padding: @thin 1rem;
+		margin-top: @thin;
+		animation: slide-in-out-top 5s ease forwards;
+	}
+	.info {background: @lighter;}
+	.warning {background: @highlight;}
+	.error {background: @red;}
+	.success {background: @green;}
+}
+
+.drop-slot {
+	flex: 1 0 @cardW;
+	position: relative;
+	// height: @cardH;
+	// width: @cardW;
+	margin: 0;
+	* {cursor: pointer;}
+	.drop-slot-over {
+	    position: absolute;
+	    top: 0;
+	    left: 0;
+	    height: 100%;
+	    width: 100%;
+	    z-index: 1;
+	    opacity: 0.5;
+	    background-color: yellow;
+	}
+}
+
+.drop-slot.list {
+	display: flex;
+}

@@ -1,0 +1,166 @@
+.card {
+  transition: 0.2s;
+  height: auto;
+  .flex-col();
+  &:hover .cardUI {
+    opacity: 1;
+    * {cursor: pointer;}
+  }
+  .cardUI {
+    opacity: 0;
+    height: 3rem;
+    background: @darkest;
+    color: @light;
+    position: absolute;
+    padding: @thin;
+  }
+}
+  .card-head {
+  .flex-row();
+  justify-content: space-between;
+  align-items: center;
+  border: 2px solid @darkest;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+  color: @darkest;
+  border-radius: @thinner;
+  background: rgba(255, 255, 255, 0.7);
+  width: 108%;
+  margin: 0 0 0 -4%;
+  padding: @thinnest @thinner;
+  font-family: @header;
+  text-align: left;
+  white-space: nowrap;
+  .cost {
+    white-space: nowrap;
+    .ms {
+      border-radius: 50%;
+      padding: 1px;
+      margin-left: @thinnest;
+      box-shadow: 0 @thinnest 0 @darkest;
+    }
+    .ms-w {background: #F8F9F4;}
+    .ms-u {background: #BAE8FC;}
+    .ms-b {background: #7C7E80;}
+    .ms-r {background: #ECBAA1;}
+    .ms-g {background: #B1DEAE;}
+    .ms-c,.ms-1,.ms-2,.ms-3,.ms-4,.ms-5,.ms-6,.ms-7,.ms-8,.ms-9,.ms-10 {background: #AEA399;}
+  }
+
+  .card-controls {
+    position: absolute;
+    width: 100%;
+    z-index: 30;
+    opacity: 0;
+    text-shadow: 0 0 @thin @darkest;
+  }
+
+}
+
+.cardGeneric {
+  transition: 0.2s;
+  cursor: pointer;
+  margin: @thinner @thinner 0 0;
+  min-width: @cardW;
+  width: @cardW;
+  min-height: @cardH;
+  height: @cardH;
+  border-radius: @thin;
+  
+  &:last-child {
+    margin-right: 0;
+  }
+  &:hover {
+    box-shadow: 0 0 @thin @highlight;
+    transform: scale(1.1);
+  }
+
+}
+
+.fullImg {
+  .cardGeneric();
+}
+
+.cardHTML {
+  .cardGeneric();
+  font-family: 'MTG-para';
+  border: @thin solid @darkest;
+  border-bottom: 1rem solid @darkest;
+  color: @darkest;
+  padding: @thinner;
+  overflow: hidden;
+
+  .front {
+    height: 100%;
+    .flex-col();
+    justify-content: space-between;
+    .types {
+      .bordered();
+      background: rgba(255, 255, 255, 0.7);
+      width: 100%;
+      margin: @thinner 0;
+      font-family: 'MTG-head';
+      font-size: @smaller;
+      text-align: left;
+      padding-left: @thinner;
+    }
+    .body {
+      .bordered();
+      flex-grow: 1;
+      border-radius: 0;
+      background: rgba(255, 255, 255, 0.9);
+      font-size: @smaller;
+      padding: @thinner;
+      text-align: left;
+      overflow: hidden;
+      i,.i,.flavor {
+        font-style: italic;
+      }
+    }
+    .footer {
+      display: flex;
+      justify-content: flex-end;
+      .pt {
+        .bordered();
+        background: @light;
+        margin-top: -0.5rem;
+        width: 2.5rem;
+        align-self: flex-end;
+        text-align: center;
+        font-size: @small;
+        padding: 0 @thinner;
+      }
+    }
+  }
+}
+  .back {
+    .cardGeneric();
+    background: #4D310E;
+    border-bottom: @thin solid @darkest;
+    text-align: center;
+
+    font-family: 'MTG-head';
+    padding: @thinner;
+    margin: @thinner;
+    height: 100%;
+    border: 1px solid @darkest;
+    div {
+      height: 100%;
+      width: 100%;
+      padding-top: 2rem;
+      border: @thinnest solid #236991;
+      border-radius: 50%;
+      background: #AA5234;
+      text-align: center;
+      h2 {
+        margin-left: -0.5rem;
+        font-size: 3rem;
+        color: #70261D;
+      }
+      h4 {
+        color: @light;
+        align-self: right;
+      }
+    }
+  }
+
+

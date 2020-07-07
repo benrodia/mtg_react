@@ -1,0 +1,1326 @@
+@font-face {
+  font-family: 'MTG-para';
+  src: url(../../fonts/Magic-After-M15/mplantin.ttf);
+}
+@font-face {
+  font-family: 'MTG-head';
+  src: url(../../fonts/Magic-After-M15/beleren-bold_P1.01.ttf);
+}
+.flex-row {
+  display: flex;
+  flex-flow: row nowrap;
+}
+.flex-col {
+  display: flex;
+  flex-flow: column nowrap;
+}
+.flex-centered {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+}
+.fixed-full-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+}
+.bordered {
+  border: 2px solid #020817;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+  border-radius: 0.25rem;
+}
+.clean-input {
+  border: none;
+  border-radius: 2rem;
+  padding: 0.25rem 1rem;
+  margin: 0.125rem;
+  background: #ebf1ff;
+  color: #020817;
+  transition: 0.2s;
+  height: 2rem;
+}
+.clean-button {
+  border: none;
+  border-radius: 2rem;
+  padding: 0.25rem 1rem;
+  margin: 0.125rem;
+  color: #020817;
+  transition: 0.2s;
+  height: 2rem;
+  font-size: 120%;
+  font-family: 'MTG-head';
+  cursor: pointer;
+  background: #ebf1ff;
+}
+.clean-button:hover {
+  background: #fcd303;
+}
+.button-inverse {
+  transition: 0.2s;
+  margin: 0.125rem;
+  border: 0.125rem solid #ebf1ff;
+  border-radius: 2rem;
+  background: transparent;
+  color: #ebf1ff;
+}
+.button-inverse:hover {
+  background: transparent;
+  color: #fcd303;
+  border-color: #fcd303;
+}
+.small-button {
+  border: none;
+  border-radius: 2rem;
+  padding: 0.25rem 1rem;
+  margin: 0.125rem;
+  color: #020817;
+  transition: 0.2s;
+  height: 2rem;
+  font-size: 120%;
+  font-family: 'MTG-head';
+  cursor: pointer;
+  background: #ebf1ff;
+  font-size: 0.8rem;
+  height: 1.5rem;
+  padding: 0 0.5rem;
+  width: auto;
+}
+.small-button:hover {
+  background: #fcd303;
+}
+.smaller-button {
+  border: none;
+  border-radius: 2rem;
+  padding: 0.25rem 1rem;
+  margin: 0.125rem;
+  color: #020817;
+  transition: 0.2s;
+  height: 2rem;
+  font-size: 120%;
+  font-family: 'MTG-head';
+  cursor: pointer;
+  background: #ebf1ff;
+  font-size: 0.8rem;
+  height: 1.5rem;
+  padding: 0 0.5rem;
+  width: auto;
+  height: 1rem;
+}
+.smaller-button:hover {
+  background: #fcd303;
+}
+.warning-button:hover {
+  background: #ff4466;
+}
+.list-item {
+  display: flex;
+  flex-flow: row nowrap;
+  padding: 0.125rem 0;
+  animation: flash-in 1s ease-out;
+  justify-content: space-between;
+}
+.list-item .item-label {
+  flex-grow: 1;
+}
+.list-item .printing {
+  min-width: 10rem;
+}
+html {
+  font-size: 100%;
+  overflow: hidden;
+  background: #414f6b;
+  color: #ebf1ff;
+}
+* {
+  font-family: 'MTG-para';
+  box-sizing: border-box !important;
+  max-height: 100%;
+  max-width: 100%;
+  text-decoration: none;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: none;
+}
+h1,
+h2,
+h3,
+h4 {
+  font-family: 'MTG-head';
+}
+input {
+  border: none;
+  border-radius: 2rem;
+  padding: 0.25rem 1rem;
+  margin: 0.125rem;
+  background: #ebf1ff;
+  color: #020817;
+  transition: 0.2s;
+  height: 2rem;
+}
+textarea {
+  border: none;
+  border-radius: 2rem;
+  padding: 0.25rem 1rem;
+  margin: 0.125rem;
+  background: #ebf1ff;
+  color: #020817;
+  transition: 0.2s;
+  height: 2rem;
+  height: auto;
+  border-radius: 0.125rem;
+  padding: 0.25rem;
+}
+button {
+  border: none;
+  border-radius: 2rem;
+  padding: 0.25rem 1rem;
+  margin: 0.125rem;
+  color: #020817;
+  transition: 0.2s;
+  height: 2rem;
+  font-size: 120%;
+  font-family: 'MTG-head';
+  cursor: pointer;
+  background: #ebf1ff;
+}
+button:hover {
+  background: #fcd303;
+}
+section {
+  border-radius: 0.125rem;
+  padding: 0.5rem;
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.5);
+}
+@keyframes slide-in-out-top {
+  0% {
+    opacity: 0;
+    margin-top: -5rem;
+    display: flex;
+  }
+  10% {
+    opacity: 1;
+    margin-top: 0;
+  }
+  80% {
+    opacity: 1;
+    margin-top: 0;
+  }
+  99% {
+    opacity: 0;
+    margin-top: -5rem;
+    display: flex;
+  }
+  100% {
+    opacity: 0;
+    margin-top: -5rem;
+    display: none;
+  }
+}
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    margin-left: -7rem;
+  }
+  to {
+    opacity: 1;
+    margin-left: 0;
+  }
+}
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+@keyframes flash-in {
+  0% {
+    background: #fcd303;
+    color: transparent;
+  }
+  30% {
+    color: initial;
+  }
+  100% {
+    background: initial;
+    color: initial;
+  }
+}
+.wrapper {
+  color: #8895b3;
+}
+.main-header {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  justify-content: space-between;
+  background: #020817;
+  height: 2rem;
+  padding: 0.5rem 1rem;
+  font-size: 120%;
+}
+.main-header .title {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  justify-content: flex-start;
+  font-family: 'MTG-head';
+}
+.main-header .title a {
+  color: #ebf1ff;
+  width: auto;
+  padding-right: 0.5rem;
+}
+.main-header .title a:hover {
+  opacity: 0.8;
+}
+.main-header .nav {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 0 1 10%;
+}
+.main-header .nav .navItem {
+  color: #ebf1ff;
+  margin-right: 0.5rem;
+  cursor: pointer;
+}
+.main-header .nav .navItem:hover {
+  opacity: 0.8;
+}
+.main-header .nav .active {
+  text-decoration: underline;
+  color: #fcd303;
+}
+.notifications {
+  position: fixed;
+  top: 1rem;
+  left: 25%;
+  width: 50%;
+  z-index: 20;
+  pointer-events: none;
+}
+.notifications .notification {
+  border: none;
+  border-radius: 2rem;
+  padding: 0.25rem 1rem;
+  margin: 0.125rem;
+  background: #ebf1ff;
+  transition: 0.2s;
+  height: 2rem;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between;
+  color: #020817;
+  padding: 0.5rem 1rem;
+  margin-top: 0.5rem;
+  animation: slide-in-out-top 5s ease forwards;
+}
+.notifications .info {
+  background: #b6bfd4;
+}
+.notifications .warning {
+  background: #fcd303;
+}
+.notifications .error {
+  background: #ff4466;
+}
+.notifications .success {
+  background: #7be8c0;
+}
+.drop-slot {
+  flex: 1 0 7.14rem;
+  position: relative;
+  margin: 0;
+}
+.drop-slot * {
+  cursor: pointer;
+}
+.drop-slot .drop-slot-over {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+  opacity: 0.5;
+  background-color: yellow;
+}
+.drop-slot.list {
+  display: flex;
+}
+.info {
+  height: calc(100% - 4rem);
+  max-height: calc(100% - 4rem);
+  padding: 1rem;
+  grid-template-columns: 1fr 2fr;
+  grid-template-rows: 100%;
+  grid-gap: 1rem;
+  grid-template-areas: 'addInfoArea addInfoArea' 'manageStatsArea manageStatsArea';
+}
+.info section {
+  border-radius: 0.125rem;
+  padding: 0.5rem;
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.5);
+}
+.info .addInfoArea {
+  grid-area: deckInfo;
+  display: flex;
+  flex-flow: column nowrap;
+  background: #8895b3;
+  overflow-y: auto;
+}
+.info .addInfoArea h3 {
+  margin: 0.5rem 0;
+  color: #1f283b;
+}
+.info .addInfoArea .nameEntry {
+  font-size: 1.5rem;
+  padding: 0.5rem;
+  border: none;
+}
+.info .addInfoArea .descEntry {
+  padding: 0.5rem;
+  border: none;
+}
+.info .addCardsArea {
+  grid-area: searchArea;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: stretch;
+  height: 100%;
+  background: #1f283b;
+  color: #8895b3;
+}
+.info .addCardsArea h2 {
+  padding-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+.info .addCardsArea .searchFind {
+  flex-grow: 1;
+  margin-right: 0.5rem;
+}
+.info .addCardsArea .searchFind .searchInput {
+  color: #020817;
+  width: 100%;
+  font-size: 1.5rem;
+}
+.info .addCardsArea .searchFind .suggestions {
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+.info .addCardsArea .searchFind .suggestions .suggestion {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  margin-top: 0.25rem;
+  background: #8895b3;
+}
+.info .addCardsArea .searchFind .suggestions .suggestion span {
+  flex-grow: 1;
+  transition: 0.15s;
+  color: #020817;
+  padding: 0.25rem;
+}
+.info .addCardsArea .searchFind .suggestions .suggestion span:hover {
+  cursor: pointer;
+  background: #fcd303;
+}
+.info .addCardsArea .importList {
+  flex-grow: 1;
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: stretch;
+}
+.info .addCardsArea .importList input {
+  font-family: 'MTG-head';
+  font-size: 1.5rem;
+}
+.info .addCardsArea .importList input:hover {
+  cursor: pointer;
+  background: #fcd303;
+}
+.info .addCardsArea .importList span {
+  font-size: 0.6rem;
+}
+.info .manageListArea {
+  grid-area: deckList;
+  display: flex;
+  flex-flow: column nowrap;
+  max-height: 100%;
+  padding: 0;
+}
+.info .manageListArea .listInner {
+  display: flex;
+  flex-flow: column nowrap;
+  flex-grow: 1;
+  height: 100%;
+  background: #8895b3;
+  color: #020817;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+.info .manageListArea .listInner h3 {
+  font-size: 1.2rem;
+  margin: 1rem 0 0.5rem;
+  border-bottom: 0.125rem solid #020817;
+  width: 100%;
+}
+.info .manageListArea .listInner .item {
+  width: 100%;
+  display: flex;
+  flex-flow: row nowrap;
+  padding: 0.125rem 0;
+  animation: flashIn 1s ease-out;
+  justify-content: space-between;
+}
+.info .manageListArea .listInner .item button {
+  background: transparent;
+  font-weight: bold;
+  width: 1rem;
+}
+.info .manageListArea .listInner .item button:hover {
+  cursor: pointer;
+  background: #fcd303;
+}
+.info .manageListArea .listInner .item .printing select {
+  width: 5rem;
+  font-size: 1rem;
+}
+.info .manageStatsArea {
+  grid-area: manageDeck;
+  height: 100%;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-between;
+  background: #020817;
+}
+.info .manageStatsArea .exportList {
+  background: #020817;
+  display: flex;
+  flex-flow: row nowrap;
+}
+.info .manageStatsArea .exportList button:hover {
+  background: #fcd303;
+}
+.info .manageStatsArea .exportList .clearList:hover {
+  background: #ff4466;
+}
+.info .manageStatsArea .dataVis .colors .chart {
+  position: fixed;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  display: flex;
+  flex-flow: row nowrap;
+}
+.info .manageStatsArea .playTest {
+  font-size: 2rem;
+}
+@keyframes flashIn {
+  0% {
+    background: #fcd303;
+    color: transparent;
+  }
+  30% {
+    color: initial;
+  }
+  100% {
+    background: initial;
+    color: initial;
+  }
+}
+.builder {
+  height: calc(100vh - 3rem);
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 4rem 1fr;
+  grid-gap: 1rem;
+  grid-template-areas: 'top-area' 'boards-area';
+}
+.builder .top-area {
+  grid-area: top-area;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  background: #8895b3;
+  padding: 0.5rem;
+  width: 100%;
+}
+.builder .top-area .add-search {
+  flex-grow: 1;
+  display: flex;
+  flex-flow: row nowrap;
+}
+.builder .boards-area {
+  grid-area: boards-area;
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: stretch;
+  padding: 0;
+  color: #020817;
+  height: calc(100vh - 7rem);
+}
+.builder .boards-area .list-head {
+  width: 100%;
+  height: 2rem;
+  display: flex;
+  flex-flow: row nowrap;
+}
+.builder .boards-area .boards {
+  display: flex;
+  flex-flow: row nowrap;
+  min-height: calc(100vh - 11rem);
+  max-height: calc(100vh - 11rem);
+  flex-grow: 1;
+  transition: 0.3s ease;
+}
+.builder .boards-area .boards h2 {
+  cursor: pointer;
+  color: #ebf1ff;
+}
+.builder .boards-area .boards .board {
+  padding: 0.5rem;
+  height: auto;
+  min-width: 10rem;
+}
+.builder .boards-area .boards .board-inner {
+  display: flex;
+  flex-flow: column nowrap;
+  height: auto;
+  background: #b6bfd4;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+.builder .boards-area .boards .board-inner h3 {
+  font-size: 1.2rem;
+  margin: 1rem 0 0.5rem;
+  border-bottom: 0.125rem solid #020817;
+  width: 100%;
+}
+.builder .boards-area .boards .board-inner .list-view {
+  display: flex;
+  flex-flow: row nowrap;
+  flex-wrap: wrap;
+  flex: 1 0 30%;
+}
+.builder .boards-area .boards .board-inner .list-inner {
+  display: flex;
+  flex-flow: column nowrap;
+}
+.builder .boards-area .boards .board-inner .list-inner .view-card {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+}
+.builder .boards-area .boards .board-inner .list-inner .view-card .list-item {
+  min-width: 10rem;
+}
+.builder .boards-area .boards .board-inner .list-inner .view-card .printing {
+  min-width: 10rem;
+  justify-self: end;
+}
+.builder .boards-area .boards .board-inner .grid-inner {
+  display: flex;
+  flex-flow: row nowrap;
+  flex-wrap: wrap;
+}
+.builder .boards-area .boards .board-inner .grid-inner .view-card {
+  display: flex;
+  flex-flow: column nowrap;
+  margin-bottom: 2rem;
+}
+.builder .boards-area .boards .board-inner .grid-inner .view-card:hover .card-controls {
+  display: flex;
+  flex-flow: column nowrap;
+}
+.builder .boards-area .boards .board-inner .grid-inner .view-card .card-controls {
+  position: absolute;
+  z-index: 10;
+  display: none;
+}
+.builder .boards-area .boards .board-inner .grid-inner .view-card .card-controls * {
+  position: relative;
+}
+.builder .boards-area .boards .board-inner .grid-inner .view-card .card-controls .quant-buttons {
+  display: flex;
+  flex-flow: row nowrap;
+}
+.builder .boards-area .boards .board-inner .grid-inner .view-card .card-controls .printing {
+  width: 100%;
+}
+.builder .board.focus {
+  min-width: 50vw;
+  flex-grow: 3;
+}
+.card {
+  transition: 0.2s;
+  height: auto;
+  display: flex;
+  flex-flow: column nowrap;
+}
+.card:hover .cardUI {
+  opacity: 1;
+}
+.card:hover .cardUI * {
+  cursor: pointer;
+}
+.card .cardUI {
+  opacity: 0;
+  height: 3rem;
+  background: #020817;
+  color: #8895b3;
+  position: absolute;
+  padding: 0.5rem;
+}
+.card-head {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  align-items: center;
+  border: 2px solid #020817;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+  color: #020817;
+  border-radius: 0.25rem;
+  background: rgba(255, 255, 255, 0.7);
+  width: 108%;
+  margin: 0 0 0 -4%;
+  padding: 0.125rem 0.25rem;
+  font-family: 'MTG-head';
+  text-align: left;
+  white-space: nowrap;
+}
+.card-head .cost {
+  white-space: nowrap;
+}
+.card-head .cost .ms {
+  border-radius: 50%;
+  padding: 1px;
+  margin-left: 0.125rem;
+  box-shadow: 0 0.125rem 0 #020817;
+}
+.card-head .cost .ms-w {
+  background: #F8F9F4;
+}
+.card-head .cost .ms-u {
+  background: #BAE8FC;
+}
+.card-head .cost .ms-b {
+  background: #7C7E80;
+}
+.card-head .cost .ms-r {
+  background: #ECBAA1;
+}
+.card-head .cost .ms-g {
+  background: #B1DEAE;
+}
+.card-head .cost .ms-c,
+.card-head .cost .ms-1,
+.card-head .cost .ms-2,
+.card-head .cost .ms-3,
+.card-head .cost .ms-4,
+.card-head .cost .ms-5,
+.card-head .cost .ms-6,
+.card-head .cost .ms-7,
+.card-head .cost .ms-8,
+.card-head .cost .ms-9,
+.card-head .cost .ms-10 {
+  background: #AEA399;
+}
+.card-head .card-controls {
+  position: absolute;
+  width: 100%;
+  z-index: 30;
+  opacity: 0;
+  text-shadow: 0 0 0.5rem #020817;
+}
+.cardGeneric {
+  transition: 0.2s;
+  cursor: pointer;
+  margin: 0.25rem 0.25rem 0 0;
+  min-width: 7.14rem;
+  width: 7.14rem;
+  min-height: 10rem;
+  height: 10rem;
+  border-radius: 0.5rem;
+}
+.cardGeneric:last-child {
+  margin-right: 0;
+}
+.cardGeneric:hover {
+  box-shadow: 0 0 0.5rem #fcd303;
+  transform: scale(1.1);
+}
+.fullImg {
+  transition: 0.2s;
+  cursor: pointer;
+  margin: 0.25rem 0.25rem 0 0;
+  min-width: 7.14rem;
+  width: 7.14rem;
+  min-height: 10rem;
+  height: 10rem;
+  border-radius: 0.5rem;
+}
+.fullImg:last-child {
+  margin-right: 0;
+}
+.fullImg:hover {
+  box-shadow: 0 0 0.5rem #fcd303;
+  transform: scale(1.1);
+}
+.cardHTML {
+  transition: 0.2s;
+  cursor: pointer;
+  margin: 0.25rem 0.25rem 0 0;
+  min-width: 7.14rem;
+  width: 7.14rem;
+  min-height: 10rem;
+  height: 10rem;
+  border-radius: 0.5rem;
+  font-family: 'MTG-para';
+  border: 0.5rem solid #020817;
+  border-bottom: 1rem solid #020817;
+  color: #020817;
+  padding: 0.25rem;
+  overflow: hidden;
+}
+.cardHTML:last-child {
+  margin-right: 0;
+}
+.cardHTML:hover {
+  box-shadow: 0 0 0.5rem #fcd303;
+  transform: scale(1.1);
+}
+.cardHTML .front {
+  height: 100%;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-between;
+}
+.cardHTML .front .types {
+  border: 2px solid #020817;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+  border-radius: 0.25rem;
+  background: rgba(255, 255, 255, 0.7);
+  width: 100%;
+  margin: 0.25rem 0;
+  font-family: 'MTG-head';
+  font-size: 0.6rem;
+  text-align: left;
+  padding-left: 0.25rem;
+}
+.cardHTML .front .body {
+  border: 2px solid #020817;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+  border-radius: 0.25rem;
+  flex-grow: 1;
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 0.6rem;
+  padding: 0.25rem;
+  text-align: left;
+  overflow: hidden;
+}
+.cardHTML .front .body i,
+.cardHTML .front .body .i,
+.cardHTML .front .body .flavor {
+  font-style: italic;
+}
+.cardHTML .front .footer {
+  display: flex;
+  justify-content: flex-end;
+}
+.cardHTML .front .footer .pt {
+  border: 2px solid #020817;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+  border-radius: 0.25rem;
+  background: #8895b3;
+  margin-top: -0.5rem;
+  width: 2.5rem;
+  align-self: flex-end;
+  text-align: center;
+  font-size: 0.8rem;
+  padding: 0 0.25rem;
+}
+.back {
+  transition: 0.2s;
+  cursor: pointer;
+  margin: 0.25rem 0.25rem 0 0;
+  min-width: 7.14rem;
+  width: 7.14rem;
+  min-height: 10rem;
+  height: 10rem;
+  border-radius: 0.5rem;
+  background: #4D310E;
+  border-bottom: 0.5rem solid #020817;
+  text-align: center;
+  font-family: 'MTG-head';
+  padding: 0.25rem;
+  margin: 0.25rem;
+  height: 100%;
+  border: 1px solid #020817;
+}
+.back:last-child {
+  margin-right: 0;
+}
+.back:hover {
+  box-shadow: 0 0 0.5rem #fcd303;
+  transform: scale(1.1);
+}
+.back div {
+  height: 100%;
+  width: 100%;
+  padding-top: 2rem;
+  border: 0.125rem solid #236991;
+  border-radius: 50%;
+  background: #AA5234;
+  text-align: center;
+}
+.back div h2 {
+  margin-left: -0.5rem;
+  font-size: 3rem;
+  color: #70261D;
+}
+.back div h4 {
+  color: #8895b3;
+  align-self: right;
+}
+.modalCont {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  z-index: 15;
+}
+.modalCont .exit {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  position: absolute;
+  z-index: -1;
+  background: rgba(0, 0, 0, 0.5);
+}
+.modalCont .modalBox {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  background: #414f6b;
+  padding: 2rem;
+  height: 30rem;
+  margin: auto;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+}
+.modalCont .modalBox .inspectContainer {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+}
+.modalCont .modalBox .inspectContainer img {
+  height: 26rem;
+  width: 18.6rem;
+  min-width: 18.6rem;
+}
+.modalCont .modalBox .inspectContainer .info {
+  align-self: flex-start;
+  padding: 0 0 0 2rem;
+  height: 26rem;
+  max-width: 26rem;
+}
+.modalCont .modalBox .inspectContainer .info h1 {
+  margin-bottom: 1rem;
+}
+.modalCont .modalBox .inspectContainer .info .rulings {
+  border-radius: 0.5rem;
+  background: #1f283b;
+  padding: 1rem;
+  overflow-y: scroll;
+}
+.modalCont .modalBox .inspectContainer .info .rulings .ruling {
+  margin-bottom: 2rem;
+}
+.modalCont .modalBox .inspectContainer .info .rulings .ruling h3 {
+  color: #8895b3;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+.modalCont .modalBox .inspectContainer .info .rulings .ruling p {
+  margin-left: 1rem;
+  color: #ebf1ff;
+}
+.modalCont .modalBox .inspectContainer .inspectOptions {
+  display: flex;
+  flex-flow: column nowrap;
+  padding: 2rem;
+}
+.modalCont .modalBox .inspectContainer .inspectOptions * {
+  margin: 0.5rem;
+}
+.modalCont .modalBox .inspectContainer .inspectOptions button {
+  padding: 0.5rem;
+}
+.modalCont .modalBox .inspectContainer .inspectOptions button:hover {
+  cursor: pointer;
+  background: #fcd303;
+}
+.modalCont .scryContainer {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+.modalCont .scryContainer .scryOptions {
+  display: flex;
+  flex-flow: row nowrap;
+}
+.modalCont .scryContainer .scryOptions h1 {
+  color: #ebf1ff;
+}
+.modalCont .scryContainer .scryOptions button {
+  margin-left: 2rem;
+}
+.modalCont .scryContainer .scryTargets {
+  display: flex;
+  flex-flow: row nowrap;
+  max-width: 100vw;
+  overflow-x: auto;
+}
+.modalCont .scryContainer .scryTargets .scryTarget {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  text-align: center;
+  justify-content: flex-end;
+  width: 8rem;
+  height: auto;
+  margin-right: 1rem;
+}
+.modalCont .scryContainer .scryTargets .scryTarget .scryImg {
+  width: 8rem;
+  height: 11.2rem;
+}
+.modalCont .scryContainer .scryTargets .scryTarget button {
+  border: none;
+  border-radius: 2rem;
+  padding: 0.25rem 1rem;
+  margin: 0.125rem;
+  color: #020817;
+  transition: 0.2s;
+  height: 2rem;
+  font-size: 120%;
+  font-family: 'MTG-head';
+  cursor: pointer;
+  background: #ebf1ff;
+  font-size: 0.8rem;
+  height: 1.5rem;
+  padding: 0 0.5rem;
+  width: auto;
+  width: 6rem;
+  margin: 0.5rem 0 0;
+}
+.modalCont .scryContainer .scryTargets .scryTarget button:hover {
+  background: #fcd303;
+}
+.modalCont .scryContainer .scryTargets .scryTarget .choice {
+  background: #fcd303;
+  pointer-events: none;
+}
+.modalCont .scryContainer .scryTargets .scryTarget .not {
+  opacity: 0;
+  pointer-events: none;
+}
+.modalCont .scryContainer .scried {
+  transform: scale(0.8);
+  opacity: 0.5;
+}
+.tester .testControls {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  justify-content: space-between;
+  height: 1.5rem;
+  color: #ebf1ff;
+  background: #414f6b;
+  width: auto;
+}
+.tester .testControls .left {
+  display: flex;
+  flex-flow: row nowrap;
+}
+.tester .testControls p {
+  font-family: 'MTG-head';
+  margin-right: 0.5rem;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  justify-content: flex-start;
+}
+.tester .testControls p * {
+  margin: 0 0.125rem 0 0;
+}
+.tester .testControls p button {
+  border: none;
+  border-radius: 2rem;
+  padding: 0.25rem 1rem;
+  margin: 0.125rem;
+  color: #020817;
+  transition: 0.2s;
+  height: 2rem;
+  font-size: 120%;
+  font-family: 'MTG-head';
+  cursor: pointer;
+  background: #ebf1ff;
+  font-size: 0.8rem;
+  height: 1.5rem;
+  padding: 0 0.5rem;
+  width: auto;
+}
+.tester .testControls p button:hover {
+  background: #fcd303;
+}
+.tester .testControls p .restart:hover {
+  background: #ff4466;
+}
+.tester .mainArea {
+  display: flex;
+  flex-flow: row nowrap;
+  height: calc(100vh - 3.5rem);
+}
+.tester .mainArea .sideRow {
+  display: flex;
+  flex-flow: column nowrap;
+  flex-direction: column-reverse;
+  justify-content: space-between;
+  background: #020817;
+  width: 7.14rem;
+  min-width: 7.14rem;
+  padding-bottom: 1rem;
+}
+.tester .mainArea .sideRow .zone {
+  margin-top: 1rem;
+}
+.tester .mainArea .sideRow .zone:first-child {
+  margin-top: 0;
+}
+.tester .mainArea .sideRow .library {
+  height: 10rem;
+  margin-top: 0;
+}
+.tester .mainArea .sideRow .graveyard,
+.tester .mainArea .sideRow .exile {
+  flex: 1 0 1rem;
+}
+.tester .mainArea .sideRow .graveyard .inner,
+.tester .mainArea .sideRow .exile .inner {
+  max-height: 20vh;
+  flex-flow: column nowrap;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  font-size: 0.6rem;
+  font-family: 'MTG-para';
+}
+.tester .mainArea .sideRow .graveyard .inner .drop-slot,
+.tester .mainArea .sideRow .exile .inner .drop-slot {
+  flex: 1 0 1px;
+}
+.tester .mainArea .sideRow .graveyard .inner .drop-slot .header,
+.tester .mainArea .sideRow .exile .inner .drop-slot .header {
+  padding: 0.125rem 0.5rem;
+}
+.tester .libraryCont {
+  margin-top: 1rem;
+  display: flex;
+  flex-flow: column-reverse;
+}
+.tester .libraryCont .libraryControls {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  transition: 0.2s;
+  width: 7.14rem;
+  padding: 0.125rem;
+}
+.tester .libraryCont .libraryControls button,
+.tester .libraryCont .libraryControls input {
+  border: none;
+  border-radius: 2rem;
+  padding: 0.25rem 1rem;
+  margin: 0.125rem;
+  color: #020817;
+  transition: 0.2s;
+  height: 2rem;
+  font-size: 120%;
+  font-family: 'MTG-head';
+  cursor: pointer;
+  background: #ebf1ff;
+  font-size: 0.8rem;
+  height: 1.5rem;
+  padding: 0 0.5rem;
+  width: auto;
+  margin: 0 0 0.125rem;
+  width: 100%;
+  border-radius: 0.5rem;
+}
+.tester .libraryCont .libraryControls button:hover,
+.tester .libraryCont .libraryControls input:hover {
+  background: #fcd303;
+}
+.tester .libraryCont .libraryControls button:last-child,
+.tester .libraryCont .libraryControls input:last-child {
+  margin-bottom: 0;
+}
+.tester .libraryCont .libraryControls button {
+  height: 1rem;
+  padding: 0 0.125rem;
+}
+.tester .deckSearch {
+  width: 7.14rem;
+  padding: 0.125rem;
+  position: relative;
+  height: 1.5rem;
+}
+.tester .deckSearch button,
+.tester .deckSearch input {
+  border: none;
+  border-radius: 2rem;
+  padding: 0.25rem 1rem;
+  margin: 0.125rem;
+  color: #020817;
+  transition: 0.2s;
+  height: 2rem;
+  font-size: 120%;
+  font-family: 'MTG-head';
+  cursor: pointer;
+  background: #ebf1ff;
+  font-size: 0.8rem;
+  height: 1.5rem;
+  padding: 0 0.5rem;
+  width: auto;
+  margin: 0 0 0.125rem;
+  width: 100%;
+  border-radius: 0.5rem;
+}
+.tester .deckSearch button:hover,
+.tester .deckSearch input:hover {
+  background: #fcd303;
+}
+.tester .deckSearch button:last-child,
+.tester .deckSearch input:last-child {
+  margin-bottom: 0;
+}
+.tester .deckSearch button {
+  height: 1rem;
+  padding: 0 0.125rem;
+}
+.tester .deckSearch .select-search {
+  z-index: 11;
+  max-height: calc(10rem + 1rem);
+  width: 7.14rem;
+}
+.tester .deckSearch .select-search ul {
+  max-height: calc(10rem + 1rem);
+  overflow-y: auto;
+}
+.tester .deckSearch .select-search ul * {
+  height: auto;
+  border-radius: 0;
+  margin: 0;
+}
+.tester .zone .inner {
+  background: #1f283b;
+  height: 100%;
+  width: 100%;
+  border: 0.125rem solid #020817;
+  box-shadow: inset 0 0 2rem rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-flow: row wrap;
+}
+.tester .zone .title {
+  display: flex;
+  flex-flow: row nowrap;
+  font-family: 'MTG-head';
+  align-items: stretch;
+  width: 100%;
+  height: 1rem;
+  background: transparent;
+  color: #8895b3;
+  padding: 0.125rem;
+}
+.tester .zone .title h2 {
+  font-size: 0.8rem;
+  width: 100%;
+}
+.tester .zone .title button,
+.tester .zone .title select {
+  padding: 0.125rem;
+}
+.tester .hand {
+  background: linear-gradient(transparent 10%, rgba(235, 235, 255, 0.7));
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: calc(100vw - 7.14rem);
+  height: calc(1rem + 10rem);
+  z-index: 10;
+}
+.tester .hand .inner {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  max-width: 100%;
+}
+.tester .hand .inner .drop-slot {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0.125rem, max-content));
+  padding: 0.5rem;
+}
+.tester .hand .inner .drop-slot .cardContainer {
+  transform-origin: 50% 100%;
+  transform: rotate(3deg);
+  animation: slide-in 0.3s ease-out 0 1 forwards;
+}
+.tester .hand .inner .drop-slot .cardContainer:hover {
+  transform: scale(1.3) translateY(-2rem);
+}
+.tester .battlefield {
+  background: #414f6b;
+  padding-bottom: 10rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+}
+.tester .battlefield .inner {
+  flex-wrap: nowrap;
+  border: none;
+  width: 100%;
+  height: 10rem;
+}
+.tester .battlefield .drop-slot .cardContainer {
+  transform: scale(0.9);
+}

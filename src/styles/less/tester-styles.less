@@ -1,0 +1,224 @@
+// // IMPORTS
+
+@import "library.less";
+@import "main-styles.less";
+@import "card-styles.less";
+@import "modal-styles.less";
+
+
+.tester { 
+
+    .testControls {
+      .flex-centered();
+      justify-content: space-between;
+      height: 1.5rem;
+      color: @lightest;
+      background: @dark;
+      width: auto; 
+      .left {
+        .flex-row();
+      }
+      p {
+        font-family: @header;
+        margin-right: @thin;
+        .flex-centered();
+        justify-content: flex-start;
+        // padding: @thin;
+        *{ margin: 0 @thinnest 0 0;}
+        button {
+          .small-button();
+        }
+
+        .restart {
+          &:hover {background: @red;}
+        }
+      }
+
+
+  }
+
+  .mainArea {
+    .flex-row();
+    height: calc(100vh - 3.5rem);
+    .sideRow {
+      .flex-col();
+      flex-direction: column-reverse;
+      justify-content: space-between;
+      background: @darkest;
+      width: @cardW;
+      min-width: @cardW;
+      padding-bottom: 1rem;
+      .zone {margin-top: 1rem;}
+      .zone:first-child{margin-top: 0;}
+        .library {
+          height: @cardH;
+          margin-top: 0;
+        }
+        .graveyard,
+        .exile {
+          flex: 1 0 1rem;
+          .inner {
+            max-height: 20vh;
+            flex-flow: column nowrap;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            font-size: @smaller;
+            font-family: 'MTG-para';
+            .drop-slot {
+              flex: 1 0 1px;
+              .header {
+                padding: @thinnest @thin;
+              }
+            }
+          }
+        }
+
+    }
+  }
+  .libraryCont {
+    margin-top: 1rem;
+    display: flex;
+    flex-flow: column-reverse;
+    .libraryControls {
+      .flex-centered();
+      flex-direction: column;
+      transition: .2s;
+      width: @cardW;
+      padding: @thinnest;
+      button, input {
+        .small-button();
+        margin: 0 0 @thinnest;
+        width: 100%;
+        border-radius: @thin;
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+      button {
+        height: 1rem;
+        padding: 0 @thinnest;
+      }
+
+    }
+  }
+    .deckSearch {
+      width: @cardW;
+      padding: @thinnest;
+      button, input {
+        .small-button();
+        margin: 0 0 @thinnest;
+        width: 100%;
+        border-radius: @thin;
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+      button {
+        height: 1rem;
+        padding: 0 @thinnest;
+      }
+
+        position: relative;
+        height: 1.5rem;
+        .select-search {
+          // position: absolute;
+          z-index: 11;
+          max-height: calc(@cardH + 1rem);
+          width: @cardW;
+          ul {
+            max-height: calc(@cardH + 1rem);
+            overflow-y: auto;
+            * {
+              height: auto;
+              border-radius: 0;
+              margin: 0;
+            }
+          }
+        }
+      }
+
+  .zone {
+    .inner {
+      background: @darker;
+      height: 100%;
+      // max-height: @cardH;
+      width: 100%;
+      border: @thinnest solid @darkest;
+      box-shadow: inset 0 0 2rem rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-flow: row wrap;
+    }
+
+    .title {
+      .flex-row();
+      font-family: 'MTG-head';
+      align-items: stretch;
+      width: 100%;
+      height: 1rem;
+      background: transparent;
+      color: @light;
+      padding: @thinnest;
+      h2 {
+        font-size: .8rem;
+        width: 100%;
+      }
+      button,
+      select {
+        padding: @thinnest;
+      }
+    }
+  }
+
+  .hand {
+    background: linear-gradient(transparent 10%,rgba(235,235,255,.7));
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: calc(100vw - @cardW);
+    height: calc(1rem + @cardH);
+    z-index: 10;
+    .inner {
+      border: none;
+      background: transparent;
+      box-shadow: none;
+      max-width: 100%;
+      .drop-slot {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(@thinnest,max-content));
+      padding: @thin;
+        .cardContainer {
+          transform-origin: 50% 100%;
+          transform: rotate(3deg);
+          animation: slide-in .3s ease-out 0 1 forwards;
+          &:hover {
+            transform: scale(1.3) translateY(-2rem);
+          }
+        }
+
+      }
+    }
+    // .cardHTML {
+    //   animation: cardEnter .2s eases-out 0s 1 forwards;
+    // }
+  }
+
+  .battlefield {
+    background: @dark;
+    padding-bottom: @cardH;
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 100%;
+    .inner {
+      flex-wrap: nowrap;
+      border: none;
+      width: 100%;    
+      height: @cardH;
+    }
+    .drop-slot {
+      .cardContainer {transform: scale(.9);}
+    }
+
+  }
+
+
+}

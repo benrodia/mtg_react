@@ -1,0 +1,126 @@
+// // IMPORTS
+
+@import "library.less";
+@import "main-styles.less";
+
+
+// STYLES
+
+
+.builder {
+	height: calc(100vh - 3rem);
+    display: grid;
+    grid-template-columns: 1fr;
+  	grid-template-rows: 4rem 1fr;
+  	grid-gap: 1rem;
+    grid-template-areas:
+    'top-area'
+    'boards-area';   
+
+	.top-area {
+		grid-area: top-area;
+		.flex-row();
+		justify-content: space-between;
+		background: @light;
+		padding: @thin;
+		width: 100%;
+		.add-search {
+			flex-grow: 1;
+			.flex-row();
+		}
+
+	}
+
+	.boards-area {
+		grid-area: boards-area;
+		.flex-col();
+		align-items: stretch;
+		padding: 0;
+		color: @darkest;
+		height: calc(100vh - 7rem);
+		.list-head {
+			width: 100%;
+			height: 2rem;
+			.flex-row();
+		}
+		.boards {
+			.flex-row();
+			min-height: calc(100vh - 11rem);
+			max-height: calc(100vh - 11rem);
+			flex-grow: 1;	
+			transition: .3s ease;
+			h2 {
+				cursor: pointer;
+				color: @lightest;
+			}
+			.board {
+				padding: @thin;	
+				height: auto;
+				min-width: 10rem;
+			}
+			.board-inner {
+				.flex-col();
+				height: auto;
+				background: @lighter;
+				overflow-y: auto;
+				padding: @thin;
+				h3 {
+					font-size: 1.2rem;
+					margin: 1rem 0 @thin;
+					border-bottom: @thinnest solid @darkest;
+					width: 100%;
+				}
+				.list-view {
+					.flex-row();
+					flex-wrap: wrap;
+					flex: 1 0 30%;
+
+				}
+				
+				.list-inner {
+					.flex-col();
+					.view-card {
+						.flex-row();
+						justify-content: flex-start;
+						.list-item {
+							min-width: 10rem;
+						}
+						.printing {
+							min-width: 10rem;
+							justify-self: end;
+						}
+					}
+				}
+				.grid-inner {
+					.flex-row();
+					flex-wrap: wrap;
+					.view-card {
+						.flex-col();
+						margin-bottom: 2rem;
+						&:hover .card-controls {.flex-col();}
+						.card-controls {
+							position: absolute;
+							* {position: relative;}
+							z-index: 10;
+							display: none;
+
+							.quant-buttons {.flex-row();}
+							.printing {
+								// margin-top: @cardH;
+								width: 100%;
+							}			
+						}
+					}
+				}
+
+			}
+		}
+	}
+
+	.board.focus {
+		min-width: 50vw;
+		flex-grow: 3;
+	}
+}
+
+

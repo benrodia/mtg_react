@@ -1,0 +1,244 @@
+// // IMPORTS
+
+@font-face {
+	font-family: 'MTG-para';
+	// src: url(../../fonts/MagicAll/mplantin.ttf);
+	src: url(../../fonts/Magic-After-M15/mplantin.ttf);
+}
+@font-face {
+	font-family: 'MTG-head';
+	src: url(../../fonts/Magic-After-M15/beleren-bold_P1.01.ttf);
+}
+
+// // VARIABLES
+
+@header: 'MTG-head';
+@para: 'MTG-para';
+
+	@lightest: #ebf1ff;
+	@lighter: #b6bfd4;
+	@light: #8895b3;
+	@dark: #414f6b;
+	@darker: #1f283b;
+	@darkest: #020817;
+
+@highlight: #fcd303;
+@red: #ff4466;
+@green: #7be8c0;
+
+
+@bigger: 2rem;
+@big: 1.5rem;
+@small: .8rem;
+@smaller: .6rem;
+@thin: .5rem;
+@thinner: .25rem;
+@thinnest: .125rem;
+
+@cardW: 7.14rem;
+@cardH: 10rem;
+
+// // MIXINS
+.flex-row {
+	display: flex;
+	flex-flow: row nowrap;
+}
+.flex-col {
+	display: flex;
+	flex-flow: column nowrap;
+}
+.flex-centered {
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: center;
+	align-items: center;
+}
+
+.fixed-full-page {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	z-index: 1;
+}
+
+.bordered {
+	border: 2px solid @darkest;
+	box-shadow: inset 0 0 5px rgba(0,0,0,.3);
+	border-radius: @thinner;
+}
+
+.clean-input {
+	border: none;
+	border-radius: 2rem;
+	padding: @thinner 1rem;
+	margin: @thinnest;
+	background: @lightest;
+	color: @darkest;
+	transition: .2s;
+	height: 2rem;
+}
+
+.clean-button {
+	.clean-input();
+	font-size: 120%;
+	font-family: 'MTG-head';
+	cursor: pointer;
+	background: @lightest;
+	&:hover {
+		background: @highlight;
+	}
+}
+
+.button-inverse {
+	transition: .2s;
+	margin: @thinnest;
+	border: @thinnest solid @lightest;
+	border-radius: 2rem;
+	background: transparent;
+	color: @lightest;
+	&:hover {
+		background: transparent;
+		color: @highlight;
+		border-color: @highlight;
+	}
+}
+
+.small-button {
+	.clean-button();
+	font-size: @small;
+	height: 1.5rem;
+	padding: 0 @thin;
+	width: auto; 
+}
+
+
+.smaller-button {
+	.small-button();
+	height: 1rem;
+}
+
+
+.warning-button {
+	&:hover {background: @red;}
+}
+
+.list-item {
+	.flex-row();
+	padding: @thinnest 0;
+	animation: flash-in 1s ease-out;
+	justify-content: space-between;
+	.item-label {flex-grow: 1;}
+	.printing {min-width: 10rem;}
+}
+
+// GENERAL RULES
+
+
+html {
+	font-size: 100%;
+	overflow: hidden;
+	background: @dark;
+	color: @lightest;
+}
+
+* {
+	font-family: @para;
+	box-sizing: border-box !important;
+	max-height: 100%;
+	max-width: 100%;
+	text-decoration: none;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	border: none;
+}
+
+
+h1,h2,h3,h4 {
+	font-family: @header;
+} 
+
+input {
+	.clean-input();
+}
+select {
+
+}
+textarea {
+	.clean-input();
+	height: auto;
+	border-radius: @thinnest;
+	padding: @thinner;
+}
+
+button {
+	.clean-button();
+}
+
+section {
+	border-radius: @thinnest;
+	padding: @thin;
+	box-shadow: 0 0 1rem rgba(0,0,0,.5);
+}
+
+
+//  ANIMATIONS
+
+@keyframes slide-in-out-top {
+	0% {
+		opacity: 0;
+		margin-top: -5rem;
+		display: flex;
+	}
+	10% {
+		opacity: 1;
+		margin-top: 0;
+	}
+	80% {
+		opacity: 1;
+		margin-top: 0;
+	}
+	99% {
+		opacity: 0;
+		margin-top: -5rem;
+		display: flex;
+	}
+	100% {
+		opacity: 0;
+		margin-top: -5rem;
+		display: none;
+	}
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    margin-left: -7rem;
+  }
+  to {
+    opacity: 1;
+    margin-left: 0;
+  }
+}
+
+.disabled {
+	opacity: .5;
+	pointer-events: none;
+}
+
+@keyframes flash-in {
+	0% {
+		background: @highlight;
+		color: transparent;
+	}
+	30% {
+		color: initial;
+	}
+	100% {
+		background: initial;
+		color: initial;
+	}
+}
+

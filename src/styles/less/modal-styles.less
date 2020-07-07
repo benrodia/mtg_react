@@ -1,0 +1,126 @@
+.modalCont {
+  .fixed-full-page();
+  .flex-centered();
+  z-index: 15;
+  .exit {
+    .fixed-full-page();
+    position: absolute;
+    z-index: -1;
+    background: rgba(0, 0, 0, 0.5);
+  }
+  .modalBox {
+    .flex-centered();
+    background: @dark;
+    padding: 2rem;
+    height: 30rem;
+    margin: auto;
+    border-radius: @thin;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+
+    .inspectContainer {
+      .flex-centered();
+      img {
+        height: 26rem;
+        width: 18.6rem;
+        min-width: 18.6rem;
+      }
+
+      .info {
+        align-self: flex-start;
+        padding:  0 0 0 2rem;
+        height: 26rem;
+        max-width: 26rem;
+        h1 {
+          margin-bottom: 1rem;
+        }
+        .rulings {
+          border-radius: @thin;
+          background: @darker;
+          padding: 1rem;
+          overflow-y: scroll;
+          .ruling {
+            margin-bottom: 2rem;
+            h3 {
+              color: @light;
+              font-weight: bold;
+              margin-bottom: @thin;
+            }
+            p {
+              margin-left: 1rem;
+              color: @lightest;
+            }
+          }
+        }
+      }
+      .inspectOptions {
+        .flex-col();
+        padding: 2rem;
+        * {
+          margin: @thin;
+        }
+        button {
+          padding: @thin;
+          &:hover {
+            cursor: pointer;
+            background: @highlight;
+          }
+        }
+      }
+    }
+  }
+
+    .scryContainer {
+      .flex-col();
+      align-items: center;
+      justify-content: space-between;
+      height: 100%;
+      .scryOptions {
+        h1 {color: @lightest;}
+        .flex-row();
+        button {
+          margin-left: 2rem;
+        }
+      }
+      .scryTargets {
+        .flex-row();
+        max-width: 100vw;
+        overflow-x: auto;
+
+        .scryTarget {
+          .flex-col();
+          align-items: center;
+          text-align: center;
+          justify-content: flex-end;
+          width: 8rem;
+          height: auto;
+          margin-right: 1rem;
+
+          .scryImg {
+            width: 8rem;
+            height: 11.2rem;
+          }
+
+          button {
+            .small-button();
+            width: 6rem;
+            margin: @thin 0 0;
+          }
+          .choice {
+            background: @highlight;
+            pointer-events: none;
+          }
+          .not {
+            opacity: 0;
+            pointer-events: none;
+          }
+        }
+      }
+
+      .scried {
+        transform: scale(.8);
+        opacity: .5;
+      }
+
+    }
+}
+
