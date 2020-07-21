@@ -1,49 +1,20 @@
 import React from 'react'
-
-import {CARD_SLEEVES} from '../Constants'
-
-import {formatManaSymbols,BGcolor,formatText} from '../functions/cardFormatting'
+import {CARD_SLEEVES} from '../constants/data_objects'
+import {formatManaSymbols} from '../functions/formattingLogic'
 
 export default function Card(props) {
+	const {imgSize,faceDown,sleeve,mana_cost,tapped,name,image_uris,classes} = props.card
+	const imgSrc = image_uris&&image_uris[imgSize||'normal']
+	? faceDown ? sleeve||CARD_SLEEVES['basic.png']
+	: image_uris[imgSize||'normal']
+	: null
 
-	const cardHead = (
-		<div className='card-head'>
-			<h3 className='name'>{props.card.name}</h3>
-			<p className='cost'>{formatManaSymbols(props.card.mana_cost)}</p>
-		</div>
-	)
-
-	const uris = props.card.image_uris
-	let imgSrc = null
-	if (uris&&uris[props.img||'normal']) {imgSrc = uris[props.img||'normal']}
-	if (props.card.faceDown) imgSrc = CARD_SLEEVES[props.sleeve||'basic.png']
-
-
-	const cardFullImg = (
-		<img 
-			className='fullImg' 
-			src={imgSrc} 
-			style={{transform: props.card.tapped && 'rotate(90deg)'}}
-		/>
-	)
-
-
-	const cardBack = (
-		<div className='back'>
-			<div>
-				<h1>Magic</h1>
-				<h5>The Gathering</h5>
-			</div>
-		</div>
-	)
-
-	const cardWhole = (
-		<div className={`card ${props.card.faceDown?'face-down':''}`}>
-			{cardFullImg}
-		</div>
-	)
-
-	return props.cardHeadOnly || !imgSrc ? cardHead : cardWhole
+	return props.cardHeadOnly
+	?<div className={`card-head ${classes}`}>
+		<h4 className='name'>{name}</h4>
+		<p className='cost'>{formatManaSymbols(mana_cost)}</p>
+	 </div>
+	:<img src={imgSrc} className={`card-img ${classes}`} style={{transform: tapped && 'rotate(90deg)'}}/>
 }
 
 

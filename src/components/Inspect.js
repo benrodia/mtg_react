@@ -1,65 +1,36 @@
-import React from 'react'
+import React,{useState,useEffect} from 'react'
 
-import * as f from '../functions/cardFormatting'
+import {formatText,formatManaSymbols} from '../functions/formattingLogic'
 
             
-export default class Inspect extends React.Component {
-	constructor(props) {
-		super(props)
-		this.state = {rulings: []}
-		this.getRulings = this.getRulings.bind(this)
-	}
-
-	componentDidMount(){this.getRulings(this.props.card.rulings_uri)}
-	getRulings(uri) {
-	    return fetch(uri)
+export default function Inspect (props) {
+	const {name,oracle_text,mana_cost,rulings_uri,image_uris,showRulings,showShopping} = props.card
+	const [rulings,getRulings] = useState([])
+	useEffect(() => {
+		if (!rulings.length) fetch(rulings_uri)
 	      .then(response => {if (!response.ok) {throw new Error("HTTP status " + response.status)}return response.json()})
-	      .then(data=>{
-	      	console.log('rulings data',data.data)
-	      	this.setState({rulings:data.data})
-	      }).catch('loadFail')    
-	}
-	render() {
+	      .then(data=>getRulings(data.data))
+	}) 
+	
+	return (
+		<div className='inspect-container'>
+			<img src={image_uris['png'||'large']} alt={name} />
+			<div className="inspect-info">
+				<div className="oracle-text">
+					<h2>{name}<span>{formatManaSymbols(mana_cost)}</span> </h2>
+					{formatText(oracle_text)}
+				</div>
 
-		console.log('modal target info',this.props.card)
-		const uris = this.props.card.image_uris
-		let imgSrc = null
-		if (uris&&uris['png']) {imgSrc = uris['png']}
-		else if (uris&&uris['large']) {imgSrc = uris['large']}
-
-		return (
-			<div className='inspectContainer'>
-				<img src={imgSrc} alt="" />
-				<div className="info">
-					<h2>{this.props.card.name}</h2>
-					{f.formatText(this.props.card.oracle_text)}
-					<h3>Rulings</h3>
-					<div className='rulings'>
-					{this.state.rulings.map(r=>
+				<h3 className='field-label'>Rulings</h3>
+				<div className='rulings'>
+					{rulings.map(r=>
 						<div className="ruling">
-							<h4>{r.published_at}</h4>
-							<p>{r.comment}</p>
-						</div>
-					)}
-					</div>
+						<h4>{r.published_at}</h4>
+						<p>{r.comment}</p>
+					</div>)}
 				</div>
 			</div>
-		)
-	}
-
+		</div>
+	)
 }
-
-function modalZoneButtons(props) {
-  if (props.info) {  
-    let zones = ['Library','Hand','Battlefield','Graveyard','Exile']
-    zones.splice(zones.indexOf(props.info.zone),1)
-    return zones.map((btn,i) => 
-    	<button 
-      		key={zones[i]+'MoveToBtn'}
-      		onClick={()=>{props.handleCloseModal(props.info,btn)}}
-      	>{btn}</button>
-    )
-  }
-}
-
 

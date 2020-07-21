@@ -1,6 +1,6 @@
 import React from 'react'
 
-import '../functions/math'
+import '../functions/utility'
 
 export default class Scry extends React.Component {
 	constructor(props) {

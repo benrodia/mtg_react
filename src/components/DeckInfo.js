@@ -1,56 +1,46 @@
 import React from 'react'
 
-import Search from './Search'
+import {FORMATS,CARD_TYPES,SINGLETON} from '../constants/definitions'
+import {EXAMPLE_DECK_NAMES,EXAMPLE_DECK_DESCS} from '../constants/data_objects'
 
 import titleCaps from '../functions/titleCaps'
-import isLegal from '../functions/cardFunctions'
+import {Q} from '../functions/cardFunctions'
+import {chooseCommander,legalCommanders} from '../functions/gameLogic'
+
+import BasicSelect from './BasicSelect'
+import CardSelect from './CardSelect'
+import CardControls from './CardControls'
+import ChooseTheme from './ChooseTheme'
 
 
+const exName = 'ex. '+ (EXAMPLE_DECK_NAMES[Math.floor(Math.random()*EXAMPLE_DECK_NAMES.length)])
+const exDesc = 'ex. \n'+ (EXAMPLE_DECK_DESCS[Math.floor(Math.random()*EXAMPLE_DECK_DESCS.length)])
 
-const rndListNames = [
-	"Timmy's BIG Surprise",
-	"Roon's War Crimes",
-	"Kaput",
-	"Septa",
-	"Something Clever",
-	"Lord of Shit Mountain",
-	"Johnny Cash Money"
-]
-let exName = 'ex. '+ (rndListNames[Math.floor(Math.random()*rndListNames.length)])
+export default function DeckInfo(props) {
+	const {deckInfo,legalCards,changeState,openModal} = props
+	const {name,desc,format,list} = deckInfo
 
-
-export default class DeckInfo extends React.Component {
-
-	constructor(props) {
-		super(props)
-	}
-
-	render() {
-		const formats = ['brawl','commander','duel','future','legacy','modern','oldschool','pauper','penny','standard','vintage','casual']
-		const exDesc = "ex. \nI'm a new and impressionable deck that needs guidance and a good description."
-
-		return (
-			<div className='info'>
-
-				<section className="addInfoArea">
-					<h3>Name</h3>
-					<input className='nameEntry' type='text' value={this.props.deckInfo.name} placeholder={exName} onChange={(e)=>this.props.changeDeck('name',e.target.value)}></input>
-					<h3>Description</h3>
-					<textarea className='descEntry' rows='5' type='text' value={this.props.deckInfo.desc} placeholder={exDesc} onChange={(e)=>this.props.changeDeck('desc',e.target.value)}></textarea>
-					<div className="format">
-						<h3>Format</h3>
-						<select value={this.props.deckInfo.format} className="selectFormat" onChange={e=>this.props.changeDeck('format',e.target.value)}>
-							{formats.map(op=><option key={op+'Op'} value={op}>{titleCaps(op)}</option>)}
-						</select>
-						<div style={{display: this.props.deckInfo.format !== 'commander' && 'none'}}>
-							<h3>Commander</h3>
-						</div>
-					</div>
-				</section>
-				
-			</div>
-		)
-	}
-
-
+	return <div className='info-bar'>
+		<div className="name">
+			<h3 className='field-label'>Name</h3>
+			<input className='nameEntry' type='text' maxLength={15} value={name} placeholder={exName} onChange={(e)=>changeState('deckInfo','name',e.target.value)}/>
+		</div>		
+		<div className="format">
+			<h3 className='field-label'>Format</h3>
+			<BasicSelect 
+				self={format}
+				options={FORMATS} 
+                callBack={e=>changeState('deckInfo','format',e)} 
+            />
+		</div>
+		<div className="desc">
+			<h3 className='field-label'>Description</h3>
+			<textarea className='desc-entry' rows='5' type='text' value={desc} placeholder={exDesc} onChange={(e)=>changeState('deckInfo','desc',e.target.value)}/>
+		</div>	
+	</div>
 }
+
+		// <div className="tags">
+		// 	<h3 className='field-label'>Tags</h3>
+		// 	"COMING SOON"
+		// </div>		

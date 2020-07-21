@@ -986,3 +986,18 @@ span.ms-half > .ms-cost {
 .ms-polis-meletis:before {
   content: "\e928";
 }
+
+.ms {
+  color: black;
+  fill: black;
+  border-radius: 50%;
+  padding: 1px;
+  margin-left: @thinnest;
+  box-shadow: 0 @thinnest 0 @darkest;
+  background: #AEA399;
+}
+.ms-w {background: #F8F9F4;}
+.ms-u {background: #BAE8FC;}
+.ms-b {background: #7C7E80;}
+.ms-r {background: #ECBAA1;}
+.ms-g {background: #B1DEAE;}

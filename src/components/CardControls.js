@@ -1,50 +1,58 @@
 import React from 'react'
+
 import Inspect from './Inspect'
-import {qCard,tutorableCards} from '../functions/cardFunctions'
+import Card from './Card'
+
+import DragContainer from './DragContainer'
+import { useDrag } from 'react-dnd'
 
 
+let timer,clicked
 export default function CardControls(props) {
+	const {card,type,style,faceDown,openModal,moveCard,illegal,children,cardClick} = props
 
-	if (props.isDragging) {clearTimeout(timer)}
+	const [{isDragging}, drag] = useDrag({
+		item: {key:card.key,type: type||'card'},
+		collect: monitor => ({isDragging: !!monitor.isDragging()})
+	})
 
+	if (isDragging) clearTimeout(timer)
+	
+	const click = () => {
+		timer&&!clicked&&cardClick&&cardClick(card)
+		if (clicked) {
+			cardClick(card,true)
+			clicked=false
+		}
+		clicked=true
+		setTimeout(()=>clicked=false,300)
+	}
+
+	const clickHold = () => {
+		if (!isDragging) {
+			timer = setTimeout(()=>{
+			    timer = null
+				openModal&&openModal(<Inspect showShopping={!!card.board} showRulings={!!card.zone} card={card}/>)
+			},400)		
+		} 
+	}
 
 	return (
-		<>
-			<div className="card-controls">{props.controls}</div>
-			<span className="clickEvents"
-				onClick={()=>cardClick(props)}
-				onMouseUp={()=>clearTimeout(timer)}
-				onMouseOut={()=>clearTimeout(timer)}
-				onMouseDown={()=>clickHold(props,props.isDragging)}
+		<div ref={drag} style={style} className={`card-container ${illegal?'illegal':''}`}>
+			<div className="card-controls">{children}</div>
+			<span className="click-events"
+			onClick={click}
+			onMouseDown={clickHold}
+			onMouseUp={()=>clearTimeout(timer)}
+			onMouseOut={()=>clearTimeout(timer)}
 			>
-        	{props.children}
+				<Card {...props} faceDown={faceDown}/>
 			</span>
-		</>
+		</div>
 	)
 }
 
 
-
-let timer,clicked
-
-function cardClick(props) {
-	timer&&props.cardClick&&props.cardClick(props.card)
-	if (clicked&&props.card.zone==="Battlefield") {
-		props.moveCard(props.card,"Graveyard")
-		clicked=false
-	}
-	clicked=true
-	setTimeout(()=>clicked=false,300)
-}
-
-function clickHold(props,isDragging) {
-	if (!isDragging) {
-		timer = setTimeout(()=>{
-		    timer = null
-			props.openModal(<Inspect card={props.card}/>)
-		},500)		
-	} 
-}
 
 
 

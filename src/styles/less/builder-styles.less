@@ -8,118 +8,251 @@
 
 
 .builder {
-	height: calc(100vh - 3rem);
-    display: grid;
-    grid-template-columns: 1fr;
-  	grid-template-rows: 4rem 1fr;
-  	grid-gap: 1rem;
-    grid-template-areas:
-    'top-area'
-    'boards-area';   
-
-	.top-area {
-		grid-area: top-area;
+	.top-bar {
 		.flex-row();
-		justify-content: space-between;
-		background: @light;
-		padding: @thin;
-		width: 100%;
-		.add-search {
-			flex-grow: 1;
-			.flex-row();
-		}
-
-	}
-
-	.boards-area {
-		grid-area: boards-area;
-		.flex-col();
-		align-items: stretch;
+		align-items: center;
+		background: @dark;
 		padding: 0;
-		color: @darkest;
-		height: calc(100vh - 7rem);
-		.list-head {
-			width: 100%;
-			height: 2rem;
+		.info-bar {
 			.flex-row();
-		}
-		.boards {
-			.flex-row();
-			min-height: calc(100vh - 11rem);
-			max-height: calc(100vh - 11rem);
-			flex-grow: 1;	
-			transition: .3s ease;
-			h2 {
-				cursor: pointer;
-				color: @lightest;
-			}
-			.board {
-				padding: @thin;	
-				height: auto;
-				min-width: 10rem;
-			}
-			.board-inner {
+			flex-wrap: wrap;
+			background: @darker;
+
+			.name {
+				flex: 1 0 45%;
 				.flex-col();
-				height: auto;
-				background: @lighter;
-				overflow-y: auto;
-				padding: @thin;
-				h3 {
-					font-size: 1.2rem;
-					margin: 1rem 0 @thin;
-					border-bottom: @thinnest solid @darkest;
+				.name-entry {
+					font-size: @big;
+					padding: @thinner;
+				}
+			}
+			.desc {
+				flex: 1 0 100%;
+				font-family: @para;
+				padding: @thinner;
+				.desc-entry {
 					width: 100%;
 				}
-				.list-view {
+			}
+			.format {
+				flex: 1 0 45%;
+				.commanders {
 					.flex-row();
-					flex-wrap: wrap;
-					flex: 1 0 30%;
-
 				}
-				
-				.list-inner {
-					.flex-col();
-					.view-card {
-						.flex-row();
-						justify-content: flex-start;
-						.list-item {
-							min-width: 10rem;
-						}
-						.printing {
-							min-width: 10rem;
-							justify-self: end;
+			}
+		}
+		.add-search {
+			.flex-row();
+			flex-grow: 1;
+			align-self: flex-start;
+			padding: @thin;
+			.card-select-container {
+				width: 20rem;
+				font-size: 1.2rem;
+			}
+
+			.filters {
+				.operators,.colors {
+					.flex-row();
+					background: rgba(0,0,0,0.1);
+					padding: 0 @thin;
+					align-items: center;
+					border-radius: @thinner;
+					input {
+						.clean-input();
+					}
+					span {
+						width: 1.5rem;
+						height: 1.5rem;
+						padding: @thinner;
+						cursor: pointer;
+						transition: .2s;
+						margin-right: @thin;
+						&:hover {transform: scale(1.2);}
+						&:not(.selected-icon) {
+							transform: scale(.9);
+							background: @darkest;
+							color: @lighter;
 						}
 					}
 				}
-				.grid-inner {
-					.flex-row();
-					flex-wrap: wrap;
-					.view-card {
-						.flex-col();
-						margin-bottom: 2rem;
-						&:hover .card-controls {.flex-col();}
-						.card-controls {
-							position: absolute;
-							* {position: relative;}
-							z-index: 10;
-							display: none;
-
-							.quant-buttons {.flex-row();}
-							.printing {
-								// margin-top: @cardH;
-								width: 100%;
-							}			
-						}
-					}
-				}
-
 			}
 		}
 	}
 
-	.board.focus {
-		min-width: 50vw;
-		flex-grow: 3;
+	.export {
+		position: fixed;
+		bottom: 1rem;
+		right: 1rem;
+		z-index: 30;
+
+		button {
+			box-shadow: 0 0 1rem @darkest;
+		}
+	}
+
+	.list-head {
+		.flex-row();
+		justify-content: space-between;
+		cursor: default;
+		height: 2rem;
+		padding: @thin 0 0 @thin;
+		.view-options {
+			.flex-row();
+		}
+	}
+
+	.boards {
+		.flex-row();
+		.Main-board {
+			flex: 1 0 60%;
+			.board-inner.grid {column-count: 2;}
+			.board-inner.list {column-count: 3;}
+		}	
+		.other-boards {
+			flex: 1 0 30%;
+			.flex-col();
+			.choose-commander {
+				width: 12rem;
+				.card-select-container {
+					width: 12rem;
+				}
+			}
+		}
+		
+	}
+	.drop-slot {margin: @thin;}
+
+	.board {
+		cursor: default;
+		color: @darkest;
+		height: auto;
+		min-width: 10rem;
+		h2 {
+			cursor: pointer;
+			color: @lightest;
+		}
+	}
+	.board-inner {
+		column-count: 1;
+		min-height: @cardH;
+		background: @lighter;
+		overflow-y: auto;
+		padding: @thin;
+		h3 {
+			font-size: 1.2rem;
+			margin: 1rem 0 @thin;
+			border-bottom: @thinnest solid @darkest;
+			width: 100%;
+			.icon {
+				background: transparent;
+			}
+		}
+		.quantity {
+			.flex-col();
+			align-items: center;
+			margin-right: @thin;
+			height: 1.5rem;
+			span {
+				font-size: 1.2rem;
+				cursor: pointer;
+				transition: .1s;
+				color: @lightest;
+				&:hover{transform: scale(1.1);}
+				&:first-child {
+					margin-bottom: -.5rem;
+					transform-origin: bottom center;
+					&:hover {color: @green;}
+				}
+				&:last-child {
+					transform-origin: top center;
+					margin-top: -.5rem;
+					&:hover {color: @red;}
+				}
+			}
+
+		}
+		.list {
+			break-inside: avoid-column;
+			page-break-inside: avoid;
+			display: inline-block;
+		}
+
+		.list-view {
+			flex: 1 0 20%;	
+		}
+		
+		.list-inner {
+			.flex-col();
+			flex-direction: column-reverse;
+			justify-content: flex-start;
+			padding: @thin;
+			.of-name {
+				margin: 0 0 @thin;
+				background: linear-gradient(90deg, rgba(0,0,0,.08),transparent);
+				border-radius: @thinner;
+			}
+			.card-container {
+				.flex-row();
+				justify-content: flex-start;
+				width: 100%;
+
+
+				.card-controls  {
+					.flex-row();
+				}
+			}
+			.illegal .card-head {
+				background: @red !important;
+			}
+		}
+		.grid-view {
+			flex: 1 0 20%;	
+			min-width: calc(@cardW*2 + 1rem)
+		}
+		.grid-inner {
+			.flex-row();
+			flex-wrap: wrap;
+			flex-direction: row-reverse;
+			justify-content: flex-end;
+			.card-container {
+				.flex-col();
+				margin: 0 @thin @thin 0;
+
+				.card-controls {
+					.flex-row();
+					align-items: center;
+					opacity: 0;
+					pointer-events: none;
+					position: absolute;
+					z-index: 15;
+					filter: drop-shadow(0 0 1rem @darkest);
+					border-radius: @thinnest;
+					transform: scale(1.2);
+
+					.quantity {
+						.clean-button();
+						padding: @thin 0;
+						height: 3rem;
+						&:hover {background: @lightest;}
+						span {
+							color: @darkest;
+							&:first-child {&:hover {color: @green;}}
+							&:last-child {&:hover {color: @red;}}
+						}
+					}
+				}
+
+				&:hover .card-controls {
+					opacity: 1;
+					pointer-events: all;
+				}
+			}
+			.illegal .fullImg {
+				box-shadow: 0 0 1rem @red !important;
+			}
+
+		}
 	}
 }
 

@@ -4,23 +4,43 @@
 
 // STYLES
 
+html {
+	font-size: 85%;
+	color: @lightest;
+	font-family: @para;
+}
+
 
 .wrapper {
-	color: @light;
-    // width: 100vw;
-    // height: 100vh;
-// 	overflow: hidden;
+	padding-top: @headerH;
+	min-height: 100vh;
+	position: relative;
+	// color: @lightest;
+}
+
+.bg-img {
+	.fixed-full-page();
+ 	background-color: @darker; 
+  	background-position: center; 
+  	background-repeat: no-repeat; 
+  	background-size: cover; 
+  	filter: brightness(60%);
+  	z-index: -1;
 }
 
 
 
 .main-header {
+	.fixed-full-page();
+	height: @headerH;
+	z-index: 150;
 	.flex-centered();
 	justify-content: space-between;
 	background: @darkest;
-	height: 2rem;
+	height: @headerH;
 	padding: @thin 1rem;
 	font-size: 120%;
+	font-family: @header;
 	.title {
 		.flex-centered();
 		justify-content: flex-start;
@@ -60,7 +80,7 @@
 	top: 1rem;
 	left: 25%;
 	width: 50%;
-	z-index: 20;
+	z-index: 155;
 	pointer-events: none;
 	.notification {
 		.clean-input();
@@ -78,25 +98,109 @@
 	.success {background: @green;}
 }
 
+.loading {
+	.fixed-full-page();
+	.flex-centered();
+	position: absolute;
+	font-size: 4rem;
+	background: rgba(0,0,0,.5);
+	color: @lighter;
+	.message {
+		animation-name: waver;
+		animation-duration: 2s;
+		animation-timing-function: ease;
+		animation-direction: alternate;
+		animation-iteration-count: infinite;
+	}
+}
+
 .drop-slot {
 	flex: 1 0 @cardW;
 	position: relative;
-	// height: @cardH;
-	// width: @cardW;
 	margin: 0;
-	* {cursor: pointer;}
 	.drop-slot-over {
+		.fixed-full-page();
 	    position: absolute;
-	    top: 0;
-	    left: 0;
-	    height: 100%;
-	    width: 100%;
 	    z-index: 1;
 	    opacity: 0.5;
-	    background-color: yellow;
+	    background-color: @highlight;
 	}
 }
 
 .drop-slot.list {
 	display: flex;
+}
+
+
+.card-select-container {
+	min-width: @cardW;
+	.card-select__indicators {
+		display: none;
+	}
+	.card-select__menu {
+		max-height: 8rem;
+		width: auto;
+		background: @lightest;
+	}
+	.card-select__option {
+		width: 100%;
+		background: @lightest;
+		color: @darkest;
+		cursor: pointer;
+		&:hover {background: @highlight;}
+	}
+	
+}
+
+// .custom-select.icon:not(.open) {
+// 	width: auto;
+// 	background: transparent;
+// }
+
+.custom-select {
+	height: 1.5rem;
+	width: 10rem;
+	border-radius: @thinnest;
+	margin: 0 @thinnest;
+	background: @lightest;
+	cursor: pointer;
+
+	.set-symbol {
+		width: 1.5rem;
+		height: 1.5rem;
+		object-fit: contain;
+	}
+	
+	.select-collapsed {
+		padding: @thinner;
+		white-space: nowrap;
+		overflow: hidden;
+		color: @darkest;
+	}
+	.options {
+		position: absolute;
+		z-index: 30;
+		width: auto;
+		max-height: 10rem;
+		overflow-y: auto;
+		overflow-x: hidden;
+		color: @darkest;
+		background: @lightest;
+		.option {
+			.flex-row();
+			justify-content: space-between;
+			padding: @thinner;
+			background: @lightest;
+			border-left: @thinner solid @highlight; 
+			cursor: pointer;
+			transition: .2s;
+
+			&:hover {
+				background: @highlight;
+			}
+		}
+		.option.active {
+			background: @highlight;
+		}
+	}
 }

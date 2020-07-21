@@ -1,73 +1,76 @@
-.modalCont {
+.modal-cont {
   .fixed-full-page();
   .flex-centered();
-  z-index: 15;
+  z-index: 100;
   .exit {
     .fixed-full-page();
     position: absolute;
     z-index: -1;
     background: rgba(0, 0, 0, 0.5);
   }
-  .modalBox {
+  .modal-box {
     .flex-centered();
     background: @dark;
-    padding: 2rem;
+    padding: 1rem;
     height: 30rem;
     margin: auto;
-    border-radius: @thin;
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+    border-radius: @thinner;
+    box-shadow: 0 0 3rem rgba(0, 0, 0, .9);
 
-    .inspectContainer {
+    .inspect-container {
       .flex-centered();
       img {
-        height: 26rem;
-        width: 18.6rem;
-        min-width: 18.6rem;
+        object-fit: cover;
+        height: 28rem;
+        width: 20rem;
+        // min-width: 20rem;
+        border-radius: @thin;
+        box-shadow: 0 0 1rem rgba(0,0,0,0,.6);
       }
 
-      .info {
-        align-self: flex-start;
+      .inspect-info {
+        .flex-col();
+        color: @lightest;
         padding:  0 0 0 2rem;
-        height: 26rem;
-        max-width: 26rem;
-        h1 {
-          margin-bottom: 1rem;
+        height: 28rem;
+        width: 20rem;
+        text-shadow: 0 0 @thin rgba(0,0,0,0.3);
+        h2 {
+          font-size: 1.3em;
+          padding-bottom: 1rem;
+          white-space: nowrap;
+          display: flex;
+          justify-content: space-between;
         }
+        p {
+          font-size: .9em;
+          line-height: 1.2em;
+          padding-bottom: @thin;
+        }
+
+        .field-label {color: @darkest;}
         .rulings {
+          height: 100%;
           border-radius: @thin;
           background: @darker;
+          box-shadow: inset 0 0 1rem rgba(0,0,0,0,.5);
           padding: 1rem;
+          margin-top: @thin;
           overflow-y: scroll;
           .ruling {
             margin-bottom: 2rem;
-            h3 {
-              color: @light;
+            h4 {
+              color: @lighter;
               font-weight: bold;
               margin-bottom: @thin;
             }
             p {
-              margin-left: 1rem;
               color: @lightest;
             }
           }
         }
       }
-      .inspectOptions {
-        .flex-col();
-        padding: 2rem;
-        * {
-          margin: @thin;
-        }
-        button {
-          padding: @thin;
-          &:hover {
-            cursor: pointer;
-            background: @highlight;
-          }
-        }
-      }
     }
-  }
 
     .scryContainer {
       .flex-col();
@@ -122,5 +125,29 @@
       }
 
     }
-}
 
+    .choose-print {
+      min-width: calc(@cardW*2);
+      max-width: 60rem;
+      height: 24rem;
+      .options {
+        .flex-row();
+        flex-wrap: wrap;
+        padding: 0 @thin;
+        margin-top: 1rem;
+        height: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+        .print-select-card {
+          margin-bottom: 1rem;
+          width: @cardW;
+          margin-right: @thin;
+          h4 {
+            height: 2rem;
+            margin-bottom: @thin;
+          }
+        }
+      }
+    }
+  }
+}

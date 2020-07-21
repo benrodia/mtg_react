@@ -2,8 +2,7 @@ import React from 'react'
 
 
 export default function Notifications(props) {
-	return (
-    <div className="notifications">
+	return <div className="notifications">
       {props.noteLog.map(n=>{
         return (
           <div key={n.key} className={`notification alert ${n.type}`}>
@@ -12,6 +11,5 @@ export default function Notifications(props) {
         )
       })}
     </div>      
-  )
 }
 

@@ -3,144 +3,191 @@ import ReactDOM from 'react-dom'
 import { BrowserRouter, Route, Redirect } from 'react-router-dom'
 import { DndProvider } from 'react-dnd'
 import {HTML5Backend} from 'react-dnd-html5-backend'
+import {v4 as uuidv4} from  'uuid'
 
+import PropTypes from 'prop-types'
+
+import {COLORS,SINGLETON} from './constants/definitions'
+import {
+  DEFAULT_SETTINGS,
+  DEFAULT_DECKINFO,
+  DEFAULT_FILTERS,
+  CARD_SLEEVES,
+  PLAYMATS
+} from './constants/data_objects'
 //Styles
-import Styles from './styles/css/styles.css'
-import ManaSymbols from './styles/css/mana.css'
+import './styles/css/styles.css'
+import './styles/css/mana.css'
+import './styles/css/icons.css'
+
 
 //Functions
-import {isLegal} from './functions/cardFunctions'
-import './functions/math'
+import {Q,isLegal,audit} from './functions/cardFunctions'
+import {chooseCommander,legalCommanders} from './functions/gameLogic'
+import './functions/utility'
 
 //Components
 import Nav from './components/Nav'
 import Notifications from './components/Notifications'
 import Modal from './components/Modal'
+import Loading from './components/Loading'
 
-import DeckInfo from './components/DeckInfo'
-import DeckBuilder from './components/DeckBuilder'
-import DeckTester from './components/DeckTester'
-
-
-
+import Page_User from './components/Page_User'
+import Page_Builder from './components/Page_Builder'
+import Page_Tester from './components/Page_Tester'
 
 
-export default class App extends React.Component {
-  
-  componentDidMount() {this.loadCardData()}
+export default class App extends React.Component {  
+  componentDidMount() {
+    this.fetchAPI('cardData',"https://api.scryfall.com/bulk-data/unique_artwork")
+    this.fetchAPI('sets',"https://api.scryfall.com/sets")
+  }
   
   constructor(props) {
   	super(props)
   	this.state = {
-      deckInfo: localStorage.getItem('cachedDeckInfo') ? 
-      JSON.parse(localStorage.getItem('cachedDeckInfo')) : 
-      {
-        name:'New Deck',
-        desc:"",
-        format: 'casual',
-        list:[]
-      },
+      settings: localStorage.getItem('settings') ? 
+      JSON.parse(localStorage.getItem('settings')) : DEFAULT_SETTINGS,
+      deckInfo: localStorage.getItem('deckInfo') ? 
+      JSON.parse(localStorage.getItem('deckInfo')) : DEFAULT_DECKINFO,
       pages: [
-        {component: DeckInfo, name: 'Info', path: '/info'},
-        {component: DeckBuilder, name: 'Build', path: '/build'},
-        {component: DeckTester, name: 'Test', path: '/test'},
+        {component: Page_User, name: 'User', path: '/user'},
+        {component: Page_Builder, name: 'Build', path: '/build'},
+        {component: Page_Tester, name: 'Test', path: '/test'},
       ],
       cardData: [],
       legalCards: [],
+      tokens: [],
       noteLog:[],
       modal: null,
+      filters: DEFAULT_FILTERS,
     }
 
-    this.loadCardData = this.loadCardData.bind(this)
+    this.fetchAPI = this.fetchAPI.bind(this)
     this.findLegalCards = this.findLegalCards.bind(this)
-    this.changeDeck = this.changeDeck.bind(this)
+    
+    this.changeState = this.changeState.bind(this)
+    this.addCard = this.addCard.bind(this)
+    
     this.openModal = this.openModal.bind(this)
     this.newMsg = this.newMsg.bind(this)
   }
 
   render() {
-    return (
-      <div className="wrapper">
-        <Notifications noteLog={this.state.noteLog} newMsg={this.newMsg}/>
+    return <div className="wrapper" style={{fontSize:this.state.settings.scale+"%"}}>
+      <div className="bg-img" style={{backgroundImage: "url('"+this.state.settings.playmat+"')"}}></div>
+        <Notifications home={'/build'} noteLog={this.state.noteLog} newMsg={this.newMsg}/>
         <Modal openModal={this.openModal}>{this.state.modal}</Modal>
-        <BrowserRouter>
+        {!this.state.cardData.length
+        ?<Loading message='Loading card data...'/>
+        :<BrowserRouter>
         <DndProvider backend={HTML5Backend}>
-
           <Nav {...this.state}/>
-          {this.state.pages.map(R=>{
-            return (
-              <Route key={R.name} path={R.path}>
-                <R.component 
-                    {...this.state} 
-                    changeDeck={this.changeDeck}
-                    openModal={this.openModal}
-                    newMsg={this.newMsg}
-                />
-              </Route>
-            )
-          })}
+          <Route exact path="/"><Redirect to="/build" /></Route>
+          {this.state.pages.map(R=>
+            <Route exact key={R.name} path={R.path}>
+              <R.component 
+              {...this.state} 
+              changeState={this.changeState}
+              openModal={this.openModal}
+              newMsg={this.newMsg}
+              addCard={this.addCard}
+              />  
+            </Route>
+          )}
         </DndProvider>
         </BrowserRouter>
+        }
       </div>
-    )
   }
 
-
-  loadCardData() {
-    this.newMsg('Loading MtG Card Data...','info')
-
-    return fetch("https://api.scryfall.com/bulk-data")
+  fetchAPI(key,uri) {
+    fetch(uri)
       .then(response => {if (!response.ok) {throw new Error("HTTP status " + response.status)}return response.json()})
-      .then(uri=>{
-        const newURI = uri.data[1].download_uri // unique art only
-        fetch(newURI)
+      .then(data=>{
+        if (data.data) {this.setState({[key]:data.data})}
+        else fetch(data.download_uri)
           .then(response => {if (!response.ok) {throw new Error("HTTP status " + response.status)}return response.json()})
           .then(data=>{
-                this.newMsg(data.length+" cards loaded!",'success')
-                console.log('it loaded',data)
-                this.setState({cardData:data})
-                this.findLegalCards(data,this.state.deckInfo.format)
-          }).catch('loadFail')
-      }).catch('loadFail')    
+            this.setState({[key]:data})
+            if (key==='cardData') {
+              this.findLegalCards(data,this.state.deckInfo.format)
+              this.setState({tokens: Q(this.state.cardData,'type_line','Token')})
+            }
+          })
+      })    
+  }
+  changeState(state,key,val) {
+    let update = {...this.state[state]}
+    if (key==='format' && val!== update.format) {
+      this.findLegalCards(this.state.cardData,val) 
+      if (!SINGLETON(val)) update.list = update.list.filter(c=>c.board!=='Command')
+    }
+    else if (key==='list') {
+      update.colors = getColorIdentity(Q(update.list,'board','Main'),'colors')
+      update.color_identity = getColorIdentity(Q(update.list,'board','Command'),'color_identity')     
+      val = val.sort((a,b)=>a.name>b.name?1:-1)
+    }
+    if (key==='clear'&&window.confirm(`Clear ${state}?`)) update = DEFAULT_DECKINFO
+    else update[key] = val
+    this.setState({[state]: update})
+    cache(state,update)
   }
 
-  changeDeck(prop,val) {
-    let update = {...this.state.deckInfo}
-    if (prop==='format' && val!== this.state.deckInfo.format) this.findLegalCards(this.state.cardData,val) 
-    if (prop==='list') val = val.sort((a,b)=>a.name>b.name?1:-1)
-    update[prop] = val
-    this.setState({deckInfo: update})
-    cacheDeckInfo(update)
+  addCard(card,board,remove) {
+    console.log('addCard',card,board,remove)
+    let list = [...this.state.deckInfo.list]
+    if(!card) return null
+
+    audit(card)
+    const existing = list.filter(c=>c.name===card.name)
+
+     if(!existing.length||(!remove && (1+existing.length)<=isLegal(card,this.state.deckInfo.format,this.state.deckInfo.color_identity))) {
+      list = [...list,{...card,
+        board: board||'Main',
+        key: legalCommanders(this.state.deckInfo.format,this.state.legalCards).filter(c=>c.name===card.name)[0]
+        ? "CommanderID__"+uuidv4()
+        : "CardID__"+uuidv4()
+      }]
+    } 
+    else if (remove) list = list.filter(c=>c.key!==card.key)       
+    this.changeState('deckInfo','list',list)
   }
+
+
+
 
   newMsg(message,type) {
-    this.setState({noteLog: [
-      {
+    this.setState({noteLog: [{
         key: type + Math.random(),
         message: message,
         type: type
-      },
-      ...this.state.noteLog.slice(0,3),
+      },...this.state.noteLog.slice(0,3),
     ]})
   }
 
-  openModal(target) {
-    console.log('openModal',target)
-    this.setState({modal: target})
-  }
+  openModal(target) {this.setState({modal: target})}
 
 
   findLegalCards(cards,format) {
-    let legal = cards.filter(c=>isLegal(c,format))
+    const legal = cards.filter(c=>isLegal(c,format,null)>0)
     this.newMsg(legal.length +" cards legal in "+ format,'success')
     this.setState({legalCards:legal})
   }
 
 }
 
+function cache(key,val) {localStorage.setItem(key,JSON.stringify(val))}
 
-function cacheDeckInfo(deckInfo) {
-  localStorage.setItem('cachedDeckInfo',JSON.stringify(deckInfo)) 
+
+function getColorIdentity(list,key) {
+  let colors = []
+  for (var i = 0; i < list.length; i++) {
+    if (list[i][key]) {
+      for (var j = 0; j < list[i][key].length; j++) {
+        if (!colors.includes(list[i][key][j])) colors.push(list[i][key][j])
+      }
+    }
+  }
+  return colors
 }
-
-
