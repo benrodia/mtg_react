@@ -68,6 +68,7 @@ export default class DeckTester extends React.Component {
         cardState={this.cardState}
         gameState={this.gameState}
         cardClick={this.cardClick}
+        handleShuffle={this.handleShuffle}
         openModal={this.props.openModal}
       />
     }
@@ -203,7 +204,7 @@ export default class DeckTester extends React.Component {
     let deck = [...this.state.game.deck]
     const toMove = card?card:card===null?null:this.inZone("Library")[0]
     const toDest = dest || "Hand"
-    if(!toMove) {return console.error('cannot draw card')}
+    if(!toMove) return console.error('cannot draw card')
     const ind = deck.findIndex(c=>c.key===toMove.key)
 
     const movedMsg = toDest!==toMove.zone?g.cardMoveMsg(deck[ind],toDest,src):undefined
@@ -222,7 +223,7 @@ export default class DeckTester extends React.Component {
     this.gameState('deck',deck,false,movedMsg)
   }
 
-  cardClick(card,dblclick) {
+  cardClick(card,dblclick,toDest) {
     if ((card.zone==="Hand"||card.zone==="Command")&&!card.type_line.includes('Land')) 
       this.gameFunction('castSpell',card,this.props.settings.manaTolerance)
 
@@ -235,7 +236,7 @@ export default class DeckTester extends React.Component {
       }
       return
     }
-    return this.moveCard(...g.clickPlace(card,this.inZone('Battlefield'),null,dblclick))
+    return this.moveCard(...g.clickPlace(card,this.inZone('Battlefield'),toDest,dblclick))
   }
 
 
@@ -265,6 +266,7 @@ export default class DeckTester extends React.Component {
     let shuffled = first ? this.state.game.deck.shuffle() : this.inZone('Library').shuffle()
     shuffled = shuffled.map((c,i)=>{c.order=i;return c}).concat(this.state.game.deck).unique('key')
     this.gameState('deck',shuffled,false,'Shuffled library')
+    this.gameState('look',0,false)
   }
 
 

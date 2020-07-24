@@ -28,7 +28,7 @@ return	<div className="add-search">
 					</button>
 			</div>
 			<div className="colors">
-				{COLORS('symbol').map((co,i)=><span 
+				{COLORS('symbol').map((co,i)=><span key={'color-filter-'+co}
 				onClick={()=>changeState('filters',co,!filters[co])}
 				className={`ms ms-${co.toLowerCase()} ${filters[co]?'selected-icon':''}`}
 				/>

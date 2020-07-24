@@ -78,7 +78,7 @@ export default function DeckInfo(props) {
 				
 				<div className="setting-check-box">
 					<p>Auto Spend Mana</p>
-					{tolerances.map((msg,i)=><button 
+					{tolerances.map((msg,i)=><button key={tolerances[i]}
 					className={`smaller-button ${settings.manaTolerance==i&&'selected'}`} 
 					onClick={_=>changeState('settings','manaTolerance',i)}>{msg}</button>)}					
 				</div>

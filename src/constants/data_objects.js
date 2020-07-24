@@ -1,9 +1,16 @@
+import {v4 as uuidv4} from  'uuid'
 import {CARD_TYPES,COLORS,SINGLETON} from './definitions'
 
 function importAll(r) {
   let images = {}
   r.keys().map(item => { images[item.replace('./', '')] = r(item) })
   return images
+}
+
+
+export const ItemTypes = {
+	CARD: 'CARD',
+	COMMANDER: 'COMMANDER'
 }
 
 export const CARD_SLEEVES = importAll(require.context('../../public/images/sleeves', false, /\.(png|jpe?g|svg)$/))
@@ -26,13 +33,14 @@ export const DEFAULT_SETTINGS = {
 	userName: 'User',
 	scale: 100,
 	subtitle: true,
-	manaTolerance: 3,//0-4
+	manaTolerance: 3,//0-3
 	gameLog: true,
 	sleeves: Object.values(CARD_SLEEVES)[0],
 	playmat: Object.values(PLAYMATS)[0],
 }
 
 export const DEFAULT_DECKINFO = {
+	key: uuidv4(),
 	name:'New Deck',
 	format: 'casual',
 	desc:"",
@@ -59,6 +67,7 @@ export const DEFAULT_FILTERS = {
 	only:false,
 	keys: ['name','oracle_text'],
 	types: [],
+	customFields: []
 }
 
 
@@ -69,17 +78,22 @@ export const FILTER_TERMS = [
 		vals: CARD_TYPES
 	},
 	{
-		name: "Color",
-		key: "colors",
-		vals: COLORS('symbol'),
-		valNames: COLORS('name'),
-		other: 'multicolor'
+		name: "Custom",
+		key: "customField",
+		other: 'unsorted'
 	},
 	{
 		name: "CMC",
 		key: "cmc",
 		vals: [...Array(20)].map((a,i)=>i),
 		valNames: NUMBER_WORDS.map(n=>n+" drop"),
+	},
+	{
+		name: "Color",
+		key: "colors",
+		vals: COLORS('symbol'),
+		valNames: COLORS('name'),
+		other: 'multicolor'
 	},
 	{
 		name: "Price (USD)",

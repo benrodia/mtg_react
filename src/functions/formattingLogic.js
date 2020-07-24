@@ -22,12 +22,12 @@ export function formatManaSymbols(text) {
 			'ms ms-cost ms-'+ms
 			:''
 
-			console.log(cName,ms)
+			// console.log(cName,ms)
 
-			return (<>
+			return <span key={ms+i}>
 				<span key={cName+i} className={cName}/>
 				<span>{m.substring(m.indexOf("}")+1,m.length)}</span>
-			</>)
+			</span>
 		}
 		else return null
 	})
@@ -87,7 +87,7 @@ export function subTitle(deckInfo) {
   return <span className="subtitle">
     {" ("}
     {titleCaps(deckInfo.format)}
-    {subTitle} {deckInfo[colorBy].map(c=><span className={`ms ms-${c.toLowerCase()}`}/>)}
+    {subTitle} {deckInfo[colorBy].map(c=><span key={'subtitle'+c} className={`ms ms-${c.toLowerCase()}`}/>)}
     )
   </span>
 }

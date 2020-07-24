@@ -2,7 +2,7 @@ import {Q} from './cardFunctions'
 import titleCaps from './titleCaps'
 import {sum,match} from './utility'
 import {CARD_TYPES,COLORS,ZONES,SINGLETON} from '../constants/definitions'
-import {MANA,TUTOR} from '../constants/greps'
+import {MANA,TUTOR,SAC_AS_COST} from '../constants/greps'
 import {v4 as uuidv4} from  'uuid'
 
 
@@ -124,8 +124,9 @@ export function chooseCommander(card,list,legalCards,addCard) {
     else list = [
       ...list.map(c=>{if(c.board==='Command') c.board='Maybe';return c}),
       {...Q(legalCards,'name',partnerName)[0],
-      key: "CommanderID__"+Q(legalCards,'name',partnerName)[0].id+"__UUID4__"+uuidv4(),
-      board: 'Command'
+      key: "CommanderID__"+uuidv4(),
+      board: 'Command',
+      customField: 'unsorted'
     }]
   }
   else if(!partners) {list = addCard
@@ -138,8 +139,9 @@ export function chooseCommander(card,list,legalCards,addCard) {
   if (addCard && !list.filter(c=>c.name===card.name).length) {
     list = [...list,
       {...card,
-      key: "CommanderID__"+card.id+"__UUID4__"+uuidv4(),
-      board: 'Command'
+      key: "CommanderID__"+uuidv4(),
+      board: 'Command',
+      customField: 'unsorted'
     }]
   }
   else list = list.map(c=>{if(c.key===card.key) c.board='Command';return c})
@@ -163,8 +165,9 @@ export function tutorableCards(card,deck) {
   let tutorable = []
   let dest = 'Hand'
   let from = 'Battlefield'
+  let sac = false
 
-  if(Q(card,...TUTOR)) {
+  if(Q(card,...TUTOR(''))) {
     const searchText = card.oracle_text.toLowerCase().slice(
       card.oracle_text.toLowerCase().indexOf('search your library')+19,
       card.oracle_text.toLowerCase().indexOf('shuffle')
@@ -176,6 +179,10 @@ export function tutorableCards(card,deck) {
       ...CARD_TYPES.map(C=>C==='Land'?'Basic':C)
     ]
 
+    if (Q(card,...SAC_AS_COST(card.name))) sac=true
+
+
+
     for (var i = 0; i < searchForType.length; i++) {
       if(searchText.includes(searchForType[i].toLowerCase())) {
         tutorable = tutorable.concat(Q(deck.filter(c=>c.zone==='Library'),'type_line',searchForType[i]))
@@ -183,19 +190,25 @@ export function tutorableCards(card,deck) {
     }
     tutorable = tutorable.unique('name')
   }
-  return {cards:tutorable,dest:dest,from:from}
+  return {cards:tutorable,dest:dest,from:from,sac:sac}
 }
 
 export function clickPlace(card,inZone,toDest,dblclick) {
-  let dest,col,row = toDest||card.zone
+  let dest = card.zone
+  let col,row 
+
   if (card.zone==="Library") dest = "Hand"
   else if (dblclick&&card.zone==="Battlefield") dest = "Graveyard"
-  else if (card.zone==="Hand"||card.zone==="Command") {
-    if (dest==card.zone) return [null] 
-    dest = "Battlefield" 
+  else if (dblclick&&card.zone==="Graveyard") dest = "Exile"
+  else if (dblclick&&card.zone==="Exile") dest = "Battlefield"
+  else if (card.zone==="Hand"||card.zone==="Command") 
+  dest = Q(card,'type_line',['Instant','Sorcery'])? "Graveyard":"Battlefield" 
+  
+  dest = toDest||dest
 
-    if (Q(card,'type_line',['Instant','Sorcery'])) dest="Graveyard"
-    else if (Q(card,'type_line','Creature')) row = 1
+  if (dest==card.zone) return [null] 
+  else {
+    if (Q(card,'type_line','Creature')) row = 1
     else if (Q(card,'type_line','Artifact')&&Q(card,...MANA.source))row = 0 
     else if (Q(card,'type_line','Artifact')) row = 2
     else if (Q(card,'type_line',['Enchantment','Planeswalker'])) {
@@ -209,9 +222,13 @@ export function clickPlace(card,inZone,toDest,dblclick) {
       // if (colors) col = colors-1
     } 
     col = col||inZone.filter(c=>c.row===row).length % 8 // REPLACE 8 with dynamic cols
+
+  console.log('clickPlace',card.name,col,row,dest)
+    return [card,dest,col,row,null,'click']
   }
-  
-  return [card,dest,col,row,null,'click']
 }
 
 
+export function guessCustomField(card) {
+  const fields = ''
+}

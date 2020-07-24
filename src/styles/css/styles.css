@@ -47,6 +47,23 @@
   transition: 0.2s;
   height: 2rem;
 }
+.discrete-input {
+  background: transparent;
+  width: 2rem;
+  color: #eff5ff;
+  padding: 0;
+}
+.discrete-input:hover {
+  color: #fcd303;
+}
+.discrete-input[type=number] {
+  -moz-appearance: textfield;
+}
+.discrete-input::-webkit-outer-spin-button,
+.discrete-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 .clean-button {
   border: none;
   border-radius: 2rem;
@@ -254,12 +271,18 @@ section {
 }
 @keyframes slide-in {
   from {
-    opacity: 0;
-    margin-left: -7rem;
+    margin-left: -7.14rem;
   }
   to {
-    opacity: 1;
     margin-left: 0;
+  }
+}
+@keyframes flip-in {
+  from {
+    transform: rotateY(60deg) translateX(7.14rem) scale(1.5);
+  }
+  to {
+    transform: none;
   }
 }
 .disabled {
@@ -287,6 +310,7 @@ section {
 html {
   font-size: 85%;
   color: #eff5ff;
+  background: #1f283b;
   font-family: 'Arimo';
 }
 .wrapper {
@@ -301,12 +325,16 @@ html {
   width: 100vw;
   height: 100vh;
   z-index: 1;
+  z-index: -1;
+}
+.bg-img .playmat {
+  width: 100vw;
+  height: 100vh;
   background-color: #1f283b;
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
   filter: brightness(60%);
-  z-index: -1;
 }
 .main-header {
   position: fixed;
@@ -429,17 +457,11 @@ html {
   flex: 1 0 7.14rem;
   position: relative;
   margin: 0;
+  transition: 0.2s;
 }
-.drop-slot .drop-slot-over {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  position: absolute;
-  z-index: 1;
-  opacity: 0.5;
-  background-color: #fcd303;
+.drop-slot.over {
+  background-color: rgba(252, 211, 3, 0.4);
+  border-radius: 0.5rem;
 }
 .drop-slot.list {
   display: flex;
@@ -711,6 +733,10 @@ html {
 .builder .board-inner h3 .icon {
   background: transparent;
 }
+.builder .board-inner h3 .custom-input {
+  width: 7rem;
+  color: #020817;
+}
 .builder .board-inner .quantity {
   display: flex;
   flex-flow: column nowrap;
@@ -841,6 +867,11 @@ html {
 }
 .card-container {
   transition: 0.2s;
+  transform-origin: 50% 100%;
+  animation-duration: 0.3s;
+  animation-timing-function: ease-out;
+  animation-iteration-count: 1;
+  animation-play-state: forwards;
 }
 .card-head {
   display: flex;
@@ -1084,29 +1115,29 @@ html {
 .tester .zone .title .custom-select * {
   color: #1f283b;
 }
-.tester .zone .inner {
+.tester .zone .row {
   display: flex;
   flex-flow: row nowrap;
   height: 100%;
   width: 100%;
   box-shadow: inset 0 0 1rem rgba(0, 0, 0, 0.5);
 }
-.tester .zone .inner .card-container .card-img {
+.tester .zone .row .card-container .card-img {
   box-shadow: 0 0 1rem rgba(0, 0, 0, 0.5);
 }
-.tester .zone .inner .card-container .card-controls > * {
+.tester .zone .row .card-container .card-controls > * {
   opacity: 0;
   pointer-events: none;
   position: absolute;
   top: 0;
   z-index: 20;
 }
-.tester .zone .inner .card-container:hover .card-controls > *,
-.tester .zone .inner .card-container .card-controls:hover .card-controls > *:hover {
+.tester .zone .row .card-container:hover .card-controls > *,
+.tester .zone .row .card-container .card-controls:hover .card-controls > *:hover {
   opacity: 1;
   pointer-events: all;
 }
-.tester .zone .inner .card-container .mana-source {
+.tester .zone .row .card-container .mana-source {
   display: flex;
   flex-flow: row nowrap;
   color: #020817;
@@ -1114,20 +1145,20 @@ html {
   text-shadow: 0 0 1rem #eff5ff;
   white-space: nowrap;
 }
-.tester .zone .inner .card-container .mana-source .tap-for {
+.tester .zone .row .card-container .mana-source .tap-for {
   cursor: pointer;
   transition: 0.1s;
   transform-origin: 50%;
 }
-.tester .zone .inner .card-container .mana-source .tap-for:hover {
+.tester .zone .row .card-container .mana-source .tap-for:hover {
   transform: scale(1.2);
   color: #fcd303;
 }
-.tester .zone .inner .card-container .add-counters {
+.tester .zone .row .card-container .add-counters {
   top: calc(10rem - 4rem);
   z-index: 25;
 }
-.tester .zone .inner .card-container .counters-display {
+.tester .zone .row .card-container .counters-display {
   top: 10rem;
   opacity: 1;
   pointer-events: all;
@@ -1155,23 +1186,6 @@ html {
   justify-content: center;
   align-items: center;
   justify-content: flex-start;
-}
-.tester .test-controls .counter input {
-  background: transparent;
-  width: 2rem;
-  color: #eff5ff;
-  padding: 0;
-}
-.tester .test-controls .counter input:hover {
-  color: #fcd303;
-}
-.tester .test-controls .counter input[type=number] {
-  -moz-appearance: textfield;
-}
-.tester .test-controls .counter input::-webkit-outer-spin-button,
-.tester .test-controls .counter input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
 }
 .tester .test-controls .mana-counters {
   display: flex;
@@ -1228,8 +1242,8 @@ html {
 .tester .side-col .exile {
   flex: 1 0 3rem;
 }
-.tester .side-col .graveyard .inner,
-.tester .side-col .exile .inner {
+.tester .side-col .graveyard .row,
+.tester .side-col .exile .row {
   max-height: 5rem;
   height: 5rem;
   flex-flow: column nowrap;
@@ -1238,29 +1252,26 @@ html {
   font-size: 0.6rem;
   font-family: 'MTG-para';
 }
-.tester .side-col .graveyard .inner .drop-slot,
-.tester .side-col .exile .inner .drop-slot {
+.tester .side-col .graveyard .row .drop-slot,
+.tester .side-col .exile .row .drop-slot {
   flex: 1 0 1px;
 }
-.tester .side-col .graveyard .inner .drop-slot .header,
-.tester .side-col .exile .inner .drop-slot .header {
+.tester .side-col .graveyard .row .drop-slot .header,
+.tester .side-col .exile .row .drop-slot .header {
   padding: 0.125rem 0.5rem;
 }
 .tester .side-col .library-cont {
   display: flex;
   flex-flow: column-reverse;
 }
-.tester .side-col .library-cont .card-container {
-  animation: slide-in;
-  animation-duration: 0.3s;
-  animation-timing-function: ease-out;
-  animation-iteration-count: 1;
-  animation-play-state: forwards;
-}
-.tester .library .inner,
-.tester .command .inner {
+.tester .library .row,
+.tester .command .row {
   min-height: 10rem;
   min-width: 7.14rem;
+}
+.tester .library .card-container,
+.tester .command .card-container {
+  animation-name: slide-in;
 }
 .tester .hand {
   position: fixed;
@@ -1271,44 +1282,51 @@ html {
   width: calc(100vw - (7.14rem + 1rem));
   transition: 0.3s ease;
 }
-.tester .hand .inner {
+.tester .hand .row {
   box-shadow: none;
   background: rgba(0, 0, 0, 0.5);
 }
-.tester .hand .inner .drop-slot {
+.tester .hand .row .drop-slot {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(0.125rem, max-content));
 }
-.tester .hand .inner .drop-slot .card-container {
-  transform-origin: 50% 100%;
-  animation: slide-in;
-  animation-duration: 0.3s;
-  animation-timing-function: ease-out;
-  animation-iteration-count: 1;
-  animation-play-state: forwards;
+.tester .hand .row .drop-slot .card-container {
+  animation-name: flip-in;
 }
-.tester .hand .inner .drop-slot .card-container:hover {
+.tester .hand .row .drop-slot .card-container:hover {
   transform: scale(1.3) translateY(-1rem);
 }
 .tester .battlefield {
-  display: flex;
-  flex-direction: column-reverse;
   position: fixed;
-  top: 3.5rem;
-  bottom: 10rem;
+  top: calc(2rem + 1.5rem);
+  height: calc(100vh - (10rem + calc(2rem + 1.5rem)));
   left: 8.14rem;
   right: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  z-index: 10;
 }
 .tester .battlefield .inner {
+  height: 100%;
+  display: flex;
+  flex-direction: column-reverse;
+}
+.tester .battlefield .inner .row {
   flex-wrap: nowrap;
   flex: 1 0 10rem;
-  border: none;
+  height: 100%;
   width: 100%;
 }
-.tester .battlefield .drop-slot .card-container {
-  transform: scale(0.9);
+.tester .battlefield .inner .row .drop-slot {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+}
+.tester .battlefield .inner .row .card-container {
+  animation-name: flip-in;
+  animation-timing-function: ease;
+  transform-origin: 100% 100%;
 }
 .tester .battlefield .bottom {
   height: 3rem;

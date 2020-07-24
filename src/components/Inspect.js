@@ -3,8 +3,8 @@ import React,{useState,useEffect} from 'react'
 import {formatText,formatManaSymbols} from '../functions/formattingLogic'
 
             
-export default function Inspect (props) {
-	const {name,oracle_text,mana_cost,rulings_uri,image_uris,showRulings,showShopping} = props.card
+export default function Inspect ({card}) {
+	const {name,oracle_text,mana_cost,rulings_uri,image_uris,showRulings,showShopping} = card
 	const [rulings,getRulings] = useState([])
 	useEffect(() => {
 		if (!rulings.length) fetch(rulings_uri)
@@ -13,7 +13,7 @@ export default function Inspect (props) {
 	}) 
 	
 	return (
-		<div className='inspect-container'>
+		<div key={'inspectTarget'+name} className='inspect-container'>
 			<img src={image_uris['png'||'large']} alt={name} />
 			<div className="inspect-info">
 				<div className="oracle-text">

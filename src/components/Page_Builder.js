@@ -6,6 +6,7 @@ import BasicSelect from './BasicSelect'
 import ImportCards from './ImportCards'
 import ListBoard from './ListBoard'
 import AddSearch from './AddSearch'
+import ItemInput from './ItemInput'
 
 import DownloadTxt from './DownloadTxt'
 import FillManabase from './FillManabase'
@@ -18,29 +19,28 @@ import {chooseCommander,legalCommanders} from '../functions/gameLogic'
 
 
 export default function Page_Builder (props) {
-	const {settings,deckInfo,legalCards,addCard,openModal,changeState,newMsg} = props
-	const [layout,changeLayout] = useState({view: 'list',sortBy: 'Type'})
+	const {settings,deckInfo,legalCards,addCard,openModal,changeState,newMsg,filters} = props
+	const [layout,changeLayout] = useState({view: 'list',sortBy: 'Custom'})
 				
 	const copyItemizedList = () => {
 		const textList = itemizeDeckList(deckInfo.list,['name'])
-			.map(cards=>cards.length+" "+cards[0].name+" ("+cards[0].set+")")
+			.map(cards=>cards.length+" "+cards[0].name)
 			.join('\n')
 		navigator.clipboard.writeText(textList)
 		newMsg('Copied list to clipboard!','success')
 	}
 
 
-	const changeBoard = dumbCard => {
-		let card = deckInfo.list.filter(c=>c.key===dumbCard.key)[0]
-	    console.log('changeBoard',card)
-	  	changeState('deckInfo','list',dumbCard.board==="Command"
+	const changeField = (card,field,val) => {
+	    console.log('changeField',card,field,val)
+	  	changeState('deckInfo','list',field==='board'&&val==="Command"
 		    ? chooseCommander(card,deckInfo.list,legalCards)
-		    : deckInfo.list.map(c=>{if(c.key===card.key){c.board=dumbCard.board};return c})
+		    : deckInfo.list.map(c=>{if(c.key===card.key){c[field]=val};return c})
 	    )
 	}
 
 
-	const layoutHeader = <span className='view-options'>
+	const layoutHeader = <span className='view-options'>			
 			<button 
 			className={`icon-list-bullet small-button ${layout.view==='list'&&'selected'}`} 
 			onClick={()=>changeLayout({...layout,view:'list'})}/>
@@ -53,6 +53,7 @@ export default function Page_Builder (props) {
 				options={FILTER_TERMS} labelBy={'name'}
                 callBack={s=>changeLayout({...layout,sortBy:s.name})} 
             />
+			{layout.sortBy!=='Custom'?null: <ItemInput addable value={{name:'New Field',key:'custom'+filters.customFields.length}} list={filters.customFields} callBack={n=>changeState('filters','customFields',n)}/>}
 	</span>
 	const commandHeader = <div className="choose-commander">
 		<BasicSelect searchable limit={20}
@@ -71,7 +72,7 @@ export default function Page_Builder (props) {
 	    	legalCards={legalCards}
 	    	deckInfo={deckInfo}
 			addCard={addCard}
-			changeBoard={changeBoard}
+			changeField={changeField}
 			changeLayout={changeLayout}
 			openModal={openModal}
 	    />

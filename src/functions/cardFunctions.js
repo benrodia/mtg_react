@@ -158,7 +158,9 @@ export function audit(card) {
   .filter(a=>a[1]===undefined)
   .filter(a=>notOK.includes(a[0]))
 
-  if(missingVals.length)console.error('"'+card.name+'"','Missing vals for:\n',missingVals.map(m=>m[0]).join('\n'))
-
+  if(missingVals.length){
+    console.error('"'+card.name+'"','Missing vals for:\n',missingVals.map(m=>m[0]).join('\n'))
+    return null
+  }
     return card
 }

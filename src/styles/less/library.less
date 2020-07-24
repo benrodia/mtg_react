@@ -88,6 +88,24 @@
 	height: 2rem;
 }
 
+
+.discrete-input {
+	background: transparent;
+	width: 2rem;
+	color: @lightest;
+	padding: 0;
+
+	&:hover {color: @highlight;}
+
+	&[type=number] {-moz-appearance: textfield;}      
+	&::-webkit-outer-spin-button,
+	&::-webkit-inner-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+
+}
+
 .clean-button {
 	.clean-input();
 	font-size: 120%;
@@ -237,12 +255,19 @@ section {
 
 @keyframes slide-in {
   from {
-    opacity: 0;
-    margin-left: -7rem;
+    margin-left: -@cardW;
   }
   to {
-    opacity: 1;
     margin-left: 0;
+  }
+}
+
+@keyframes flip-in {
+  from {
+    transform: rotateY(60deg) translateX(@cardW) scale(1.5);
+  }
+  to {
+    transform: none;
   }
 }
 

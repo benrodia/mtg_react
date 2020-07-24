@@ -76,7 +76,8 @@ export default function ImportCards (props) {
 			key: legalCommanders(deckInfo.format,legalCards).filter(c=>c.name===card.name)[0]
 		        ? "CommanderID__"+uuidv4()
 		        : "CardID__"+uuidv4(),
-		    board: 'Main'
+		    board: 'Main',
+        	customField: 'custom0',
 		}})
 
 	    changeState('deckInfo','list',[...deckInfo.list,...cards])

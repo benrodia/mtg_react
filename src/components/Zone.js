@@ -1,6 +1,7 @@
 import React,{useState,useEffect,useRef} from 'react'
 
 import {CARD_SIZE} from '../constants/definitions'
+import {ItemTypes} from '../constants/data_objects'
 import {tutorableCards,clickPlace} from '../functions/gameLogic'
 
 import DragContainer from './DragContainer'
@@ -13,7 +14,7 @@ import CardControls from './CardControls'
 
 let scrolled
 export default function Zone(props) {
-  const {zone,deck,context,look,reveal,header,handleMana,gameState,cardState,moveCard,openModal} = props
+  const {zone,deck,context,look,reveal,header,handleMana,handleShuffle,gameState,cardState,moveCard,openModal,cardClick} = props
   const [size,setSize] = useState({width:0,height:0})
   const zoneDiv = useRef()
   const bottom = useRef()
@@ -23,7 +24,7 @@ export default function Zone(props) {
         width: zoneDiv.current.clientWidth,
         height: zoneDiv.current.clientHeight,
       })
-      if (!scrolled) {bottom.current.scrollIntoView();scrolled=true}
+      // if (!scrolled&&bottom.current) {bottom.current.scrollIntoView();scrolled=true}
     }
   })
 
@@ -48,11 +49,19 @@ export default function Zone(props) {
           />
 
       </div>
-      <div className='bottom' ref={bottom}></div>
-      {[...Array(rows)].map((und,row)=><div key={"row"+row} className={`inner row-${row}`}>
+      {context!=='grid'
+      ?[...Array(rows)].map((und,row)=><div key={"row"+row} className={`row row-${row}`}>
           {[...Array(cols)].map((und,col)=>slot(col,row))}
         </div>
-      )}
+      )
+      : <div className="inner">
+        {[...Array(rows)].map((und,row)=><div key={"row"+row} className={`row row-${row}`}>
+          {[...Array(cols)].map((und,col)=>slot(col,row))}
+        </div>
+        )}
+      <div className='bottom' ref={bottom}/>
+      </div>
+    }
     </div>
   }
 
@@ -67,8 +76,8 @@ export default function Zone(props) {
     return <DropSlot key={"slot"+col}
         zone={zone}
         col={col} row={row}
-        accept={zone==='Command'?'commander':['card','commander']}
-        callBack={moveCard}
+        accept={zone==='Command'?ItemTypes.COMMANDER:[ItemTypes.CARD,ItemTypes.COMMANDER]}
+        callBack={card=>moveCard(card,zone,col,row)}
         >
           {cardStack[0]&&cardStack.map((c,i)=>renderCard(c,i))}
         </DropSlot>
@@ -78,7 +87,7 @@ export default function Zone(props) {
   const renderCard = (card,ind) => { 
     const tutorable = tutorableCards(card,deck)
     return <CardControls key={card.key} card={card} {...props}
-      type={card.commander?'commander':'card'}
+      itemType={card.commander?ItemTypes.COMMANDER:ItemTypes.CARD}
       style={{
         position: (context==='single'||context==='grid')&&ind ? 'absolute':'block',
         top: (zone==='Library'?-ind:ind)+"rem",
@@ -86,14 +95,19 @@ export default function Zone(props) {
         zIndex: ind,
       }}
       >
-        {tutorable.from===zone
-        ?<BasicSelect 
+        {tutorable.from!==zone?null
+        :<BasicSelect 
         options={tutorable.cards} 
         placeholder='Tutor'
         labelBy={'name'}
-        callBack={clickPlace}
-        />
-        :null}
+        callBack={c=>{
+          console.log('tutor',c.name,tutorable.dest)
+          cardClick(c,false,tutorable.dest)
+          handleShuffle()
+          if (tutorable.sac) cardClick(card,false,'Graveyard')
+
+        }}
+        />}
         {zone==="Library"&&look>0?<button onClick={_=>{
           // gameState('look',-1,true)
           setTimeout(_=>moveCard(card,'Library',0,0,'bottom'),50)

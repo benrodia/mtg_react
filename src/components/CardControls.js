@@ -1,18 +1,19 @@
 import React from 'react'
+import { useDrag,DragPreviewImage } from 'react-dnd'
+import {ItemTypes} from '../constants/data_objects'
 
+import DragContainer from './DragContainer'
 import Inspect from './Inspect'
 import Card from './Card'
 
-import DragContainer from './DragContainer'
-import { useDrag } from 'react-dnd'
 
 
 let timer,clicked
 export default function CardControls(props) {
-	const {card,type,style,faceDown,openModal,moveCard,illegal,children,cardClick} = props
+	const {card,itemType,style,faceDown,openModal,moveCard,illegal,children,cardClick} = props
 
-	const [{isDragging}, drag] = useDrag({
-		item: {key:card.key,type: type||'card'},
+	const [{isDragging}, drag, preview] = useDrag({
+		item: {key:card.key,type: itemType||ItemTypes.CARD},
 		collect: monitor => ({isDragging: !!monitor.isDragging()})
 	})
 
@@ -32,13 +33,12 @@ export default function CardControls(props) {
 		if (!isDragging) {
 			timer = setTimeout(()=>{
 			    timer = null
-				openModal&&openModal(<Inspect showShopping={!!card.board} showRulings={!!card.zone} card={card}/>)
+				openModal&&openModal(<Inspect card={card}/>)
 			},400)		
 		} 
 	}
 
-	return (
-		<div ref={drag} style={style} className={`card-container ${illegal?'illegal':''}`}>
+	return <div key={(card.key||card.id)+"container"} ref={drag} style={style} className={`card-container ${illegal?'illegal':''}`}>
 			<div className="card-controls">{children}</div>
 			<span className="click-events"
 			onClick={click}
@@ -49,7 +49,6 @@ export default function CardControls(props) {
 				<Card {...props} faceDown={faceDown}/>
 			</span>
 		</div>
-	)
 }
 
 

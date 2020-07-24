@@ -12,9 +12,9 @@ export default function BasicSelect(props) {
   const [state,setstate] = useState(reset)
   let displayed = [...state.options]
   displayed.length = Math.min(displayed.length,limit||100)
-  const optionDivs = displayed.map(o=><div 
+  const optionDivs = displayed.map((o,i)=><div 
     className={`option`}
-    key={`option-${o[valueBy||'value']}`}
+    key={`option-${i}${o[labelBy||'label']}`}
     onClick={_=>{callBack(o);setstate(reset)}}>
       <span>{titleCaps(o[labelBy||'label']?o[labelBy||'label']:o)}</span>
       {img?img(o):null}

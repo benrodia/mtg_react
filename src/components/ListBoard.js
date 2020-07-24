@@ -1,13 +1,13 @@
 import React,{useState} from 'react'
 import Select from 'react-select'
-import SVG from 'react-inlinesvg'
+import {v4 as uuidv4} from  'uuid'
 
 import {sum} from '../functions/utility'
 import {Q,itemizeDeckList, isLegal,audit} from '../functions/cardFunctions'
 import titleCaps from '../functions/titleCaps'
 
 import {RARITY_COLOR,SINGLETON} from '../constants/definitions'
-import {FILTER_TERMS,NUMBER_WORDS} from '../constants/data_objects'
+import {FILTER_TERMS,NUMBER_WORDS,ItemTypes} from '../constants/data_objects'
 import {DUAL_COMMANDER} from '../constants/greps'
 
 import DropSlot from './DropSlot'
@@ -15,9 +15,11 @@ import CardSelect from './CardSelect'
 import BasicSelect from './BasicSelect'
 import CardControls from './CardControls'
 import Card from './Card'
+import Icon from './Icon'
+import ItemInput from './ItemInput'
 
 export default function ListBoard(props) {
-	const {legalCards,sets,deckInfo,board,layout,openModal,addCard,changeState,changeBoard,header} = props
+	const {legalCards,sets,deckInfo,board,layout,openModal,addCard,changeState,changeField,header,filters} = props
 	const {list,format,color_identity} = deckInfo
 	const {view} = layout
 	
@@ -27,18 +29,19 @@ export default function ListBoard(props) {
 	const boardInner = () => {
 		const Filter_By = FILTER_TERMS.filter(t=>t.name===layout.sortBy)[0]
 		const sortBy = {...Filter_By,
-			vals: Filter_By.vals||cards.map(c=>c[Filter_By.key]).sort(),
+			vals: layout.sortBy==='Custom'?(filters.customFields.map(f=>f.key))
+			: Filter_By.vals || cards.map(c=>c[Filter_By.key]).sort(),
+			valNames: layout.sortBy==='Custom'?(filters.customFields.map(f=>f.name))
+			:Filter_By.valNames,
 			other: Filter_By.other||`Missing ${Filter_By.name}`
 		}
 
 		const sorted = (val,ind) => {
-
 			const filteredCards = ind==='other'
 			?cards
 			:cards.filter(c=>{
 				c = sortBy.subKey?c[sortBy.key]:c
 				const key = sortBy.subKey||sortBy.key
-				
 				return c[key]===undefined||c[key]===null?false
 				: typeof c[key]==='number'?c[key]<=val
 				: Array.isArray(c[key]) ? c[key].length?c[key].join('')===val:'C'===val
@@ -49,12 +52,31 @@ export default function ListBoard(props) {
 			
 			const cardStacks = itemizeDeckList(filteredCards,['name']).orderBy('name')
 			const valName = sortBy.valNames&&!isNaN(ind)?sortBy.valNames[ind]:val.toString()
-		
-			return !cardStacks.length ? null
+			
+			if (sortBy.name==='Custom'&&board==='Main'&&ind!=='other') {
+				return <DropSlot key={"custom"+valName} field={val}
+				accept={[ItemTypes.CARD,ItemTypes.COMMANDER]}
+				callBack={c=>changeField(c,'customField',val)}
+				>	
+					<div key={board+"_"+sortBy.key+"_"+valName} className={`${valName}-list list ${view}-view`}>
+						<h3 style={{display:board==='Command'&&'none'}}>
+						<ItemInput changeable removable 
+						value={{name:titleCaps(valName),key:val}} 
+						list={filters.customFields} 
+						callBack={n=>changeState('filters','customFields',n)}
+						/> ({filteredCards.length})
+						</h3>
+						<div className={`${view}-inner`}>				
+							{cardStacks.map((c,i)=>renderCardStack(c,i,valName))}
+						</div>
+					</div>	
+				</DropSlot>
+			}
+			else return !cardStacks.length ? null
 			:	<div key={board+"_"+sortBy.key+"_"+valName} className={`${valName}-list list ${view}-view`}>
 					<h3 style={{display:board==='Command'&&'none'}}>{<div className={`icon ms ms-${val.toString().toLowerCase()}`}/>} {titleCaps(layout.sortBy=='Type'?valName==='Sorcery'?'Sorceries':valName+'s':valName)} ({filteredCards.length})</h3>
 					<div className={`${view}-inner`}>				
-						{cardStacks.map(c=>renderCardStack(c))}
+						{cardStacks.map((c,i)=>renderCardStack(c,i,valName))}
 					</div>
 				</div>
 		}
@@ -67,22 +89,17 @@ export default function ListBoard(props) {
 	}
 
 
-	const renderCardStack = cards => {
+	const renderCardStack = (cards,i,val) => {
 		const legal = isLegal(cards[0],format,color_identity) 
 		const numOfSets = itemizeDeckList(cards,['set_name'])
-		return <div className={`of-name`}>	
+		return <div key={board+val+i} className={`of-name`}>	
 		{numOfSets.map(cardsOfSet=>cardsOfSet.map((card,cardInd)=>{
-			const setLogo = <span className="icon">	
-				<SVG className={card.rarity} title={card.set_name}
-				  src={!sets||!sets.length?null:sets.filter(s=>s.name===card.set_name)[0].icon_svg_uri}
-				  loader={<span>{card.set}</span>}
-				  onError={error => console.log(error.message)}
-				/>
-			</span>
-
+			const setLogo = <Icon className={card.rarity} loader={card.set} name={card.set_name} src={!sets||!sets.length?null:sets.filter(s=>s.name===card.set_name)[0].icon_svg_uri} />
 			return <CardControls 
 			key={card.key} card={card} 
-			type={card.key.includes('Commander')?'commander':'card'}
+			itemType={card.key.includes('Commander')
+				?ItemTypes.COMMANDER
+				:ItemTypes.CARD}
 			openModal={openModal}
 			imgSize='small'
 			illegal={cards.length>legal?cardInd>=legal:false}
@@ -98,7 +115,7 @@ export default function ListBoard(props) {
 					<span className={`icon-sort-up ${cards.length>=legal?'disabled':''}`} onClick={()=>addCard(card,board)}/>
 					<span className="icon-sort-down" onClick={()=>addCard(card,board,true)}/>
 				</div>
-				<span onClick={()=>openModal(printSelector(card))}>
+				<span onClick={_=>openModal(printSelector(card))}>
 				{view==='list'?setLogo
 				:<button>{setLogo} {card.set_name}</button>}
 				</span>
@@ -127,20 +144,6 @@ export default function ListBoard(props) {
 		</div>
 
 	}
-	// return <BasicSelect 
-	// 		self={card}
-	// 		options={legalCards.filter(c=>c.name===card.name)} 
-	// 		// key={legalCards.filter(c=>c.name===card.name)}//keep this
-	// 		labelBy={'set_name'} valueBy={'set_name'}
-	// 		placeholder={"Change printing"}		
-	// 		img={card=>view==='list'?
-	// 		<SVG className={card.rarity} title={card.set_name}
-	// 		  src={sets&&sets.filter(s=>s.name===card.set_name)[0].icon_svg_uri}
-	// 		  loader={<span>{card.set}</span>}
-	// 		  onError={error => console.log(error.message)}
-	// 		/>:undefined}
-	// 		callBack={} 
-	// 	/>
 	
 	const title = `${board}${board==='Command'
 			?cards.length>1||Q(cards,...DUAL_COMMANDER).length
@@ -158,9 +161,9 @@ export default function ListBoard(props) {
 			<div className="list-head">
 				<h2>{title}{amt}</h2> {header||null}
 			</div>
-			<DropSlot key={"slot"+board} board={board}
-			accept={board==='Command'?'commander':['card','commander']}
-			callBack={changeBoard}
+			<DropSlot key={"slot"+board} field={board}
+			accept={board==='Command'?ItemTypes.COMMANDER:[ItemTypes.COMMANDER,ItemTypes.CARD]}
+			callBack={c=>changeField(c,'board',board)}
 			>
 			<div className={`board-inner ${view}`}>{boardInner()}</div>
 			</DropSlot>

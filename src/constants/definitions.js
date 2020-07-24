@@ -1,3 +1,7 @@
+export const HOME_DIR = '/reactmtg'
+export const USER_DIR = '/user'
+
+
 export const FORMATS = ['brawl','commander','duel','future','legacy','modern','oldschool','pauper','penny','standard','vintage','casual']
 
 export const PHASES = ['untap','upkeep','draw','main1','combat','main2','end']

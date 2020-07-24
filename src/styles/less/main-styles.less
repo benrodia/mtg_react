@@ -7,6 +7,7 @@
 html {
 	font-size: 85%;
 	color: @lightest;
+	background: @darker;
 	font-family: @para;
 }
 
@@ -20,12 +21,21 @@ html {
 
 .bg-img {
 	.fixed-full-page();
- 	background-color: @darker; 
-  	background-position: center; 
-  	background-repeat: no-repeat; 
-  	background-size: cover; 
-  	filter: brightness(60%);
-  	z-index: -1;
+	z-index: -1;
+	// transform-style: preserve-3d;
+	// transform: translateZ(2rem) perspective(25rem);
+
+	.playmat {
+		width: 100vw;
+		height: 100vh;
+		// transform: rotateX(20deg);
+	 	background-color: @darker; 
+	  	background-position: center; 
+	  	background-repeat: no-repeat; 
+	  	background-size: cover; 
+	  	filter: brightness(60%);
+
+	}
 }
 
 
@@ -118,13 +128,12 @@ html {
 	flex: 1 0 @cardW;
 	position: relative;
 	margin: 0;
-	.drop-slot-over {
-		.fixed-full-page();
-	    position: absolute;
-	    z-index: 1;
-	    opacity: 0.5;
-	    background-color: @highlight;
-	}
+	transition: .2s;
+
+}
+.drop-slot.over {
+    background-color: fade(@highlight,40%);
+	border-radius: @thin;
 }
 
 .drop-slot.list {
