@@ -14,11 +14,12 @@ export default class TesterShortcuts extends React.Component {
 	componentWillUnmount() {window.removeEventListener('keydown',this.addEvents)}
 
 	addEvents(e) {
+		// console.log('TesterShortcuts',e.key)
 		if (cooledDown && !document.activeElement.id) {	
 			cooledDown = false
 			setTimeout(()=>cooledDown=true,100)
 
-			if (e.key === 'd') {this.props.moveCard()}
+			if (e.key === 'd') {this.props.moveCard({})}
 			else if (e.key === 'r') {this.props.startTest()}
 			else if (e.key === 'u') {this.props.cardState(this.props.deck,'tapped',false)}
 			else if (e.key === 't') {this.props.cardState(this.props.deck,'tapped',true)}

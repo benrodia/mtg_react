@@ -132,7 +132,11 @@ export default class App extends React.Component {
       update.color_identity = getColorIdentity(Q(update.list,'board','Command'),'color_identity')     
       val = val.sort((a,b)=>a.name>b.name?1:-1)
     }
-    if (key==='clear'&&window.confirm(`Clear ${state}?`)) update = DEFAULT_DECKINFO
+    if (key==='clear'&&window.confirm(`Clear ${state}?`)) update = 
+      state==='deckInfo'? DEFAULT_DECKINFO:
+      state==='settings'? DEFAULT_SETTINGS:
+      state==='filters'? DEFAULT_FILTERS:{}
+
     else update[key] = val
     this.setState({[state]: update})
     cache(state,update)

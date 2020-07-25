@@ -1,6 +1,7 @@
 import {v4 as uuidv4} from  'uuid'
 
 import {CARD_TYPES,COLORS,ZONES,SINGLETON} from '../constants/definitions'
+import {NO_QUANT_LIMIT} from '../constants/greps'
 import {matchStr} from '../functions/utility'
 import {CONTROL_CARD} from '../constants/controlCard.js'
 
@@ -108,7 +109,8 @@ export function isLegal(card,format,deckIdentity) {
   if (format === 'casual') {allowed = 4}
   if (Q(card,'type_line','Token')) {allowed = 0}
   if (SINGLETON(format)) {allowed = 1}
-  if (Q(card,'name',COLORS('basic')).length) allowed = 1000000
+  if (NO_QUANT_LIMIT(card)) allowed = 1000000
+  if (card.name==='Seven Dwarves') allowed = 7
 
   if (card.color_identity&&deckIdentity&&deckIdentity.length&&
     !card.color_identity.every(ci=> deckIdentity.includes(ci))) {

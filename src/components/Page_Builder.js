@@ -20,7 +20,7 @@ import {chooseCommander,legalCommanders} from '../functions/gameLogic'
 
 export default function Page_Builder (props) {
 	const {settings,deckInfo,legalCards,addCard,openModal,changeState,newMsg,filters} = props
-	const [layout,changeLayout] = useState({view: 'list',sortBy: 'Custom'})
+	const [layout,changeLayout] = useState({view: 'list',sortBy: 'Type'})
 				
 	const copyItemizedList = () => {
 		const textList = itemizeDeckList(deckInfo.list,['name'])

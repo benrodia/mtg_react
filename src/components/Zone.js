@@ -1,7 +1,9 @@
 import React,{useState,useEffect,useRef} from 'react'
 
+import {ETB} from '../constants/greps'
 import {CARD_SIZE} from '../constants/definitions'
 import {ItemTypes} from '../constants/data_objects'
+import {Q} from '../functions/cardFunctions'
 import {tutorableCards,clickPlace} from '../functions/gameLogic'
 
 import DragContainer from './DragContainer'
@@ -12,9 +14,8 @@ import Counters from './Counters'
 import BasicSelect from './BasicSelect'
 import CardControls from './CardControls'
 
-let scrolled
 export default function Zone(props) {
-  const {zone,deck,context,look,reveal,header,handleMana,handleShuffle,gameState,cardState,moveCard,openModal,cardClick} = props
+  const {zone,deck,context,look,reveal,header,handleMana,handleShuffle,gameState,cardState,moveCard,openModal,cardClick,spawnToken} = props
   const [size,setSize] = useState({width:0,height:0})
   const zoneDiv = useRef()
   const bottom = useRef()
@@ -42,10 +43,11 @@ export default function Zone(props) {
           <BasicSelect 
             isHeader
             searchable
+            keys={['name','type_line','oracle_text']}
             options={cards} 
             labelBy={'name'}
             placeholder={`${zone} (${cards.length})`}
-            callBack={c=>moveCard(c,'Hand')}
+            callBack={c=>moveCard({card:c,dest:'Hand'})}
           />
 
       </div>
@@ -77,7 +79,7 @@ export default function Zone(props) {
         zone={zone}
         col={col} row={row}
         accept={zone==='Command'?ItemTypes.COMMANDER:[ItemTypes.CARD,ItemTypes.COMMANDER]}
-        callBack={card=>moveCard(card,zone,col,row)}
+        callBack={card=>moveCard({card:card,dest:zone,col:col,row:row})}
         >
           {cardStack[0]&&cardStack.map((c,i)=>renderCard(c,i))}
         </DropSlot>
@@ -105,15 +107,16 @@ export default function Zone(props) {
           cardClick(c,false,tutorable.dest)
           handleShuffle()
           if (tutorable.sac) cardClick(card,false,'Graveyard')
-
         }}
         />}
-        {zone==="Library"&&look>0?<button onClick={_=>{
-          // gameState('look',-1,true)
-          setTimeout(_=>moveCard(card,'Library',0,0,'bottom'),50)
+        {zone==="Library"&&look?<button onClick={_=>{
+          setTimeout(_=>moveCard({card:card,dest:'Library',effects:{bottom:true}}),50)
         }}>bottom</button>:null}
-        {zone==="Battlefield"?<Counters card={card} cardState={cardState}/>:null}
-        {zone==="Battlefield"?<ManaSource card={card} cardState={cardState} handleMana={handleMana}/>:null}      
+        {zone!=="Battlefield"?null:<>
+          <Counters card={card} cardState={cardState}/>
+          <ManaSource card={card} cardState={cardState} handleMana={handleMana}/>      
+          {!Q(card,'type_line','Token')?null:<button onClick={_=>spawnToken(card)}>Clone</button>}
+        </>}
       </CardControls>
   }
 

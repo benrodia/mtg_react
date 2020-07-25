@@ -25,13 +25,12 @@ export default function Counters(props) {
 
 	return <>
 		<div className="add-counters">	
-
 			{!defaultCounter?null:<button className='smaller-button' onClick={()=>changeCounters(defaultCounter,1)}>{defaultCounter=="PlusOne"?'+1/+1':defaultCounter}</button>}
 			<BasicSelect 
 			searchable
 			placeholder='Add Counter'
-			options={COUNTERS.map(C=>{return{label: C,value:C}})}
-			callBack={counter=>changeCounters(counter.label,1)}
+			options={COUNTERS}
+			callBack={counter=>changeCounters(counter,1)}
 			/>
 		</div>
 		<h3 className="counters-display">{countersDisplay}</h3>

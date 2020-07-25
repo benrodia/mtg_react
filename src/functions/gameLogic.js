@@ -24,18 +24,14 @@ export function cardMoveMsg(card,dest) {
 
 export function castSpell(card,game,manaTolerance) {
   let floating = [...game.mana]
-
   const colored = card.mana_cost.split('{').map(m=>m.replace('}','').replace('/','')) 
   colored.shift()
-  
   let toPay = [...COLORS('symbol').map(C=>colored.filter(co=>co===C).length),parseInt(colored[0])]
-  
-  
   let manaSources = Q([...game.deck].filter(c=>c.zone==='Battlefield'),...MANA.source)
       .map(l=>{l.color_identity=Q(l,...MANA.any)?COLORS('symbol'):!l.color_identity.length?['C']:l.color_identity;return l})
       .map(l=>{l.amt=Q(l,...MANA.twoC)?2:1;return l})
 
-  console.log('casting Spell','floating',floating,'toPay',toPay,'manaSources',manaSources)
+  // console.log('casting Spell','floating',floating,'toPay',toPay,'manaSources',manaSources)
 
   if (manaTolerance>=3) {
     for (var i = 0; i < toPay.length; i++) {
@@ -67,9 +63,7 @@ export function castSpell(card,game,manaTolerance) {
   }
   
 
-
-
-  console.log('cast Spell','floating',floating,'toPay',toPay,'manaSources',manaSources)
+  // console.log('cast Spell','floating',floating,'toPay',toPay,'manaSources',manaSources)
   if (sum(toPay)>0) return false //fuckeverything
   else return {
     tapped:manaSources.filter(a=>a.tapped),
@@ -206,25 +200,18 @@ export function clickPlace(card,inZone,toDest,dblclick) {
   
   dest = toDest||dest
 
-  if (dest==card.zone) return [null] 
+  if (dest==card.zone) return {card:null} 
   else {
     if (Q(card,'type_line','Creature')) row = 1
     else if (Q(card,'type_line','Artifact')&&Q(card,...MANA.source))row = 0 
     else if (Q(card,'type_line','Artifact')) row = 2
-    else if (Q(card,'type_line',['Enchantment','Planeswalker'])) {
-      row = 2
-      // col = 8 - inZone.filter(c=>c.row===row).length % 8
-    } 
-    else if (Q(card,'type_line','Land')) {
-      row = 0
-      // let colors = card.color_identity.length
-      // if (Q(card,'oracle_text',['add','mana','any color'],true)) colors=4
-      // if (colors) col = colors-1
-    } 
+    else if (Q(card,'type_line',['Enchantment','Planeswalker'])) row = 2
+    else if (Q(card,'type_line','Land')) row = 0
+    
     col = col||inZone.filter(c=>c.row===row).length % 8 // REPLACE 8 with dynamic cols
 
-  console.log('clickPlace',card.name,col,row,dest)
-    return [card,dest,col,row,null,'click']
+    // console.log('clickPlace',card.name,col,row,dest)
+    return {card:card,dest:dest,col:col,row:row}
   }
 }
 

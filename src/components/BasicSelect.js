@@ -6,17 +6,19 @@ import titleCaps from '../functions/titleCaps'
 
 
 export default function BasicSelect(props) {
-  const {open,img,className,self,labelBy,options,defImg,placeholder,callBack,valueBy,searchable,isHeader,limit} = props
+  const {open,img,className,self,labelBy,valueBy,options,defImg,placeholder,callBack,searchable,isHeader,limit} = props
   const reset = {open:false,search:'',options:options}
+
+  const label=item=>(typeof(labelBy)==='function'?labelBy(item):item['name'])||item.toString()
 
   const [state,setstate] = useState(reset)
   let displayed = [...state.options]
   displayed.length = Math.min(displayed.length,limit||100)
   const optionDivs = displayed.map((o,i)=><div 
     className={`option`}
-    key={`option-${i}${o[labelBy||'label']}`}
+    key={`option-${i}${label(o)}`}
     onClick={_=>{callBack(o);setstate(reset)}}>
-      <span>{titleCaps(o[labelBy||'label']?o[labelBy||'label']:o)}</span>
+      <span>{titleCaps(label(o))}</span>
       {img?img(o):null}
     </div>
   )
@@ -30,9 +32,8 @@ export default function BasicSelect(props) {
     id={`basicsearch${options}`}
     onChange={e=>{
       const sorted = e.target.value.length
-        ?matchSorter(options,e.target.value,{keys:[labelBy||'label']})
+        ?matchSorter(options.map(o=>{return{...o,label:label(o)}}),e.target.value,{keys:['label']})
         :options
-        console.log('BasicSelect',options,e.target.value,sorted,labelBy)
       setstate({...state,search:e.target.value,options:sorted})
     }}
     />
@@ -60,9 +61,8 @@ export default function BasicSelect(props) {
           {defImg?defImg:null}
           {placeholder?placeholder
           :titleCaps(self!==undefined
-          ?self[labelBy||'label']!==undefined
-          ?self[labelBy||'label']
-          :self:'')}
+          ?label(self)
+          :'')}
         </div>
     }
     </div>

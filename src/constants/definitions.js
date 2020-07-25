@@ -71,6 +71,11 @@ const colors = [
 	:colors
 } 
 
+export const TOKEN_NAME = t => {
+	const color = COLORS('name')[COLORS('symbol').indexOf(t.color_identity[0])]||'colorless'
+	return !t.power?t.name:
+	`${t.power}/${t.toughness} ${color.toLowerCase()} ${t.name}`
+}
 
 export const RARITY_COLOR = {
 	common: '#000000',

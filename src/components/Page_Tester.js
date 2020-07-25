@@ -13,11 +13,11 @@ import CardControls from './CardControls'
 
 // CONSTANTS
 import {INIT_GAME_STATE} from '../constants/data_objects'
-import {COLORS,SINGLETON} from '../constants/definitions'
-import {MANA} from '../constants/greps'
+import {COLORS,SINGLETON,TOKEN_NAME} from '../constants/definitions'
+import {MANA,ETB,IS_SPELL,} from '../constants/greps'
 
 // Functions
-import {timestamp,sum} from '../functions/utility'
+import {timestamp,sum,matchStr} from '../functions/utility'
 import {formatText} from '../functions/formattingLogic'
 import * as g from '../functions/gameLogic'
 import {Q, prepCardsForTest,normalizePos} from '../functions/cardFunctions'
@@ -65,6 +65,7 @@ export default class DeckTester extends React.Component {
         cardHeadOnly={settings.cardHeadOnly}
         moveCard={this.moveCard}
         handleMana={this.handleMana}
+        spawnToken={this.spawnToken}
         cardState={this.cardState}
         gameState={this.gameState}
         cardClick={this.cardClick}
@@ -92,7 +93,8 @@ export default class DeckTester extends React.Component {
           searchable
           placeholder='Create Token'
           options={this.props.tokens} 
-          labelBy={'name'} valueBy={'id'} 
+          labelBy={t=>TOKEN_NAME(t)} 
+          valueBy={'id'} 
           callBack={this.spawnToken}
           />
           <div className="library-cont">
@@ -148,22 +150,30 @@ export default class DeckTester extends React.Component {
         let init = 7
         const drawTimer = setInterval(()=>{init--
           !init&&clearInterval(drawTimer)
-          this.moveCard()
+          this.moveCard({})
         },70)
       },150)     
       // KEEP OR MULL
-      this.moveCard()
+      this.moveCard({})
     }
     else {
-      this.cardState(this.inZone('Battlefield'),'tapped',false)
-      this.cardState(this.inZone('Battlefield'),'sickness',false)
-      this.gameState('mana',COLORS().map(C=>0),false,'Go to main phase')   
+      this.cardState(this.inZone('Battlefield'),'tapped',false)//UNTAP
+      this.cardState(this.inZone('Battlefield'),'sickness',false)//LOSE SUMMONING SICKNESS
+      this.gameState('mana',COLORS().map(C=>0),false,'Go to main phase')// DRAIN MANA
       // UPKEEP EFFECTS
-      this.moveCard()
+      this.gameState('deck',this.state.game.deck.map(c=>{
+        c.counters = 
+        Q(c,'oracle_text','Vanishing')?{...c.counters,['Time']:(c.counters['Time']--)}
+        :Q(c,'oracle_text','Cumulative upkeep')?{...c.counters,['Age']:(c.counters['Age']++)}
+        :c.counters
+        return c
+      }),false,'Upkeep Effects')   // UPKEEP EFFECTS
+
+      
+      this.moveCard({}) // DRAW FOR TURN
 
     }
     this.gameState('turn',1,true,'Go to turn '+(this.state.game.turn+1))   
-    // UPKEEP EFFECTS
   }
 
 
@@ -185,49 +195,57 @@ export default class DeckTester extends React.Component {
   }
 
   undoAction(ind) {
-    const newState = this.state.gameHistory[ind]!==undefined
-      ?this.state.gameHistory[ind]
-      :(this.state.gameHistory.length-2)>=0
-        ?this.state.gameHistory[this.state.gameHistory.length-2]
-        :this.state.gameHistory[this.state.gameHistory.length-1]
+    const hist = this.state.gameHistory
+    const newState = hist[ind]!==undefined
+      ?hist[ind]:(hist.length-2)>=0
+        ?hist[hist.length-2]
+        :hist[hist.length-1]
     
     this.props.newMsg('Undid: "'+newState.action+'"','info')
     this.setState({
       game: newState.state,
-      gameHistory: this.state.gameHistory.slice(0,ind)
+      gameHistory: hist.slice(0,ind)
     })
   }
   
 
 
-  moveCard(card,dest,col,row,src) {
-    let deck = [...this.state.game.deck]
-    const toMove = card?card:card===null?null:this.inZone("Library")[0]
-    const toDest = dest || "Hand"
+  moveCard({card,dest,col,row,effects}) {
+    const {bottom} = effects||{}
+    const toMove = card!==undefined?card:this.inZone("Library")[0]
     if(!toMove) return console.error('cannot draw card')
+    let deck = [...this.state.game.deck]
     const ind = deck.findIndex(c=>c.key===toMove.key)
+    const toDest = dest || "Hand"
+    let moveMsg
+    
+    if (IS_SPELL(deck[ind])) this.gameFunction('castSpell',deck[ind])
+    if(this.state.game.look){
+      if (deck[ind].zone==='Library'&&(toDest!==deck[ind].zone||bottom)) this.gameState('look',-1,true)
+      else if(deck[ind].zone!=='Library') this.gameState('look',0)      
+    }
 
-    const movedMsg = toDest!==toMove.zone?g.cardMoveMsg(deck[ind],toDest,src):undefined
-    if (this.state.game.look) this.gameState('look',-1,true)
+    if (toDest==='Battlefield'&&toDest!==deck[ind].zone) { // ENTERING BATTLEFIELD
+      moveMsg = g.cardMoveMsg(deck[ind],toDest)
+      deck[ind] = this.handleAbility('ETB',deck[ind])
+    }
+
     deck[ind] = {
       ...deck[ind],
       col: col>=0?col:this.inZone(dest,null,row).length,
       row: row>=0?row:0,
       stack: this.inZone(dest,col,row).length,
-      order: src==='bottom'?0:this.inZone(dest).length,
+      order: bottom?0:this.inZone(dest).length,
       zone: toDest,
-      faceDown: toDest=="Library"
+      faceDown: toDest=="Library",
     }
 
-    console.log('MOVED',deck[ind],toDest)
-    this.gameState('deck',deck,false,movedMsg)
+    // console.log('MOVED',deck[ind],toDest)
+    this.gameState('deck',deck,false,moveMsg)
   }
 
   cardClick(card,dblclick,toDest) {
-    if ((card.zone==="Hand"||card.zone==="Command")&&!card.type_line.includes('Land')) 
-      this.gameFunction('castSpell',card,this.props.settings.manaTolerance)
-
-    else if (card.zone==="Battlefield"&&!dblclick) {
+    if (card.zone==="Battlefield"&&!dblclick) {
       this.cardState(card,'tapped',!card.tapped) 
       if (Q(card,...MANA.source)&&card.tapped) {
         const amt = Q(card,...MANA.twoC)?2:1
@@ -236,13 +254,13 @@ export default class DeckTester extends React.Component {
       }
       return
     }
-    return this.moveCard(...g.clickPlace(card,this.inZone('Battlefield'),toDest,dblclick))
+    this.moveCard(g.clickPlace(card,this.inZone('Battlefield'),toDest,dblclick))
   }
 
 
   spawnToken(token) {
     const deck = [...this.state.game.deck,...prepCardsForTest(token,this.props.settings.sleeve,true)]     
-    this.gameState('deck',deck,false,'Created '+(token.power&&(token.power+'/'+token.toughness))+' '+token.name +' token')
+    this.gameState('deck',deck,false,'Created '+TOKEN_NAME(token) +' token')
   }
 
 
@@ -255,11 +273,47 @@ export default class DeckTester extends React.Component {
   }
 
   handleMana(mana,replace) {
-    console.log('handleMana',mana)
+    // console.log('handleMana',mana)
     return mana?replace
     ?this.gameState('mana',mana)     
     :this.gameState('mana',this.state.game.mana.map((m,i)=>m+=mana[i]))     
     :this.gameState('mana',COLORS().map(_=>0))     
+  }
+
+  handleAbility(type,card) {
+      const boardState = this.inZone('Battlefield')
+      const executeAbilities = (obj,text) => {
+        const effects = Object.entries(obj.effect).filter(c=>c[1]!==null)
+        for (var i = 0; i < effects.length; i++) {
+          let [key,val] = effects[i]
+          setTimeout(_=>{
+            if (Object.keys(this.state.game).includes(key)) this.gameState(key,val,true)
+            if (key==='draw') while (val-->0) this.moveCard({})   
+            if (key==='mill') while (val-->0) this.moveCard({dest:'Graveyard'})   
+            if (key==='token') {
+              const token = this.props.tokens.filter(t=>obj.text.includes(TOKEN_NAME(t)))[0]
+              if(token) while (val-->0) this.spawnToken(token) 
+            }     
+          },100)
+        }
+      }
+
+      if (type==='ETB') {
+        for (var i = 0; i < (1+boardState.filter(c=>ETB(c).copier).length); i++) {
+          if(ETB(card).self) executeAbilities(ETB(card))
+          setTimeout(_=>{
+          for(var i = 0; i< boardState.length;i++) {
+            if (Q(card,'type_line',ETB(boardState[i]).types)) 
+              executeAbilities(ETB(boardState[i]))
+          }
+        },100)
+        }
+      }
+      return {...card,
+        tapped: ETB(card).tapped,
+        counters: ETB(card).counters
+      }
+
   }
 
   handleShuffle(first) {
@@ -278,10 +332,10 @@ export default class DeckTester extends React.Component {
     return inZone
   }
   
-  gameFunction(func,card,manaTolerance) {
+  gameFunction(func,card) {
     let result, msg
     if (func==='castSpell') {
-      result = g.castSpell(card,this.state.game,manaTolerance)
+      result = g.castSpell(card,this.state.game,this.props .settings.manaTolerance)
       msg = formatText('Paid '+result.cost)
     }
     if (func==='attack') {

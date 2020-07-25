@@ -279,7 +279,7 @@ section {
 }
 @keyframes flip-in {
   from {
-    transform: rotateY(60deg) translateX(7.14rem) scale(1.5);
+    transform: perspective(20rem) rotateY(85deg) translateX(7.14rem) scale(1.5);
   }
   to {
     transform: none;
