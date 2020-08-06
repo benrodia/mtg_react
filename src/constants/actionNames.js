@@ -1,0 +1,18 @@
+// export const OBJ_VAL = 'OBJ_VAL'
+// export const OBJ_KEY_VAL = 'OBJ_KEY_VAL'
+
+export const MAIN = 'MAIN'
+export const DECK = 'DECK'
+export const SETTINGS = 'SETTINGS'
+export const FILTERS = 'FILTERS'
+export const INIT_GAME = 'INIT_GAME'
+export const PLAYTEST = 'PLAYTEST'
+export const BOARD = 'BOARD'
+export const NEW_TURN = 'NEW_TURN'
+export const SHUFFLE = 'SHUFFLE'
+export const TOKEN = 'TOKEN'
+export const MANA = 'MANA'
+export const CARD = 'CARD'
+export const UNTAP = 'UNTAP'
+
+export const NEW_MSG = 'NEW_MSG'

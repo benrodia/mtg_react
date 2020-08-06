@@ -7,18 +7,18 @@ import {v4 as uuidv4} from  'uuid'
 
 
 export function cardMoveMsg(card,dest) {
-    let msg = `Put "${card.name}" into ${dest} from ${card.zone}`
-    if (dest==="Exile") {msg = `Exiled "${card.name}" from ${card.zone}`}
-    else if (dest==="Hand"&&card.zone!=="Library") {msg = `Returned "${card.name}" from ${card.zone} to hand`}
-    else if (dest!=="Library"&&(card.zone==="Hand"||card.zone==="Command")&&!card.type_line.includes('Land')) {msg = `Cast "${card.name}"`}
-    else if (dest==="Hand"&&card.zone==="Library") {msg = `Drew "${card.name}"`}
-    
-    else if (dest==="Battlefield"&&(card.zone==="Graveyard"||card.zone==="Exile")) {msg = `Returned "${card.name}" from ${card.zone} to Battlefield`}
-    else if (dest==="Battlefield") {msg = `Played "${card.name}"`}
-    
-    else if (dest==="Graveyard"&&card.zone==="Library") {msg = `Milled "${card.name}"`}
-    else if (dest==="Graveyard"&&card.zone==="Battlefield") {msg = `Sacrificed "${card.name}"`}
-    return msg
+    const {zone,name,type_line} = card
+    return (
+        dest==="Exile" ? `Exiled "${name}" from ${zone}` :
+        dest==="Hand"&&zone!=="Library" ? `Returned "${name}" from ${zone} to hand` :
+        dest!=="Library"&&(zone==="Hand"||zone==="Command")&&!type_line.includes('Land') ? `Cast "${name}"` :
+        dest==="Hand"&&zone==="Library" ? `Drew "${name}"` :
+        dest==="Battlefield"&&(zone==="Graveyard"||zone==="Exile") ? `Returned "${name}" from ${zone} to Battlefield` :
+        dest==="Battlefield" ? `Played "${name}"` :
+        dest==="Graveyard"&&zone==="Library" ? `Milled "${name}"` :
+        dest==="Graveyard"&&zone==="Battlefield" ? `Sacrificed "${name}"` :
+        `Put "${name}" into ${dest} from ${zone}`
+    )
 }
 
 
@@ -74,8 +74,8 @@ export function castSpell(card,game,manaTolerance) {
 }
 
 
-export function attackAll(state) {
-  const available = state.game.deck.filter(c=>
+export function attackAll(deck) {
+  const available = deck.filter(c=>
     c.zone==="Battlefield"
     &&c.type_line.includes('Creature')
     &&!c.type_line.includes('Wall')
@@ -95,11 +95,23 @@ export function attackAll(state) {
   return false
 }
 
-export function playLand(state) {
-    return state.game.deck.filter(c=>
+export function playLand(deck) {
+    return deck.filter(c=>
       c.zone==="Hand"
       &&c.type_line.includes('Land')
     )[0]
+}
+
+export function getColorIdentity(list,key) {
+  let colors = []
+  for (var i = 0; i < list.length; i++) {
+    if (list[i][key]) {
+      for (var j = 0; j < list[i][key].length; j++) {
+        if (!colors.includes(list[i][key][j])) colors.push(list[i][key][j])
+      }
+    }
+  }
+  return colors
 }
 
 

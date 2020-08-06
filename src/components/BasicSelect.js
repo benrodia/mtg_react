@@ -7,7 +7,7 @@ import titleCaps from '../functions/titleCaps'
 
 export default function BasicSelect(props) {
   const {open,img,className,self,labelBy,valueBy,options,defImg,placeholder,callBack,searchable,isHeader,limit} = props
-  const reset = {open:false,search:'',options:options}
+  const reset = {open:false,search:'',options:options||[]}
 
   const label=item=>(typeof(labelBy)==='function'?labelBy(item):item['name'])||item.toString()
 
@@ -40,7 +40,7 @@ export default function BasicSelect(props) {
 
 
   return <div 
-    style={{display: !options.length&&!isHeader&&'none'}}
+    style={{display: !options||!options.length&&!isHeader&&'none'}}
     tabIndex={"0"} 
     onBlur={_=>{if(!searchable)setTimeout(_=>setstate(reset),50)}}
     className={`custom-select 

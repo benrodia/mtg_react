@@ -1,5 +1,4 @@
-import {v4 as uuidv4} from  'uuid'
-import {CARD_TYPES,COLORS,SINGLETON} from './definitions'
+import {CARD_TYPES,COLORS,SINGLETON,HOME_DIR} from './definitions'
 
 function importAll(r) {
   let images = {}
@@ -29,46 +28,26 @@ export const SPECIAL_SYMBOLS = [
 'polis-setessa','polis-akros','polis-meletis',
 ]
 
-export const DEFAULT_SETTINGS = {
-	userName: 'User',
-	scale: 100,
-	subtitle: true,
-	manaTolerance: 3,//0-3
-	gameLog: true,
-	sleeves: Object.values(CARD_SLEEVES)[0],
-	playmat: Object.values(PLAYMATS)[0],
-}
+export const EXAMPLE_DECK_NAMES = [
+	"Timmy's BIG Surprise",
+	"Roon's War Crimes",
+	"Kaput",
+	"Septa",
+	"Something Clever",
+	"Lord of Shit Mountain",
+	"Johnny Cash Money"
+]
 
-export const DEFAULT_DECKINFO = {
-	key: uuidv4(),
-	name:'New Deck',
-	format: 'casual',
-	desc:"",
-	list:[],
-	colors: [],
-	color_identity: [],
-}
+export const EXAMPLE_DECK_DESCS = [
+	"I'm a new and impressionable deck that needs guidance and a good description.",
+	"Hey there, I'm new in town.",
+	"This is my dumb stupid aggro deck. Here's how it works:\n T3: AAAAAAAAAAHHH!",
+	"T1 swamp, T2 swamp, T3 swamp, T4 swamp, T5 swamp Sidisi, T6 swamp ad naus dark sphere rit sickening dreams GG",
+	"Just gonna leave this here...",
+	"This list comes to you shamelessly copied and pasted from a more talented deck builder"
+]
 
-export const INIT_GAME_STATE = format => {return {
-    deck: [],
-    life: SINGLETON(format)?40:20,
-    eLife: SINGLETON(format)?40:20,
-    poison: 0,
-    turn: 0,
-    mana: COLORS().map(C=>0),
-    phase: 'untap',
-    look: 0,
-    reveal: false,
-}}
 
-export const DEFAULT_FILTERS = {
-	...Object.assign(...COLORS('symbol').map(s=>({[s]: true}))),
-	all:false,
-	only:false,
-	keys: ['name','oracle_text'],
-	types: [],
-	customFields: []
-}
 
 
 export const FILTER_TERMS = [
@@ -136,28 +115,6 @@ export const FILTER_TERMS = [
 ]
 
 
-
-export const EXAMPLE_DECK_NAMES = [
-	"Timmy's BIG Surprise",
-	"Roon's War Crimes",
-	"Kaput",
-	"Septa",
-	"Something Clever",
-	"Lord of Shit Mountain",
-	"Johnny Cash Money"
-]
-
-
-
-
-export const EXAMPLE_DECK_DESCS = [
-	"I'm a new and impressionable deck that needs guidance and a good description.",
-	"Hey there, I'm new in town.",
-	"This is my dumb stupid aggro deck. Here's how it works:\n T3: AAAAAAAAAAHHH!",
-	"T1 swamp, T2 swamp, T3 swamp, T4 swamp, T5 swamp Sidisi, T6 swamp ad naus dark sphere rit sickening dreams GG",
-	"Just gonna leave this here...",
-	"This list comes to you shamelessly copied and pasted from a more talented deck builder"
-]
 export const COUNTERS = [
 	"PlusOne",
 	"Loyalty",

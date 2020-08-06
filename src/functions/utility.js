@@ -1,3 +1,4 @@
+export function cache(key,val) {localStorage.setItem(key,JSON.stringify(val))}
 
 export function sum(nums) {
   if (!nums || !nums.length) {return 0}

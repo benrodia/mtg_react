@@ -1,20 +1,23 @@
 import React,{useState} from 'react'
 import {CARD_SLEEVES,PLAYMATS} from '../constants/data_objects'
 
+import {connect} from 'react-redux'
+import * as actions from '../actionCreators'
+
 import titleCaps from '../functions/titleCaps'
 import '../functions/utility'
 
-export default function ChooseTheme(props) {
-	const {type,settings,legalCards,changeState} = props
-	const [hiRes,surpriseMe] = useState(0)
+function ChooseTheme(props) {
+	const {type,settings,legalCards,cacheState} = props
+	const [hiRes,surpriseMe] = useState([])
 
 	const constant = type==='sleeve'?CARD_SLEEVES:PLAYMATS
 
 	const getImgs = num => {
 		const got = legalCards
-		.filter(c=>c.highres_image&&c.image_uris&&c.image_uris.art_crop)
-		.map(c=>c.image_uris.art_crop)
-		.shuffle()
+			.filter(c=>c.highres_image&&c.image_uris&&c.image_uris.art_crop)
+			.map(c=>c.image_uris.art_crop)
+			.shuffle()
 		got.length = num
 		return got
 	}
@@ -31,10 +34,19 @@ export default function ChooseTheme(props) {
 		{show.map(s=>
 			<img 
 			className={`${type} ${settings[type]===s?'selected':''}`}
-			onClick={_=>changeState('settings',type,s)}
+			onClick={_=>cacheState('settings',type,s)}
 			src={s} alt={s}
 			/>
 		)}
 		</div>
 	</div>
 }
+
+const select = state => {
+	return {
+		settings: state.settings,
+		legalCards: state.main.legalCards,
+	}
+}
+
+export default connect(select,actions)(ChooseTheme)

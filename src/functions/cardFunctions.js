@@ -47,13 +47,13 @@ export function itemizeDeckList(list,filters,headers) {
 	return itemized
 }
 
-export function prepCardsForTest(deckInfo,sleeve,isToken) {
+export function prepCardsForTest(deck,sleeve,isToken) {
   let list = []
-  if (isToken) list = [deckInfo]
+  if (isToken) list = [deck]
   else {
     list = [
-      ...deckInfo.list.filter(c=>c.board==='Main'),
-      ...deckInfo.list.filter(c=>c.board==='Command').map(c=>{c.commander=true;return c})
+      ...deck.filter(c=>c.board==='Main'),
+      ...deck.filter(c=>c.board==='Command').map(c=>{c.commander=true;return c})
     ]
   }
   return list.map((c,i)=>{

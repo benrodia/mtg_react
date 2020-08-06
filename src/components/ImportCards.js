@@ -1,6 +1,9 @@
 import React, {useState,useEffect,useRef} from 'react'
-import matchSorter from 'match-sorter';
+import matchSorter from 'match-sorter'
 import {v4 as uuidv4} from  'uuid'
+
+import {connect} from 'react-redux'
+import * as actions from '../actionCreators'
 
 import titleCaps from '../functions/titleCaps'
 import {chooseCommander,legalCommanders} from '../functions/gameLogic'
@@ -10,8 +13,10 @@ import CardControls from './CardControls'
 import ImportTxt from './ImportTxt'
 
 
-export default function ImportCards (props) {
-	const {deckInfo,changeState,legalCards,openModal,addCard} = props
+function ImportCards(props) {
+	const {list,format,legalCards,addCard,openModal} = props
+	console.log('legalCards',legalCards)
+
 	const [cart,changeForm] = useState({form:'',cards:[]})
 
 	const exText = [...Array(7)].map((ex,i)=>{
@@ -70,18 +75,10 @@ export default function ImportCards (props) {
 		let cards = []
 		for (var i = 0; i < cart.cards.length; i++) {
 			cards = cards.concat([...Array(cart.cards[i].quantity)].map(_=>cart.cards[i].card))
-		}		
-		cards = cards.map(card=>{return{
-			...card,
-			key: legalCommanders(deckInfo.format,legalCards).filter(c=>c.name===card.name)[0]
-		        ? "CommanderID__"+uuidv4()
-		        : "CardID__"+uuidv4(),
-		    board: 'Main',
-        	customField: 'custom0',
-		}})
-
-	    changeState('deckInfo','list',[...deckInfo.list,...cards])
-
+		}	
+		console.log('importCart',cards)
+	    addCard(cards)
+	    openModal(null)
 	}
 
 	const total = sum(cart.cards.map(c=>c.quantity))
@@ -104,29 +101,13 @@ export default function ImportCards (props) {
 				}
 		</div>
 }
-				// <FillManabase {...props}/>
-			// <div className="checkout">
-			// 	<h3>Cards to Add</h3>
-			// 	<div className="inner">
-					
-			// 	{cart.map(item=>{
-			// 	return item.card
-			// 	? <CardControls key={item.card.id} card={item.card} 
-			// 	cardHeadOnly
-			// 	>
-			// 	<h4>{item.quantity}</h4>
-			// 	<h4>{item.card.set}</h4>
-			// 	</CardControls>
-			// 	:null
-			// 	})}
-			// 	</div>
-			// 	{cart.length
-			// 		?<button>Import {cart.length} card{cart.length!==1?'s':''}?</button>
-			// 		:null
-			// 	}
-			// </div>
 
 
-
-
-
+const select = state => {
+	return {
+		list: state.deck.list,
+		format: state.deck.format,
+		legalCards: state.main.legalCards,
+	}
+}
+export default connect(select,actions)(ImportCards)
