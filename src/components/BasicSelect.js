@@ -2,7 +2,7 @@ import React,{useState,useRef,useEffect} from 'react'
 import matchSorter from 'match-sorter'
 
 import '../functions/utility'
-import titleCaps from '../functions/titleCaps'
+import {titleCaps} from '../functions/text'
 
 
 export default function BasicSelect(props) {

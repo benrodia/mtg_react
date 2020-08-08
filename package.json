@@ -25,6 +25,7 @@
     "reactjs-mappletooltip": "^1.4.63",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
+    "redux-undo": "^1.0.1",
     "uuid": "^8.2.0"
   },
   "scripts": {

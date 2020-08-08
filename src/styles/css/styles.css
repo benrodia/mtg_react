@@ -1332,3 +1332,39 @@ html {
   height: 3rem;
   background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5));
 }
+.tester .stack {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  display: flex;
+  flex-flow: column-reverse;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, #020817);
+}
+.tester .stack .item {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: flex-end;
+  pointer-events: all;
+  filter: drop-shadow(0 0 1rem #020817);
+  margin-right: 0.5rem;
+  margin-top: 1rem;
+  max-width: 15rem;
+}
+.tester .stack .item .header {
+  text-align: right;
+  font-weight: bolder;
+  font-size: 1.1em;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eff5ff;
+  margin-bottom: 0.5rem;
+}
+.tester .stack .item .body {
+  font-style: italic;
+  padding-bottom: 0.5rem;
+}

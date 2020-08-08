@@ -5,7 +5,7 @@ import {v4 as uuidv4} from  'uuid'
 import {connect} from 'react-redux'
 import * as actions from '../actionCreators'
 
-import titleCaps from '../functions/titleCaps'
+import {titleCaps} from '../functions/text'
 import {chooseCommander,legalCommanders} from '../functions/gameLogic'
 import {sum} from '../functions/utility'
 import FillManabase from './FillManabase'

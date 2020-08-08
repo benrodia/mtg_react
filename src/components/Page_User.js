@@ -6,7 +6,7 @@ import * as actions from '../actionCreators'
 import {FORMATS,CARD_TYPES,SINGLETON} from '../constants/definitions'
 import {CARD_SLEEVES,PLAYMATS,EXAMPLE_DECK_NAMES,EXAMPLE_DECK_DESCS} from '../constants/data_objects'
 
-import titleCaps from '../functions/titleCaps'
+import {titleCaps} from '../functions/text'
 import {Q} from '../functions/cardFunctions'
 import {chooseCommander,legalCommanders} from '../functions/gameLogic'
 

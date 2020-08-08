@@ -4,7 +4,7 @@ import {CARD_SLEEVES,PLAYMATS} from '../constants/data_objects'
 import {connect} from 'react-redux'
 import * as actions from '../actionCreators'
 
-import titleCaps from '../functions/titleCaps'
+import {titleCaps} from '../functions/text'
 import '../functions/utility'
 
 function ChooseTheme(props) {

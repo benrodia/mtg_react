@@ -1,99 +1,12 @@
 import {Q} from './cardFunctions'
-import titleCaps from './titleCaps'
+import {titleCaps} from './text'
 import {sum,match} from './utility'
 import {CARD_TYPES,COLORS,ZONES,SINGLETON} from '../constants/definitions'
 import {MANA,TUTOR,SAC_AS_COST} from '../constants/greps'
 import {v4 as uuidv4} from  'uuid'
 
 
-export function cardMoveMsg(card,dest) {
-    const {zone,name,type_line} = card
-    return (
-        dest==="Exile" ? `Exiled "${name}" from ${zone}` :
-        dest==="Hand"&&zone!=="Library" ? `Returned "${name}" from ${zone} to hand` :
-        dest!=="Library"&&(zone==="Hand"||zone==="Command")&&!type_line.includes('Land') ? `Cast "${name}"` :
-        dest==="Hand"&&zone==="Library" ? `Drew "${name}"` :
-        dest==="Battlefield"&&(zone==="Graveyard"||zone==="Exile") ? `Returned "${name}" from ${zone} to Battlefield` :
-        dest==="Battlefield" ? `Played "${name}"` :
-        dest==="Graveyard"&&zone==="Library" ? `Milled "${name}"` :
-        dest==="Graveyard"&&zone==="Battlefield" ? `Sacrificed "${name}"` :
-        `Put "${name}" into ${dest} from ${zone}`
-    )
-}
 
-
-export function castSpell(card,game,manaTolerance) {
-  let floating = [...game.mana]
-  const colored = card.mana_cost.split('{').map(m=>m.replace('}','').replace('/','')) 
-  colored.shift()
-  let toPay = [...COLORS('symbol').map(C=>colored.filter(co=>co===C).length),parseInt(colored[0])]
-  let manaSources = Q([...game.deck].filter(c=>c.zone==='Battlefield'),...MANA.source)
-      .map(l=>{l.color_identity=Q(l,...MANA.any)?COLORS('symbol'):!l.color_identity.length?['C']:l.color_identity;return l})
-      .map(l=>{l.amt=Q(l,...MANA.twoC)?2:1;return l})
-
-  // console.log('casting Spell','floating',floating,'toPay',toPay,'manaSources',manaSources)
-
-  if (manaTolerance>=3) {
-    for (var i = 0; i < toPay.length; i++) {
-      for (var j = 0; j < manaSources.length; j++) {
-        if(floating[i] < toPay[i] &&!manaSources[j].tapped&&manaSources[j].color_identity.includes(COLORS('symbol')[i])) {
-          floating[i]+=manaSources[j].amt
-          manaSources[j].tapped = true
-        }
-      }
-      if (i===6&&toPay[6]) {
-        for (var j = 0; j < manaSources.length; j++) {
-          if(sum(floating)< toPay[6] &&!manaSources[j].tapped) {
-            floating[5]+=manaSources[j].amt
-            manaSources[j].tapped = true
-          }
-        }        
-      }
-    }
-  }
-  
-  floating = floating.map((f,i)=>f-Math.min(f,toPay[i]))
-  toPay = toPay.map((p,i)=>p-Math.min(p,(floating[i]||0)))
-
-  for (var i = 0; i < floating.length; i++) {
-    if (toPay[6]>0) {
-      floating[5-i] -= Math.min(floating[5-i],toPay[6])
-      toPay[6] -= Math.min(floating[5-i],toPay[6])
-    }
-  }
-  
-
-  // console.log('cast Spell','floating',floating,'toPay',toPay,'manaSources',manaSources)
-  if (sum(toPay)>0) return false //fuckeverything
-  else return {
-    tapped:manaSources.filter(a=>a.tapped),
-    mana: floating,
-    cost: card.mana_cost,
-  } 
-  return false
-}
-
-
-export function attackAll(deck) {
-  const available = deck.filter(c=>
-    c.zone==="Battlefield"
-    &&c.type_line.includes('Creature')
-    &&!c.type_line.includes('Wall')
-    &&!c.tapped
-    ).filter(c=>Q(c,'oracle_text','haste')||!c.sickness)
-  
-
-  const total = sum(available.map(c=>{
-    return (parseInt(c.power) + (c.counters.PlusOne||0))
-    *((Q(c,'oracle_text','double strike')||c.counters['Double strike'])?2:1)
-  }))
-  console.log('attacking with',available,'for',total)
-  
-  const tapped = available.filter(c=>!Q(c,'oracle_text','vigilance'))
-  
-  if(available.length) {return {tapped:tapped,total:!isNaN(total)?total:0}}
-  return false
-}
 
 export function playLand(deck) {
     return deck.filter(c=>

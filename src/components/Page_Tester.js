@@ -8,6 +8,7 @@ import Loading from './Loading'
 import Zone from './Zone'
 import TestControls from './TestControls'
 import TesterShortcuts from './TesterShortcuts'
+import TheStack from './TheStack'
 import BasicSelect from './BasicSelect'
 import CardControls from './CardControls'
 
@@ -15,8 +16,7 @@ import {TOKEN_NAME} from '../constants/definitions'
 
 
 
-function Page_Tester(props) {
-    const {list,tokens,look,startTest,spawnToken,handleShuffle,gameState} = props
+function Page_Tester({list,tokens,look,startTest,spawnToken,handleShuffle,gameState}) {
     useEffect(_=>startTest(),[])
 
     const zone = (name,{context,header,cardHeadOnly}) => 
@@ -26,10 +26,9 @@ function Page_Tester(props) {
       cardHeadOnly={cardHeadOnly}
       />
 
-    console.log('tokens',tokens)
-    
-
     return <div className="tester">
+      <TesterShortcuts/>
+      <TheStack/>
       <div className="side-col">                
         {!list.filter(c=>c.board==='Command').length?null:
         zone("Command",{context: 'single'})}
@@ -57,13 +56,12 @@ function Page_Tester(props) {
             <button className={'smaller-button'} onClick={_=>handleShuffle(false)}>Shuffle</button>
             <div className="lookBtn">
               <button className={'smaller-button warning-button'} onClick={_=>gameState('look',0)} style={{display:!look&&'none'}}>X</button>
-              <button className={'smaller-button'} onClick={_=>gameState('look',1,true)}>Look Top {look}</button>
+              <button className={'smaller-button'} onClick={_=>gameState('look',1,true)}>Reveal Top {look?look:''}</button>
             </div>
           </div>
         </div>    
     </div>
       <TestControls/>
-      <TesterShortcuts/>
       {zone("Battlefield", {context: 'grid'})}
       {zone("Hand", {context: 'list', faceDown: true})}
   </div>   

@@ -7,12 +7,11 @@ import * as actions from '../actionCreators'
 function TesterShortcuts(props) {
 	const [cooledDown,coolDown] = useState(true)
 	useEffect(_=>{
-		console.log('TesterShortcuts')
 		const keyEvent = e => {
-			console.log(e)
 			if (cooledDown && !document.activeElement.id) {	
 				coolDown(false)
-				setTimeout(()=>coolDown(true),100)
+				setTimeout(_=>coolDown(true),100)
+				// console.log(e.key)
 
 				switch (e.key) {
 					case 'd': return props.moveCard()
@@ -26,7 +25,7 @@ function TesterShortcuts(props) {
 					case '.': return props.gameState('life',-1,true,"You lost 1 life")
 					case '<': return props.gameState('eLife',1,true,"Enemy gained 1 life")
 					case '>': return props.gameState('eLife',-1,true,"Enemy lost 1 life")
-					// case 'z': props.undoAction(-1)
+					// case ' ': return props.resStack()
 				}
 			}
 		}

@@ -1,6 +1,6 @@
 import React,{useState,useEffect} from 'react'
 
-import {formatText,formatManaSymbols} from '../functions/formattingLogic'
+import {formatText,formatManaSymbols} from '../functions/text'
 
             
 export default function Inspect ({card}) {

@@ -1,22 +1,28 @@
 import React from 'react'
+import {connect} from 'react-redux'
+import * as actions from '../actionCreators'
+import {formatText} from '../functions/text'
 
+function TheStack({resStack,stack}) {
+	const stackItems = [...stack].reverse()
 
-export default function TheStack({resolve,stack}) {
-	const stackItems = [...stack].reverse()//.slice(0,3)
-	return <div className={`stack  ${!stack.length?'empty':''} `}>
+	return <div className={`stack ${!stack.length?'empty':''} `}>
       {stackItems.map((s,i)=>{
+        const {key,src,res,text,effect,effectType} = s
       	const active = i===0
         return (
-          <div key={s.key} style={{opacity:(1-(.1*i))}} className={`item action alert ${s.type} ${!active?'disabled':''}`}>
+          <div key={key} style={{opacity:(1-(.2*i))}} className={`item action alert ${!active?'disabled':''}`}>
           	<div className="msg">
-          		<div className="header">{s.src} - {s.type}</div>
-          		<div className="body">{s.text}</div>
+          		<div className="header">{src} - {effectType}</div>
+          		{!active?null:<div className="body">{formatText(text)}</div>}
           	</div>
           	{!active?null: 
           	<div className="stackOp">
-	          	{s.options.map(o=><button onClick={_=>resolve({key:s.key,resolve:o.method})}>{o.name}</button>)}
-	            <button autoFocus={active} className='small-button success-button' onClick={_=>resolve({key:s.key,resolve:true})}>Resolve</button>
-	            <button className='small-button warning-button' onClick={_=>resolve({key:s.key,resolve:false})}>Counter</button>
+	            <button autoFocus={active} className='small-button success-button' onClick={_=>{
+                resStack()
+                if(res!==null) res()
+              }}>{effect}</button>
+              <button className='small-button warning-button' onClick={resStack}>Counter</button>
           	</div>
           	}
           </div>
@@ -25,3 +31,6 @@ export default function TheStack({resolve,stack}) {
     </div>      
 }
 
+
+
+export default connect(state=>{return{stack: state.playtest.stack}},actions)(TheStack)

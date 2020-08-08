@@ -2,7 +2,7 @@ import React from 'react'
 import {Link, useLocation} from 'react-router-dom'
 import {connect} from 'react-redux'
 import {HOME_DIR} from '../constants/definitions'
-import {subTitle} from '../functions/formattingLogic'
+import {subTitle} from '../functions/text'
 
 function Nav(props) {
   const {deck,subtitle,userName} = props

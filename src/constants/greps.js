@@ -34,6 +34,7 @@ export const ETB = card => {
 		const effect = card.oracle_text.indexOf('enters the battlefield')<0?''
 		:card.oracle_text.substring(card.oracle_text.indexOf('enters the battlefield')+22,card.oracle_text.indexOf('.'))
 		return{
+			src: card.name,
 			types: types,
 			effect: BASIC_ABILITIES(effect),
 			self: Q(card,'oracle_text',['this card enters the battlefield',`${card.name} enters the battlefield`]),

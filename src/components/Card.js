@@ -1,11 +1,11 @@
 import React,{useEffect} from 'react'
 import {connect} from 'react-redux'
 import {CARD_SLEEVES} from '../constants/data_objects'
-import {formatManaSymbols} from '../functions/formattingLogic'
+import {formatManaSymbols} from '../functions/text'
 
 function Card(props) {
 	const {imgSize,sleeve,card} = props
-	const {mana_cost,faceDown,tapped,name,image_uris} = card
+	const {mana_cost,face_down,tapped,name,image_uris} = card
 
 	return props.cardHeadOnly
 		? <div className={`card-head`}>
@@ -13,7 +13,7 @@ function Card(props) {
 			<p className='cost'>{formatManaSymbols(mana_cost)}</p>
 		  </div>
 		: <img 
-			src={(faceDown ? sleeve: image_uris[imgSize||'normal']) || CARD_SLEEVES['_basic.png']} 
+			src={(face_down ? sleeve: image_uris[imgSize||'normal']) || CARD_SLEEVES['_basic.png']} 
 			className={`card-img`} style={{transform: tapped && 'rotate(90deg)'}}
 		  />
 }

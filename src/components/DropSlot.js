@@ -21,9 +21,6 @@ export default function DropSlot({accept,callBack,children,field,greedy}) {
     }),
   })
 
-  // console.log('isOver',isOver,'isOverCurrent',isOverCurrent)
-
-
   return <div ref={drop} className={`drop-slot ${field} ${isOver&&'over'}`}>
       {children}
     </div>

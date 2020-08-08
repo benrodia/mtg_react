@@ -57,8 +57,9 @@ export function prepCardsForTest(deck,sleeve,isToken) {
     ]
   }
   return list.map((c,i)=>{
+
     return {
-      key: !isToken?"card_"+i+"_of_"+list.length:"token_"+Math.random(),
+      key: isToken?"token_"+Math.random():"card_"+i,
       name: c.name,
       type_line:c.type_line,
       oracle_text:c.oracle_text,
@@ -75,10 +76,10 @@ export function prepCardsForTest(deck,sleeve,isToken) {
       row:1,col:0,
       counters: {},
       tapped: false,
-      faceDown: false,//!isToken&&!c.commander
+      face_down: false,
       flipped: false,
       sickness: true,
-      sleeve: sleeve,
+
       isToken: !!isToken,
       commander: !!c.commander
     }

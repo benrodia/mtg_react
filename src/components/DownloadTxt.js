@@ -4,7 +4,7 @@ import {connect} from 'react-redux'
 import * as actions from '../actionCreators'
 
 import {itemizeDeckList} from '../functions/cardFunctions'
-import titleCaps from '../functions/titleCaps'
+import {titleCaps} from '../functions/text'
 
 function DownloadTxt(props) {
   const {name,userName,list,format} = props

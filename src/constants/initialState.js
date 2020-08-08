@@ -11,6 +11,7 @@ export const INIT_SETTINGS_STATE = {
 	gameLog: true,
 	sleeves: Object.values(CARD_SLEEVES)[0],
 	playmat: Object.values(PLAYMATS)[0],
+	useStack: 1
 }
 
 export const INIT_DECK_STATE = {
@@ -47,8 +48,9 @@ export const INIT_MAIN_STATE = {
 
 
 export const INIT_PLAYTEST_STATE = (list,format,num) => {return {
-    deck: prepCardsForTest(list)||[],
     number: num||0,
+    size: {cols:1,rows:1},
+    deck: prepCardsForTest(list||[]),
     life: SINGLETON(format)?40:20,
     eLife: SINGLETON(format)?40:20,
     poison: 0,
@@ -56,7 +58,10 @@ export const INIT_PLAYTEST_STATE = (list,format,num) => {return {
     mana: COLORS().map(C=>0),
     phase: 'untap',
     look: 0,
-    reveal: false
+    reveal: false,
+    history: [],
+    future: [],
+    stack: [],
 }}
 
 

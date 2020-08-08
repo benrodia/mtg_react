@@ -4,7 +4,7 @@ import {connect} from 'react-redux'
 import * as actions from '../actionCreators'
 
 import {Q,itemizeDeckList, isLegal,audit} from '../functions/cardFunctions'
-import titleCaps from '../functions/titleCaps'
+import {titleCaps} from '../functions/text'
 
 import {SINGLETON} from '../constants/definitions'
 import {FILTER_TERMS,NUMBER_WORDS,ItemTypes} from '../constants/data_objects'

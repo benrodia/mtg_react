@@ -3,8 +3,7 @@ import {Q} from '../functions/cardFunctions'
 import {COLORS} from '../constants/definitions'
 import {MANA} from '../constants/greps'
 
-export default function ManaSource (props) {
-	const {card,cardState,handleMana} = props
+export default function ManaSource ({card,cardState,handleMana}) {
 
 	const addMana = (type,amt) => {
 		if (!card.tapped) {
@@ -20,16 +19,15 @@ export default function ManaSource (props) {
 		const amt = Q(card,...MANA.twoC)?2:1
 
 		const manaTapDisplay =  types.map((C,i)=>!C?null
-			:<div key={`tapfor${C}`} className={`tap-for`} onClick={()=>addMana(i,amt)}>
+			: <div key={`tapfor${C}`} className={`tap-for`} onClick={_=>addMana(i,amt)}>
 				{[...Array(amt)].map(_=><span key={amt} className={`ms ms-${C.toLowerCase()}`}/>)}
-			</div>
+			  </div>
 		)
 
-		return !types.length?null
-		:<div className="mana-source">
+		return !types.length ? null
+		: <div className="mana-source">
 			<span className={`ms ms-tap`}/>: Add {manaTapDisplay}
-		</div>
-	}		
-	else return null
+		  </div>
+	} else return null
 
 }

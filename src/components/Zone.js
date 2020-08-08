@@ -8,7 +8,6 @@ import {ItemTypes} from '../constants/data_objects'
 import {Q} from '../functions/cardFunctions'
 import {tutorableCards,clickPlace} from '../functions/gameLogic'
 
-import DragContainer from './DragContainer'
 import DropSlot from './DropSlot'
 
 import ManaSource from './ManaSource'
@@ -17,24 +16,26 @@ import BasicSelect from './BasicSelect'
 import CardControls from './CardControls'
 
 function Zone(props) {
-  const {zone,playtest,context,cardHeadOnly,header,handleMana,handleShuffle,gameState,cardState,moveCard,cardClick,spawnToken} = props
-  const {deck,look,reveal} = playtest
-
-  const [size,setSize] = useState({width:0,height:0})
-  
+  const {zone,deck,look,size,context,cardHeadOnly,header,handleMana,handleShuffle,gameState,cardState,moveCard,cardClick,spawnToken} = props
   const zoneDiv = useRef()
-  const bottom = useRef()
-  useEffect(()=>{
-    if(size.width!==zoneDiv.current.clientWidth) {
-      setSize({
-        width: zoneDiv.current.clientWidth,
-        height: zoneDiv.current.clientHeight,
-      })
-      // if (!scrolled&&bottom.current) {bottom.current.scrollIntoView();scrolled=true}
-    }
-  })
 
-  const cols = context==='grid'?Math.floor(size.width/CARD_SIZE.w):1
+  // DUMBASS HACK WORKAROUND FOR STORING DIV SIZE {
+  const [sizeFlag,setSizeFlag] = useState(false)
+  const getSize = _ => {return {
+      cols: Math.floor(zoneDiv.current.clientWidth/CARD_SIZE.w),
+      rows: Math.floor(zoneDiv.current.clientHeight/CARD_SIZE.h),
+    }
+  }
+  const shouldUpdateSize = context==='grid'&&!sizeFlag&&zoneDiv.current&&Math.floor(zoneDiv.current.clientWidth/CARD_SIZE.w)!==size.cols
+  if (shouldUpdateSize) {
+    gameState('size',getSize())
+    setSizeFlag(true)
+    setTimeout(_=>setSizeFlag(false),1000)
+  }
+
+
+
+  const cols = context==='grid'?size.cols:1
   const rows = context==='grid'?4:1
   const cards = deck.filter(c=>c.zone===zone).orderBy('order')
 
@@ -42,7 +43,7 @@ function Zone(props) {
     const cardStack = 
       context==='grid' ? cards.filter(c=>col===c.col&&row===c.row) : 
       context==='list' || zone==="Command" ? cards : 
-      cards.splice(cards.length-(look||1),look||1).map(c=>{return {...c,faceDown:!look}})
+      cards.splice(cards.length-(look||1),look||1).map(c=>{return {...c,face_down:!look}})
 
 
     return <DropSlot key={"slot"+col}
@@ -78,7 +79,7 @@ function Zone(props) {
       </div>
       {context!=='grid'
         ? inner
-        : <div className="inner">{inner}<div className='bottom' ref={bottom}/></div>
+        : <div className="inner">{inner}</div>
       }
     </div>
   }
@@ -91,7 +92,7 @@ function Zone(props) {
     return <CardControls key={card.key} card={card} cardHeadOnly={cardHeadOnly}
       itemType={card.commander?ItemTypes.COMMANDER:ItemTypes.CARD}
       style={{
-        position: (context==='single'||context==='grid')&&ind ? 'absolute':'default',
+        position: context!=='list' ? 'absolute':'default',
         top: (zone==='Library'?-ind:ind)+"rem",
         left: (zone==='Library'?ind*3:ind)+"rem",
         zIndex: ind,
@@ -105,15 +106,22 @@ function Zone(props) {
         callBack={c=>{
           cardClick(c,false,tutorable.dest)
           handleShuffle()
-          if (tutorable.sac) cardClick(card,false,'Graveyard')
+          if (tutorable.sac) cardClick(card,true,'Graveyard')
         }}
         />}
-        {zone==="Library"&&look?<button onClick={_=>setTimeout(_=>moveCard({card,dest:'Library',effects:{bottom:true}}),50)}>bottom</button>:null}
-        {zone!=="Battlefield"?null:<>
+        {!(zone==="Library"&&look)?null:
+        <div>
+          <button className="small-button" onClick={_=>moveCard({card,dest:'Library',effects:{bottom:true}})}>Bottom</button>
+          <button className="small-button" onClick={_=>moveCard({card,dest:'Graveyard'})}>Graveyard</button>
+        </div>
+      }
+        {zone!=="Battlefield"?null:
+        <>
           <Counters card={card} cardState={cardState}/>
           <ManaSource card={card} cardState={cardState} handleMana={handleMana}/>      
           {!Q(card,'type_line','Token')?null:<button onClick={_=>spawnToken(card)}>Clone</button>}
-        </>}
+        </>
+      }
       </CardControls>
   }
 
@@ -124,10 +132,9 @@ function Zone(props) {
 
 const select = state => {
   return {
-    playtest: state.playtest,
-    sleeve: state.settings.sleeve,
-    list: state.deck.list,
-    format: state.deck.format,
+    deck: state.playtest.deck,
+    look: state.playtest.look,
+    size: state.playtest.size,
   }
 }
 
