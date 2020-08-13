@@ -107,20 +107,32 @@
         max-height: 15rem;
         overflow-y: auto;
         align-self: flex-start;
-        border-radius: @thinnest;
+        border-radius: @thinner;
         .log {
           .flex-row();
           justify-content: space-between;
+          padding: 0 @thin @thin;
+          &:last-child {padding-bottom: 0;}
 
           .timestamp {font-weight: bold;}
           .action {font-style: italic;}
-          .undo {
+          .arrow {
             text-decoration: underline;
             cursor: pointer;
             &:hover {color: @red;}
           }
-          padding: 0 @thin @thin;
-          &:last-child {padding-bottom: 0;}
+          &:hover {
+            opacity: 1;
+            cursor: pointer;
+            background: rgba(200,200,0,.3);
+          }
+        }
+        .inactive {
+          opacity: .7;
+        }
+        .pointer {
+          margin-bottom: @thin;
+          border-bottom: 1px solid @highlight;
         }
       }
     }

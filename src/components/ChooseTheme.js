@@ -1,5 +1,5 @@
 import React,{useState} from 'react'
-import {CARD_SLEEVES,PLAYMATS} from '../constants/data_objects'
+import {CARD_SLEEVES,PLAYMATS} from '../constants/data'
 
 import {connect} from 'react-redux'
 import * as actions from '../actionCreators'
@@ -7,8 +7,7 @@ import * as actions from '../actionCreators'
 import {titleCaps} from '../functions/text'
 import '../functions/utility'
 
-function ChooseTheme(props) {
-	const {type,settings,legalCards,cacheState} = props
+function ChooseTheme({type,settings,legalCards,changeSettings}) {
 	const [hiRes,surpriseMe] = useState([])
 
 	const constant = type==='sleeve'?CARD_SLEEVES:PLAYMATS
@@ -34,7 +33,7 @@ function ChooseTheme(props) {
 		{show.map(s=>
 			<img 
 			className={`${type} ${settings[type]===s?'selected':''}`}
-			onClick={_=>cacheState('settings',type,s)}
+			onClick={_=>changeSettings(type,s)}
 			src={s} alt={s}
 			/>
 		)}

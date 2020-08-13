@@ -17,12 +17,24 @@ import Page_Builder from './components/Page_Builder'
 import Page_Tester from './components/Page_Tester'
 
 
-function App(props) { 
-  const {cardData,legalCards,scale,format,tokens,loadAppData,getLegalCards,getTokens} = props
+function App({
+  cardData,
+  legalCards,
+  scale,
+  format,
+  tokens,
+  loadAppData,
+  getLegalCards,
+  getTokens
+}) { 
 
-  useEffect(_=>loadAppData(),[])
-  useEffect(_=>{if(cardData.length && !legalCards.length) getLegalCards(cardData,format)},[cardData])
-  useEffect(_=>{if(cardData.length && !tokens.length) getTokens(cardData)},[cardData])
+  useEffect(_=>{
+    if(cardData.length) {
+      !tokens.length && getTokens(cardData)
+      !legalCards.length && getLegalCards(cardData,format)
+    } 
+    else loadAppData()
+},[cardData])
 
   const routes = 
     <Switch>

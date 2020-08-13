@@ -1200,7 +1200,7 @@ html {
   max-height: 15rem;
   overflow-y: auto;
   align-self: flex-start;
-  border-radius: 0.125rem;
+  border-radius: 0.25rem;
 }
 .tester .test-controls .game-log .log {
   display: flex;
@@ -1208,21 +1208,32 @@ html {
   justify-content: space-between;
   padding: 0 0.5rem 0.5rem;
 }
+.tester .test-controls .game-log .log:last-child {
+  padding-bottom: 0;
+}
 .tester .test-controls .game-log .log .timestamp {
   font-weight: bold;
 }
 .tester .test-controls .game-log .log .action {
   font-style: italic;
 }
-.tester .test-controls .game-log .log .undo {
+.tester .test-controls .game-log .log .arrow {
   text-decoration: underline;
   cursor: pointer;
 }
-.tester .test-controls .game-log .log .undo:hover {
+.tester .test-controls .game-log .log .arrow:hover {
   color: #ff4466;
 }
-.tester .test-controls .game-log .log:last-child {
-  padding-bottom: 0;
+.tester .test-controls .game-log .log:hover {
+  opacity: 1;
+  cursor: pointer;
+  background: rgba(200, 200, 0, 0.3);
+}
+.tester .test-controls .game-log .inactive {
+  opacity: 0.7;
+}
+.tester .test-controls .game-log .pointer {
+  border-bottom: 1px solid #fcd303;
 }
 .tester .side-col {
   position: fixed;

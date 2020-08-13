@@ -1,6 +1,6 @@
 import React,{useState} from 'react'
 import {useDrag} from 'react-dnd'
-import {ItemTypes} from '../constants/data_objects'
+import {ItemTypes} from '../constants/data'
 
 import {connect} from 'react-redux'
 import * as actions from '../actionCreators'
@@ -11,10 +11,19 @@ import Card from './Card'
 
 
 let timer
-function CardControls(props) {
-	const {card,itemType,style,faceDown,cardHeadOnly,openModal,illegal,children,cardClick,classes} = props
+function CardControls({
+	card,
+	itemType,
+	style,
+	faceDown,
+	cardHeadOnly,
+	openModal,
+	illegal,
+	children,
+	cardClick,
+	classes
+}) {
 	const [clicked,clickState] = useState(false)
-
 	const [{isDragging}, drag, preview] = useDrag({
 		item: {...card,type: itemType||ItemTypes.CARD},
 		collect: monitor => ({isDragging: !!monitor.isDragging()})

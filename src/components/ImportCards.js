@@ -13,10 +13,7 @@ import CardControls from './CardControls'
 import ImportTxt from './ImportTxt'
 
 
-function ImportCards(props) {
-	const {list,format,legalCards,addCard,openModal} = props
-	console.log('legalCards',legalCards)
-
+function ImportCards({list,format,legalCards,addCard,openModal}) {
 	const [cart,changeForm] = useState({form:'',cards:[]})
 
 	const exText = [...Array(7)].map((ex,i)=>{

@@ -1,8 +1,14 @@
 import React,{useState,useEffect} from 'react'
 
-export default function ItemImput
-	({addable,removable,changeable,value,list,callBack,filters}) {
-
+export default function ItemImput({
+	addable,
+	removable,
+	changeable,
+	value,
+	list,
+	callBack,
+	filters
+}) {
 	const [input,update] = useState(!!addable?'':value.name)
 	const [edit,isEditing] = useState(!!addable)
 	useEffect(_ => {

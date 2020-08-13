@@ -6,8 +6,7 @@ import * as actions from '../actionCreators'
 import {itemizeDeckList} from '../functions/cardFunctions'
 import {titleCaps} from '../functions/text'
 
-function DownloadTxt(props) {
-  const {name,userName,list,format} = props
+function DownloadTxt({name,userName,list,format}) {
 
   const meta = [
   	"//Deck file created by MagicTouch \n",

@@ -1,45 +1,41 @@
+import store from '../store'
+
 import {Q} from './cardFunctions'
 import {sum,match} from './utility'
-import {CARD_TYPES,COLORS,ZONES,SINGLETON} from '../constants/definitions'
-import {MANA,TUTOR,SAC_AS_COST} from '../constants/greps'
+import {COLORS,CARD_TYPES,ZONES} from '../constants/definitions'
+import {SINGLETON,MANA,TUTOR,SAC_AS_COST,CAN_TAP} from '../constants/greps'
 
 
 
-export default function payMana(cost,playtest,manaTolerance) {
+export default function payMana(cost) {
+  const {mana,deck} = store.getState().playtest
 
-  let floating = [...playtest.mana]
+  let floating = [...mana]
   const symbols = cost.split('{').map(m=>m.replace('}','').replace('/','')) 
   symbols.shift()
   let colored = COLORS('symbol').map(C=>symbols.filter(co=>co===C).length)
   let generic = isNaN(symbols[0])?0:parseInt(symbols[0])
 
-  let manaSources = Q([...playtest.deck].filter(c=>c.zone==='Battlefield'),...MANA.source)
-      .map(l=>{l.color_identity=Q(l,...MANA.any)?COLORS('symbol'):!l.color_identity.length?['C']:l.color_identity;return l})
-      .map(l=>{l.amt=Q(l,...MANA.twoC)?2:1;return l})
-      .filter(l=>!l.tapped)
+  let manaCards = deck.filter(c=>MANA.source(c)&&CAN_TAP(c))||[]
 
-  // console.log('casting Spell','floating',floating,'colored',colored,'manaSources',manaSources)
-
-  if (manaTolerance>=3) {
-    for (let i = 0; i < colored.length; i++) {
-      for (let j = 0; j < manaSources.length; j++) {
-        if(floating[i] < colored[i] && !manaSources[j].tapped&&manaSources[j].color_identity.includes(COLORS('symbol')[i])) {
-          floating[i] = floating[i]+manaSources[j].amt
-          manaSources[j] = {...manaSources[j],tapped:true}
-        }
+  for (let i = 0; i < colored.length; i++) {
+    for (let j = 0; j < manaCards.length; j++) {
+      if(floating[i] < colored[i] && !manaCards[j].tapped&&manaCards[j].mana_source[i]) {
+        floating[i] = floating[i] + manaCards[j].mana_source[i]
+        manaCards[j] = {...manaCards[j],tapped:true}
       }
     }
-    floating = floating.map((fl,i)=>fl>=colored[i]?fl-colored[i]:fl)
-    colored = colored.map((co,i)=>co>=floating[i]?0:co)
+  }
+  const paidColored = colored.map((co,i)=>floating[i]>=co?0:co)
+  floating = floating.map((fl,i)=>fl>=colored[i]?0:fl)
 
-    if (generic>0) {
-      for (let k = 0; k < manaSources.length; k++) {
-        if(sum(floating) < generic && !manaSources[k].tapped) {
-          floating[5] = floating[5]+manaSources[k].amt
-          manaSources[k] = {...manaSources[k],tapped:true}
-        }
-      }        
-    }
+  if (generic>0) {
+    for (let k = 0; k < manaCards.length; k++) {
+      if(sum(floating) < generic && !manaCards[k].tapped) {
+        floating[5] = floating[5]+Math.max(...manaCards[k].mana_source)
+        manaCards[k] = {...manaCards[k],tapped:true}
+      }
+    }        
   }
   
 
@@ -52,11 +48,12 @@ export default function payMana(cost,playtest,manaTolerance) {
   }
   
 
-  console.log('Pay Mana','remaining',sum([...colored,generic]),'floating',floating,'colored',colored,'generic',generic,'manaSources',manaSources,'tapped',manaSources.filter(a=>a.tapped).map(c=>c.name))
-  if (sum([...colored,generic])<=0) return {
-    tapped:manaSources.filter(a=>a.tapped),
+  console.log('Pay Mana','remaining',sum([...paidColored,generic]),'floating',floating,'paidColored',paidColored,'generic',generic,'manaCards',manaCards,'tapped',manaCards.filter(a=>a.tapped).map(c=>c.name))
+  if (sum([...paidColored,generic])>0) return false
+  else return {
+    tapped:manaCards.filter(a=>a.tapped),
     mana: floating,
+    usedMana: floating < mana,
     cost,
   } 
-  return false
 }

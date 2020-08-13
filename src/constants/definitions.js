@@ -1,10 +1,35 @@
 export const HOME_DIR = '/reactmtg'
 export const USER_DIR = '/user'
 
-
 export const FORMATS = ['brawl','commander','duel','future','legacy','modern','oldschool','pauper','penny','standard','vintage','casual']
 
-export const PHASES = ['untap','upkeep','draw','main1','combat','main2','end']
+
+export const LIBRARY = 'Library'
+export const HAND = 'Hand'
+export const BATTLEFIELD = 'Battlefield'
+export const GRAVEYARD = 'Graveyard'
+export const EXILE = 'Exile'
+export const COMMAND = 'Command'
+export const ZONES = [LIBRARY,HAND,BATTLEFIELD,GRAVEYARD,EXILE,COMMAND]
+
+
+export const UNTAP = 'Untap'
+export const UPKEEP = 'Upkeep'
+export const DRAW = 'Draw'
+export const MAIN_ONE = 'Main One'
+export const COMBAT = 'Combat'
+export const MAIN_TWO = 'Main Two'
+export const END = 'End'
+export const PHASES = [UNTAP,UPKEEP,DRAW,MAIN_ONE,COMBAT,MAIN_TWO,END]
+
+export const CREATURE = 'Creature'
+export const INSTANT = 'Instant'
+export const SORCERY = 'Sorcery'
+export const ARTIFACT = 'Artifact'
+export const ENCHANTMENT = 'Enchantment'
+export const PLANESWALKER = 'Planeswalker'
+export const LAND = 'Land'
+export const CARD_TYPES = [CREATURE,INSTANT,SORCERY,ARTIFACT,ENCHANTMENT,PLANESWALKER,LAND]
 
 
 const size_mod = 3
@@ -13,27 +38,16 @@ export const CARD_SIZE = {
 	h: 16*3.5*size_mod
 }
 
-export const ZONES = [
-	'Library',
-	'Hand',
-	'Battlefield',
-	'Graveyard',
-	'Exile',
-	'Command',
-]
 
 
-export const CARD_TYPES = [
-	'Creature',
-	'Instant',
-	'Sorcery',
-	'Artifact',
-	'Enchantment',
-	'Planeswalker',
-	'Land'
-]
+export const RARITY_COLOR = {
+	common: '#000000',
+	uncommon: '#879795',
+	rare: '#B9974E',
+	mythic: '#F34800',
+}
 
-export const COLORS = key =>{
+export const COLORS = key => {
 const colors = [
 	{
 		name: 'White',
@@ -70,18 +84,3 @@ const colors = [
 	?colors.map(c=>c[key]) 
 	:colors
 } 
-
-export const TOKEN_NAME = t => {
-	const color = COLORS('name')[COLORS('symbol').indexOf(t.color_identity[0])]||'colorless'
-	return !t.power?t.name:
-	`${t.power}/${t.toughness} ${color.toLowerCase()} ${t.name}`
-}
-
-export const RARITY_COLOR = {
-	common: '#000000',
-	uncommon: '#879795',
-	rare: '#B9974E',
-	mythic: '#F34800',
-}
-
-export const SINGLETON = format => format === 'commander' || format === 'brawl'

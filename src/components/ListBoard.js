@@ -4,11 +4,10 @@ import {connect} from 'react-redux'
 import * as actions from '../actionCreators'
 
 import {Q,itemizeDeckList, isLegal,audit} from '../functions/cardFunctions'
-import {titleCaps} from '../functions/text'
+import {titleCaps,pluralize} from '../functions/text'
 
-import {SINGLETON} from '../constants/definitions'
-import {FILTER_TERMS,NUMBER_WORDS,ItemTypes} from '../constants/data_objects'
-import {DUAL_COMMANDER} from '../constants/greps'
+import {FILTER_TERMS,NUMBER_WORDS,ItemTypes} from '../constants/data'
+import {SINGLETON,DUAL_COMMANDER} from '../constants/greps'
 
 import DropSlot from './DropSlot'
 import BasicSelect from './BasicSelect'
@@ -17,13 +16,28 @@ import Card from './Card'
 import Icon from './Icon'
 import ItemInput from './ItemInput'
 
-function ListBoard(props) {
-	const {legalCards,sets,list,format,color_identity,board,view,sortBy,openModal,addCard,cacheState,changeField,header,customFields} = props
-	
+function ListBoard({
+	legalCards,
+	sets,
+	list,
+	format,
+	color_identity,
+	board,
+	view,
+	sortBy,
+	openModal,
+	addCard,
+	changeDeck,
+	changeFilters,
+	changeField,
+	header,
+	customFields
+}) {	
 	let cards = list.filter(c=>c.board===board)
 	
-	const boardInner = () => {
+	const boardInner = _ => {
 		const Filter_By = FILTER_TERMS.filter(t=>t.name===sortBy)[0]
+		console.log(board,'sortBy',sortBy,'Filter_By',Filter_By,'FILTER_TERMS',FILTER_TERMS)
 		const category = {...Filter_By,
 			vals: sortBy==='Custom'?(customFields.map(f=>f.key))
 			: Filter_By.vals || cards.map(c=>c[Filter_By.key]).sort(),
@@ -59,7 +73,7 @@ function ListBoard(props) {
 						<ItemInput changeable removable 
 						value={{name:titleCaps(valName),key:val}} 
 						list={customFields} 
-						callBack={n=>cacheState('filters','customFields',n)}
+						callBack={n=>changeFilters('customFields',n)}
 						/> ({filteredCards.length})
 						</h3>
 						<div className={`${view}-inner`}>				
@@ -70,7 +84,7 @@ function ListBoard(props) {
 			}
 			else return !cardStacks.length ? null
 			:	<div key={board+"_"+category.key+"_"+valName} className={`${valName}-list list ${view}-view`}>
-					<h3 style={{display:board==='Command'&&'none'}}><div className={`icon ms ms-${val.toString().toLowerCase()}`}/> {titleCaps(sortBy=='Type'?valName==='Sorcery'?'Sorceries':valName+'s':valName)} ({filteredCards.length})</h3>
+					<h3 style={{display:board==='Command'&&'none'}}><div className={`icon ms ms-${val.toString().toLowerCase()}`}/> {titleCaps(pluralize(valName))} ({filteredCards.length})</h3>
 					<div className={`${view}-inner`}>				
 						{cardStacks.map((c,i)=>renderCardStack(c,i,valName))}
 					</div>
@@ -131,7 +145,7 @@ function ListBoard(props) {
 						board:card.board,
 						customField:card.customField
 					}
-					cacheState('deck','list',list.map(c=>c.key===newCard.key?newCard:c))
+					changeDeck('list',list.map(c=>c.key===newCard.key?newCard:c))
 					openModal(null)
 				}}>
 				<h4>{print.set_name}</h4>

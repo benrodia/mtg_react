@@ -4,7 +4,7 @@ import {connect} from 'react-redux'
 import * as actions from '../actionCreators'
 
 import {CARD_SIZE} from '../constants/definitions'
-import {ItemTypes} from '../constants/data_objects'
+import {ItemTypes} from '../constants/data'
 import {Q} from '../functions/cardFunctions'
 import {tutorableCards,clickPlace} from '../functions/gameLogic'
 
@@ -15,11 +15,24 @@ import Counters from './Counters'
 import BasicSelect from './BasicSelect'
 import CardControls from './CardControls'
 
-function Zone(props) {
-  const {zone,deck,look,size,context,cardHeadOnly,header,handleMana,handleShuffle,gameState,cardState,moveCard,cardClick,spawnToken} = props
+function Zone({
+  zone,
+  deck,
+  look,
+  size,
+  context,
+  cardHeadOnly,
+  header,
+  handleMana,
+  handleShuffle,
+  gameState,
+  cardState,
+  moveCard,
+  cardClick,
+  spawnToken
+}) {
+  
   const zoneDiv = useRef()
-
-  // DUMBASS HACK WORKAROUND FOR STORING DIV SIZE {
   const [sizeFlag,setSizeFlag] = useState(false)
   const getSize = _ => {return {
       cols: Math.floor(zoneDiv.current.clientWidth/CARD_SIZE.w),
@@ -32,7 +45,6 @@ function Zone(props) {
     setSizeFlag(true)
     setTimeout(_=>setSizeFlag(false),1000)
   }
-
 
 
   const cols = context==='grid'?size.cols:1
@@ -50,7 +62,7 @@ function Zone(props) {
         zone={zone}
         col={col} row={row}
         accept={zone==='Command'?ItemTypes.COMMANDER:[ItemTypes.CARD,ItemTypes.COMMANDER]}
-        callBack={card=>moveCard({card:card,dest:zone,col:col,row:row})}
+        callBack={card=>moveCard({card,dest:zone,col,row})}
         >
           {cardStack[0]&&cardStack.map((c,i)=>renderCard(c,i))}
         </DropSlot>
@@ -111,14 +123,14 @@ function Zone(props) {
         />}
         {!(zone==="Library"&&look)?null:
         <div>
-          <button className="small-button" onClick={_=>moveCard({card,dest:'Library',effects:{bottom:true}})}>Bottom</button>
+          <button className="small-button" onClick={_=>moveCard({card,dest:'Library',bottom:true})}>Bottom</button>
           <button className="small-button" onClick={_=>moveCard({card,dest:'Graveyard'})}>Graveyard</button>
         </div>
       }
         {zone!=="Battlefield"?null:
         <>
-          <Counters card={card} cardState={cardState}/>
-          <ManaSource card={card} cardState={cardState} handleMana={handleMana}/>      
+          <Counters card={card}/>
+          <ManaSource card={card}/>      
           {!Q(card,'type_line','Token')?null:<button onClick={_=>spawnToken(card)}>Clone</button>}
         </>
       }

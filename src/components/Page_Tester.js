@@ -12,13 +12,20 @@ import TheStack from './TheStack'
 import BasicSelect from './BasicSelect'
 import CardControls from './CardControls'
 
-import {TOKEN_NAME} from '../constants/definitions'
+import {TOKEN_NAME} from '../constants/greps'
 
 
 
-function Page_Tester({list,tokens,look,startTest,spawnToken,handleShuffle,gameState}) {
+function Page_Tester({
+  list,
+  tokens,
+  look,
+  startTest,
+  spawnToken,
+  handleShuffle,
+  gameState
+}) {
     useEffect(_=>startTest(),[])
-
     const zone = (name,{context,header,cardHeadOnly}) => 
       <Zone zone={name} key={name} 
       context={context} 

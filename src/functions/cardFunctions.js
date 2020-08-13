@@ -1,7 +1,7 @@
 import {v4 as uuidv4} from  'uuid'
 
-import {CARD_TYPES,COLORS,ZONES,SINGLETON} from '../constants/definitions'
-import {NO_QUANT_LIMIT} from '../constants/greps'
+import {CARD_TYPES,ZONES} from '../constants/definitions'
+import {SINGLETON,NO_QUANT_LIMIT,MANA,NUM_FROM_WORD} from '../constants/greps'
 import {matchStr} from '../functions/utility'
 import {CONTROL_CARD} from '../constants/controlCard.js'
 
@@ -47,44 +47,6 @@ export function itemizeDeckList(list,filters,headers) {
 	return itemized
 }
 
-export function prepCardsForTest(deck,sleeve,isToken) {
-  let list = []
-  if (isToken) list = [deck]
-  else {
-    list = [
-      ...deck.filter(c=>c.board==='Main'),
-      ...deck.filter(c=>c.board==='Command').map(c=>{c.commander=true;return c})
-    ]
-  }
-  return list.map((c,i)=>{
-
-    return {
-      key: isToken?"token_"+Math.random():"card_"+i,
-      name: c.name,
-      type_line:c.type_line,
-      oracle_text:c.oracle_text,
-      rulings_uri:c.rulings_uri,
-      mana_cost: c.mana_cost,
-      cmc: c.cmc,
-      color_identity: c.color_identity,
-      image_uris: c.image_uris,
-      power:c.power,
-      toughness:c.toughness,
-
-      zone: isToken?'Battlefield':c.commander?'Command':'Library',
-      order: i,
-      row:1,col:0,
-      counters: {},
-      tapped: false,
-      face_down: false,
-      flipped: false,
-      sickness: true,
-
-      isToken: !!isToken,
-      commander: !!c.commander
-    }
-  })
-}
 
 export function normalizePos(deck) {
   let zoneCards = ZONES.map(z=>deck.filter(c=>c.zone===z))
@@ -151,19 +113,4 @@ export function filterSearch(options,filters,limit) {
 }
 
 
-export function audit(card) {
-
-  const audit = Object.assign(...Object.keys(CONTROL_CARD).map(k=>({[k]: card[k]})))
-  
-  const notOK = ['type_line','img_uris','name','cmc','colors','color_identity','oracle_text']
-
-  const missingVals = Object.entries(audit)
-  .filter(a=>a[1]===undefined)
-  .filter(a=>notOK.includes(a[0]))
-
-  if(missingVals.length){
-    console.error('"'+card.name+'"','Missing vals for:\n',missingVals.map(m=>m[0]).join('\n'))
-    return null
-  }
-    return card
-}
+export const audit = card => Object.assign(CONTROL_CARD(),card)

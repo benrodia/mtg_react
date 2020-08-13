@@ -1,4 +1,9 @@
-export const cache = (key,val) => localStorage.setItem(key,JSON.stringify(val))
+
+export const cache = (obj,key,val) => {
+  const data = key==='all' ? val : {...(JSON.parse(localStorage.getItem(obj))||{}),[key]:val}
+  localStorage.setItem(obj,JSON.stringify(data,))
+}
+
 
 export const sum = nums => !(nums&&nums.length)?0:parseInt(nums.reduce((a, b)=>a+b,0),10) 
 

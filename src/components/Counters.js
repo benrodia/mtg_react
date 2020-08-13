@@ -1,14 +1,13 @@
 import React from 'react'
+import {connect} from 'react-redux'
+import * as actions from '../actionCreators'
 import BasicSelect from './BasicSelect'
 import {Q} from '../functions/cardFunctions'
-import {COUNTERS} from '../constants/data_objects'
+import {COUNTERS} from '../constants/data'
 
-export default function Counters(props) {
-	const {card,cardState} = props
-	const counters = card.counters
-	
-	const countersDisplay = Object.entries(counters).map(c=>{
-			return <div key={c[0]+c[1]} className="counter" onClick={()=>changeCounters(c[0],-1)}>
+function Counters({card,cardState}) {	
+	const countersDisplay = Object.entries(card.counters).map(c=>{
+			return <div key={c[0]+c[1]} className="counter" onClick={_=>changeCounters(c[0],-1)}>
 			{
 				c[0]==='PlusOne'
 				?c[1]>=0?`+${c[1]}/+${c[1]}`:`${c[1]}/${c[1]}`
@@ -16,7 +15,7 @@ export default function Counters(props) {
 			}
 			</div>
 	})
-	const changeCounters = (type,amt) => {cardState(card,'counters',{...counters,[type]:amt+(counters[type]||0)})}
+	const changeCounters = (type,amt) => {cardState(card,'counters',{...card.counters,[type]:amt+(card.counters[type]||0)})}
 	
 	const defaultCounter = 
 	 Q(card,'type_line','creature')?'PlusOne'
@@ -37,3 +36,5 @@ export default function Counters(props) {
 	</>
 
 }
+
+export default connect(null,actions)(Counters)

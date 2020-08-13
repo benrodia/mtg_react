@@ -4,7 +4,18 @@ import {connect} from 'react-redux'
 import {attackAll} from '../functions/gameLogic'
 import * as actions from '../actionCreators'
 
-function TesterShortcuts(props) {
+function TesterShortcuts({
+	moveCard,
+	startTest,
+	untap,
+	handleTurns,
+	handleCombat,
+	landDrop,
+	resStack,
+	handleShuffle,
+	gameState,
+}) {
+	
 	const [cooledDown,coolDown] = useState(true)
 	useEffect(_=>{
 		const keyEvent = e => {
@@ -14,18 +25,17 @@ function TesterShortcuts(props) {
 				// console.log(e.key)
 
 				switch (e.key) {
-					case 'd': return props.moveCard()
-					case 'r': return props.startTest()
-					case 'u': return props.untap()
-					case 'n': return props.handleTurns()
-					case 'a': return props.gameFunction('attack')
-					case 'l': return props.gameFunction('playLand')
-					case 's': return props.handleShuffle()
-					case ',': return props.gameState('life',1,true,"You gained 1 life")
-					case '.': return props.gameState('life',-1,true,"You lost 1 life")
-					case '<': return props.gameState('eLife',1,true,"Enemy gained 1 life")
-					case '>': return props.gameState('eLife',-1,true,"Enemy lost 1 life")
-					// case ' ': return props.resStack()
+					case 'd': return moveCard()
+					case 'r': return startTest()
+					case 'u': return untap()
+					case 'n': return handleTurns()
+					case 'a': return handleCombat()
+					case 'l': return landDrop()
+					case 's': return handleShuffle()
+					case ',': return gameState('life',1,true)
+					case '.': return gameState('life',-1,true)
+					case '<': return gameState('eLife',1,true)
+					case '>': return gameState('eLife',-1,true)
 				}
 			}
 		}

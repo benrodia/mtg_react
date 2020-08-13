@@ -8,29 +8,26 @@ function TheStack({resStack,stack}) {
 
 	return <div className={`stack ${!stack.length?'empty':''} `}>
       {stackItems.map((s,i)=>{
-        const {key,src,res,text,effect,effectType} = s
+        const {key,src,text,effectType,options} = s
       	const active = i===0
         return (
           <div key={key} style={{opacity:(1-(.2*i))}} className={`item action alert ${!active?'disabled':''}`}>
-          	<div className="msg">
+          	<div className="msg2">
           		<div className="header">{src} - {effectType}</div>
           		{!active?null:<div className="body">{formatText(text)}</div>}
           	</div>
-          	{!active?null: 
           	<div className="stackOp">
-	            <button autoFocus={active} className='small-button success-button' onClick={_=>{
-                resStack()
-                if(res!==null) res()
-              }}>{effect}</button>
-              <button className='small-button warning-button' onClick={resStack}>Counter</button>
+              {!active?null:options.map((op,num)=>op.hide?null:
+  	            <button autoFocus={num===0} className={`small-button ${op.color}`} onClick={_=>{
+                  resStack()
+                  if(typeof op.res === 'function') op.res()
+                }}>{op.effect}</button>
+              )}
           	</div>
-          	}
           </div>
         )
       })}
     </div>      
 }
-
-
 
 export default connect(state=>{return{stack: state.playtest.stack}},actions)(TheStack)

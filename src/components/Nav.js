@@ -4,8 +4,7 @@ import {connect} from 'react-redux'
 import {HOME_DIR} from '../constants/definitions'
 import {subTitle} from '../functions/text'
 
-function Nav(props) {
-  const {deck,subtitle,userName} = props
+function Nav({deck,subtitle,userName}) {
   const path = useLocation().pathname
 
 	return (

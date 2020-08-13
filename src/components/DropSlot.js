@@ -1,6 +1,6 @@
 import React, { useState, useImperativeHandle } from 'react'
 import {useDrop,DropTarget, DragPreviewImage} from 'react-dnd'
-import {ItemTypes} from '../constants/data_objects'
+import {ItemTypes} from '../constants/data'
 
 export default function DropSlot({accept,callBack,children,field,greedy}) {
   const [hasDropped, setHasDropped] = useState(false)

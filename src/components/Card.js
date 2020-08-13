@@ -1,13 +1,12 @@
 import React,{useEffect} from 'react'
 import {connect} from 'react-redux'
-import {CARD_SLEEVES} from '../constants/data_objects'
+import {CARD_SLEEVES} from '../constants/data'
 import {formatManaSymbols} from '../functions/text'
 
-function Card(props) {
-	const {imgSize,sleeve,card} = props
+function Card({imgSize,sleeve,card,cardHeadOnly}) {
 	const {mana_cost,face_down,tapped,name,image_uris} = card
 
-	return props.cardHeadOnly
+	return cardHeadOnly
 		? <div className={`card-head`}>
 			<h4 className='name'>{name}</h4>
 			<p className='cost'>{formatManaSymbols(mana_cost)}</p>

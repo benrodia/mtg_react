@@ -5,10 +5,23 @@ import '../functions/utility'
 import {titleCaps} from '../functions/text'
 
 
-export default function BasicSelect(props) {
-  const {open,img,className,self,labelBy,valueBy,options,defImg,placeholder,callBack,searchable,isHeader,limit} = props
-  const reset = {open:false,search:'',options:options||[]}
+export default function BasicSelect({
+  open,
+  img,
+  className,
+  self,
+  labelBy,
+  valueBy,
+  options,
+  defImg,
+  placeholder,
+  callBack,
+  searchable,
+  isHeader,
+  limit
+}) {
 
+  const reset = {open:false,search:'',options:options||[]}
   const label=item=>(typeof(labelBy)==='function'?labelBy(item):item['name'])||item.toString()
 
   const [state,setstate] = useState(reset)

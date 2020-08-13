@@ -1,8 +1,6 @@
 import React from 'react'
 
-export default function CounterInput(props) {
-	const {value,children,callBack,icon,neg,addOnClick} = props
-
+export default function CounterInput({value,children,callBack,icon,neg,addOnClick}) {
 
 	return  <p className='counter'>
           <span className={icon} onClick={()=>addOnClick&&callBack(addOnClick)}>

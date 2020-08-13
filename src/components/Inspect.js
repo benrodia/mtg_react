@@ -6,7 +6,7 @@ import {formatText,formatManaSymbols} from '../functions/text'
 export default function Inspect ({card}) {
 	const {name,oracle_text,mana_cost,rulings_uri,image_uris,showRulings,showShopping} = card
 	const [rulings,getRulings] = useState([])
-	useEffect(() => {
+	useEffect(_=> {
 		if (!rulings.length) fetch(rulings_uri)
 	      .then(response => {if (!response.ok) {throw new Error("HTTP status " + response.status)}return response.json()})
 	      .then(data=>getRulings(data.data))

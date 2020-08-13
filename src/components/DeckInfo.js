@@ -4,7 +4,7 @@ import {connect} from 'react-redux'
 import * as actions from '../actionCreators'
 
 import {FORMATS} from '../constants/definitions'
-import {EXAMPLE_DECK_NAMES,EXAMPLE_DECK_DESCS} from '../constants/data_objects'
+import {EXAMPLE_DECK_NAMES,EXAMPLE_DECK_DESCS} from '../constants/data'
 
 import BasicSelect from './BasicSelect'
 
@@ -12,15 +12,13 @@ import BasicSelect from './BasicSelect'
 const exName = 'ex. '+ (EXAMPLE_DECK_NAMES[Math.floor(Math.random()*EXAMPLE_DECK_NAMES.length)])
 const exDesc = 'ex. \n'+ (EXAMPLE_DECK_DESCS[Math.floor(Math.random()*EXAMPLE_DECK_DESCS.length)])
 
-function DeckInfo(props) {
-	const {name,desc,format,cacheState} = props
-
+function DeckInfo({name,desc,format,changeDeck}) {
 	return <div className='info-bar'>
 		<div className="name">
 			<h3 className='field-label'>Name</h3>
 			<input className='nameEntry' type='text' 
 			maxLength={15} value={name} placeholder={exName} 
-			onChange={e=>cacheState('deck','name',e.target.value)}
+			onChange={e=>changeDeck('name',e.target.value)}
 			/>
 		</div>		
 		<div className="format">
@@ -28,14 +26,14 @@ function DeckInfo(props) {
 			<BasicSelect 
 				self={format}
 				options={FORMATS} 
-                callBack={e=>cacheState('deck','format',e)} 
+                callBack={e=>changeDeck('format',e)} 
             />
 		</div>
 		<div className="desc">
 			<h3 className='field-label'>Description</h3>
 			<textarea className='desc-entry' rows='5' type='text' value={desc} 
 			placeholder={exDesc} 
-			onChange={e=>cacheState('deck','desc',e.target.value)}
+			onChange={e=>changeDeck('desc',e.target.value)}
 			/>
 		</div>	
 	</div>

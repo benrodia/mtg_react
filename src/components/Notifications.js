@@ -1,17 +1,9 @@
 import React from 'react'
 import {connect} from 'react-redux'
 
-function Notifications(props) {
-	const {noteLog} = props
-
+function Notifications({noteLog}) {
 	return <div className="notifications">
-      {noteLog.map(n=>{
-        return (
-          <div key={n.key} className={`notification alert ${n.type}`}>
-            {n.message}
-          </div>
-        )
-      })}
+      {noteLog.map(n=><div key={n.key} className={`notification alert ${n.type}`}>{n.message}</div>)}
     </div>      
 }
 

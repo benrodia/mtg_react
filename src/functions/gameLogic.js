@@ -1,8 +1,8 @@
 import {Q} from './cardFunctions'
 import {titleCaps} from './text'
 import {sum,match} from './utility'
-import {CARD_TYPES,COLORS,ZONES,SINGLETON} from '../constants/definitions'
-import {MANA,TUTOR,SAC_AS_COST} from '../constants/greps'
+import {COLORS,CARD_TYPES,ZONES} from '../constants/definitions'
+import {SINGLETON,MANA,TUTOR,SAC_AS_COST} from '../constants/greps'
 import {v4 as uuidv4} from  'uuid'
 
 
@@ -12,7 +12,7 @@ export function playLand(deck) {
     return deck.filter(c=>
       c.zone==="Hand"
       &&c.type_line.includes('Land')
-    )[0]
+    )[0] || false
 }
 
 export function getColorIdentity(list,key) {
@@ -120,22 +120,19 @@ export function clickPlace(card,inZone,toDest,dblclick) {
   else if (dblclick&&card.zone==="Battlefield") dest = "Graveyard"
   else if (dblclick&&card.zone==="Graveyard") dest = "Exile"
   else if (dblclick&&card.zone==="Exile") dest = "Battlefield"
-  else if (card.zone==="Hand"||card.zone==="Command") 
-  dest = Q(card,'type_line',['Instant','Sorcery'])? "Graveyard":"Battlefield" 
+  else if (card.zone==="Hand"||card.zone==="Command") dest = "Battlefield" 
   
   dest = toDest||dest
-
   if (dest==card.zone) return {card:null} 
   else {
     if (Q(card,'type_line','Creature')) row = 1
-    else if (Q(card,'type_line','Artifact')&&Q(card,...MANA.source))row = 0 
+    else if (MANA.source(card)) row = 0 
     else if (Q(card,'type_line','Artifact')) row = 2
     else if (Q(card,'type_line',['Enchantment','Planeswalker'])) row = 2
     else if (Q(card,'type_line','Land')) row = 0
     
     col = col||inZone.filter(c=>c.row===row).length % 8 // REPLACE 8 with dynamic cols
 
-    // console.log('clickPlace',card.name,col,row,dest)
     return {card:card,dest:dest,col:col,row:row}
   }
 }

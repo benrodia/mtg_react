@@ -1,6 +1,7 @@
 import React from 'react'
-import {CARD_TYPES,COLORS,ZONES,SINGLETON,TOKEN_NAME} from '../constants/definitions'
-import {SPECIAL_SYMBOLS,NUMBER_WORDS} from '../constants/data_objects'
+import {COLORS,CARD_TYPES,ZONES} from '../constants/definitions'
+import {SINGLETON,TOKEN_NAME} from '../constants/greps'
+import {SPECIAL_SYMBOLS,NUMBER_WORDS} from '../constants/data'
 
 
 export const formatManaSymbols = text => {
@@ -98,14 +99,19 @@ export function cardMoveMsg(card,dest) {
     )
 }
 
+export const pluralize = (word,val) => {
+	const s = val!==1 ? word[word.length-1].toLowerCase()==='y' ? 'ies':'s':null
+	return `${s==='ies'?word.slice(0,word.length-1):word}${s||''}`
+}
+
+
 export const effectText = (effects,token) => {
 	let text = ''
 	for (var i = 0; i < effects.length; i++) {
 		const [key,val] = effects[i]
 	  	if (val>0) {
 			const valText = val===1?'a':NUMBER_WORDS[val]
-			const addText = (t,plu) => `${text}${text?' and ':''} ${t}${plu&&val!==1?'s':''}`
-
+			const addText = (t,plu) => `${text}${text?' and ':''} ${pluralize(t,val)}`
 		    if (key==='life') text = val>0?addText(`gain ${valText} life`):addText(`lose ${valText} life`)
 		    if (key==='look') text = addText(`reveal top ${val===1?'':valText} card`,true)
 		    if (key==='draw') text = addText(`draw ${valText} card`,true)
@@ -113,9 +119,15 @@ export const effectText = (effects,token) => {
 		    if (key==='token'&&token) text = addText(`create ${valText} ${TOKEN_NAME(token)}`,true)     
 	    }
 	}
-	return text||null
+	return titleCaps(text)||null
 }
 
+
+export const paidCostMsg = paid => {
+    const usedMana = paid.usedMana?'Used floating mana':''
+    const usedLands = paid.tapped.length?`${NUMBER_WORDS[paid.tapped.length]} mana source${paid.tapped.length!==1?'s':''}`:null
+    return formatText(`${usedMana} ${usedMana.length&&usedLands?' and tapped ':usedLands?'Tapped ':''} ${usedLands||''} to pay ${paid.cost}`)
+}
 
 
 /*
