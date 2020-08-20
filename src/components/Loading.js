@@ -1,10 +1,11 @@
-import React from 'react'
+import React,{useEffect,useState} from 'react'
 
-
-export default function Loading(props) {
-	return (
-		<div className="loading">
-			<h3 style={{animationName: props.anim}} className="message">{props.message?props.message:"Loading..."}</h3>
-		</div>
-	)
+export default ({message,subMessage,anim,spinner,full})=> {
+	return <div style={{position: full?'fixed':'default'}} className="loading">
+		<span style={{animationName: anim}} className="main-msg">		
+			{spinner||<span className="spinner icon-spin2"/>}
+			<h3 className="message">{message||"Loading..."}</h3>
+		</span>
+		{!subMessage?null:<p className="sub-msg">{subMessage}</p>}
+	</div>
 }

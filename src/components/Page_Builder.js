@@ -1,121 +1,95 @@
-import React,{useState} from 'react'
+import React,{useEffect} from 'react'
+import {connect} from 'react-redux'
+import * as actions from '../actionCreators'
+import utilities from '../utilities'
 
-import DeckInfo from './DeckInfo'
-import CardSelect from './CardSelect'
-import BasicSelect from './BasicSelect'
-import ImportCards from './ImportCards'
-import ListBoard from './ListBoard'
-import AddSearch from './AddSearch'
-import ItemInput from './ItemInput'
-
-import DownloadTxt from './DownloadTxt'
-import FillManabase from './FillManabase'
 import CardControls from './CardControls'
+import BasicSearch from './BasicSearch'
+import AdvancedSearch from './AdvancedSearch'
+import DeckInfo from './DeckInfo'
+import DeckStats from './DeckStats'
+import BoardFilters from './BoardFilters'
+import ImportCards from './ImportCards'
+import Board from './Board'
+import DownloadFile from './DownloadFile'
 
-import {COLORS,SINGLETON} from '../constants/definitions'
-import {ALL_CARDS,FILTER_TERMS, BOARDS} from '../constants/data_objects'
-import {itemizeDeckList} from '../functions/cardFunctions'
-import {chooseCommander,legalCommanders} from '../functions/gameLogic'
+const {
+	FORMATS,
+	ItemTypes,
+	SINGLETON,
+	legalCommanders,
+	chooseCommander,
+	titleCaps,
+	textList,
+} = utilities
 
-
-export default function Page_Builder (props) {
-	const {settings,deckInfo,legalCards,addCard,openModal,changeState,newMsg,filters} = props
-	const [layout,changeLayout] = useState({view: 'list',sortBy: 'Type'})
-				
-	const copyItemizedList = () => {
-		const textList = itemizeDeckList(deckInfo.list,['name'])
-			.map(cards=>cards.length+" "+cards[0].name)
-			.join('\n')
-		navigator.clipboard.writeText(textList)
-		newMsg('Copied list to clipboard!','success')
-	}
-
-
-	const changeField = (card,field,val) => {
-	    console.log('changeField',card,field,val)
-	  	changeState('deckInfo','list',field==='board'&&val==="Command"
-		    ? chooseCommander(card,deckInfo.list,legalCards)
-		    : deckInfo.list.map(c=>{if(c.key===card.key){c[field]=val};return c})
-	    )
-	}
-
-
-	const layoutHeader = <span className='view-options'>			
-			<button 
-			className={`icon-list-bullet small-button ${layout.view==='list'&&'selected'}`} 
-			onClick={()=>changeLayout({...layout,view:'list'})}/>
-			<button 
-			className={`icon-th-large small-button ${layout.view==='grid'&&'selected'}`} 
-			onClick={()=>changeLayout({...layout,view:'grid'})}/>
-			<BasicSelect 
-				self={FILTER_TERMS.filter(f=>f.name===layout.sortBy)[0]}
-				defImg={<span className="icon-sort-alt-down"/>}
-				options={FILTER_TERMS} labelBy={'name'}
-                callBack={s=>changeLayout({...layout,sortBy:s.name})} 
-            />
-			{layout.sortBy!=='Custom'?null: <ItemInput addable value={{name:'New Field',key:'custom'+filters.customFields.length}} list={filters.customFields} callBack={n=>changeState('filters','customFields',n)}/>}
-	</span>
-	const commandHeader = <div className="choose-commander">
-		<BasicSelect searchable limit={20}
-		options={legalCommanders(deckInfo.format,legalCards)} 
-		labelBy={'name'} valueBy={'id'}
-		callBack={card=>changeState('deckInfo','list',chooseCommander(card,deckInfo.list,legalCards,true))} 
-		placeholder="Choose a Commander"
-		/>
-	</div>
-
-
-	const listBoard = (board,header) => {
-		return <ListBoard key={board} board={board} 
-			layout={layout} {...props}
-			header={header}
-	    	legalCards={legalCards}
-	    	deckInfo={deckInfo}
-			addCard={addCard}
-			changeField={changeField}
-			changeLayout={changeLayout}
-			openModal={openModal}
-	    />
-	}
+export default connect(({main:{legalCards},deck:{name,list,format}})=>{return {legalCards,name,list,format}},actions)
+(({name,format,list,board,legalCards,openModal,changeDeck,newMsg,setPage,addCard})=> {	
+	useEffect(_=>{setPage('Build')},[])
 
 	return <div className='builder'>
-		<section className='top-bar'>
-			<DeckInfo {...props}/>
-			<AddSearch {...props}/>
+		<section className='side-bar'>
+			<button onClick={_=>openModal(<DeckInfo/>)} className="edit-deckinfo icon-pencil">{name||'New Deck'}</button>
+			<div className="format">
+				<h3 className='field-label'>Format</h3>
+				<BasicSearch 
+					self={format}
+					options={FORMATS} 
+	                callBack={e=>changeDeck('format',e)} 
+	            />
+				{!SINGLETON(format)?null:
+				<>
+					<BasicSearch
+					searchable
+					limit={20}
+					options={legalCommanders(format,legalCards)}
+					placeholder='Choose Commander'
+					callBack={c=>changeDeck('list',chooseCommander(c,list,legalCards))}
+					/>
+					<div className="commanders">
+						{list.filter(c=>c.commander).map(c=><CardControls type={ItemTypes.COMMANDER} card={c}/>)}
+					</div>
+				</>
+				}
+			</div>
+
+
 			<div className="quick-import">
-				<button onClick={()=>openModal(
-				<ImportCards {...props}
-				legalCards={legalCards} 
-				addCard={addCard}
-				openModal={openModal}
-				newMsg={newMsg}
-				/>
-				)}>
+				<button className='small-button icon-upload' onClick={_=>openModal(<ImportCards/>)}>
 				Quick Import	
 				</button>
+				<button className='small-button icon-download' onClick={_=>openModal(<DownloadFile/>)}>
+				Download File	
+				</button>
+				<button className="small-button success-button icon-paste" onClick={_=>{
+					navigator.clipboard.writeText(textList(list))
+					newMsg('Copied list to clipboard!','success')
+				}}>
+				Copy List
+				</button>
+				<button className="small-button warning-button icon-trash" onClick={_=>changeDeck('clear')}>Clear List</button>
 			</div>
+			<DeckStats/>
 		</section>
-		
-		<div className="boards">
-			{listBoard('Main',layoutHeader)}
-			<div className="other-boards">
-				{SINGLETON(deckInfo.format)?listBoard('Command',commandHeader):null}	
-				{listBoard('Side')}	
-				{listBoard('Maybe')}	
+		<section className="deck-area">
+			<div className="add-search">
+				<div className="search-bar">
+					<h4>Search Cards</h4>
+					<BasicSearch 
+					searchable
+					unique
+					orderBy={"name"}
+					limit={20}
+					label={c=>c.name}
+					options={legalCards} 
+					callBack={c=>addCard(c,board)} 
+					placeholder={"Search For Cards"}
+					/>
+				</div>
+				<button onClick={_=>openModal(<AdvancedSearch/>)}>Advanced Search</button>
 			</div>
-		</div>
-
-		<div className="export">
-			<button className="icon-clipboard small-button" onClick={copyItemizedList}>
-			Copy List
-			</button>
-			<DownloadTxt settings={settings} deck={deckInfo}/>
-			<button className="small-button warning-button" onClick={_=>changeState('deckInfo','clear')}>Clear List</button>
-		</div>
+			<BoardFilters/>
+			<Board/>
+		</section>		
 	</div>
-}
-
-
-
-
-
+})

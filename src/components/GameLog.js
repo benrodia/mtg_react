@@ -1,31 +1,33 @@
 import React,{useState,useRef,useEffect} from 'react'
 
+import {connect} from 'react-redux'
+import * as actions from '../actionCreators'
+import * as A from '../constants/actionNames'
 
-export default function GameLog(props) {
-    const [open,openLog] = useState(0)
-    const bottom = useRef()
-    useEffect(() => bottom.current.scrollIntoView())
-   
-    const logBook = open
-      ?props.gameHistory.slice(Math.max(props.gameHistory.length - (props.showLast||50), 0))
-      :[{...props.gameHistory[props.gameHistory.length-1]}]
 
-  	return (
-      <div className="game-log" 
+function GameLog({history,current,timeTravel}) {
+  const [open,openLog] = useState(false)
+  const bottom = useRef()
+  useEffect(_=>bottom.current.scrollIntoView())
+ 
+  const past = open?history:[{...history[history.length-1]}]
+
+	return <div className="history">
+    
+    <div className="game-log" 
       tabIndex={"0"} 
-      onClick={()=>openLog(true)}
-      onBlur={()=>openLog(false)} 
-      >
-
-        {logBook.map(l=>{
-          return <div key={"gamelog-"+l.index} className={`log`}>
-                <span className="action"><span className="timestamp">{l.timestamp}</span> {l.action}</span>
-                <span className="undo" onClick={()=>props.undoAction(l.index)}><span className="icon-ccw"/></span>
-              </div>
-            
-        })}
-        <div ref={bottom}></div>
-      </div>      
-    )
+      onClick={_=>openLog(true)}
+      onBlur={_=>openLog(false)} 
+    >
+      {past.map(p=>
+        <div onClick={_=>open&&timeTravel(p.current)} key={"gamelog_"+p.current} className={`log ${p.current>current&&'inactive'} ${open&&p.current===current&&current<history.length&&'pointer'}`}>
+          <span className="action"><span className="timestamp">{p.timestamp}</span> {p.msg}</span>
+        </div>    
+      )}
+      <div ref={bottom}/>
+    </div>      
+  </div>
 }
 
+
+export default connect(({playtest:{history,current}})=>{return {history,current}},actions)(GameLog)

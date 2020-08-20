@@ -1,6 +1,6 @@
 import React, { useState, useImperativeHandle } from 'react'
 import {useDrop,DropTarget, DragPreviewImage} from 'react-dnd'
-import {ItemTypes} from '../constants/data_objects'
+import {ItemTypes} from '../constants/data'
 
 export default function DropSlot({accept,callBack,children,field,greedy}) {
   const [hasDropped, setHasDropped] = useState(false)
@@ -20,9 +20,6 @@ export default function DropSlot({accept,callBack,children,field,greedy}) {
       isOverCurrent: monitor.isOver({ shallow: true }),
     }),
   })
-
-  // console.log('isOver',isOver,'isOverCurrent',isOverCurrent)
-
 
   return <div ref={drop} className={`drop-slot ${field} ${isOver&&'over'}`}>
       {children}

@@ -8,8 +8,8 @@
   animation-play-state: forwards;
 }
   .card-head {
-    .flex-row();
-    justify-content: space-between;
+    .flex-col();
+    justify-content: flex-start;
     color: @darkest;
     margin: 0 @thinner @thinner;
     border-radius: @thinner;
@@ -17,11 +17,20 @@
     padding: @thinnest @thinner;
     font-family: @header;
     text-align: left;
-    transition: .2s;
     &:hover {
       cursor: pointer;
       background: @highlight;
-      transform: scale(1.1);
+    }
+    .types {
+      font-size: @small;
+      .ms {
+        &:before{font-size: .8rem;}
+        height: 1rem;
+        width: 1rem;
+      }
+    }
+    .prices {
+      padding: @thinner;
     }
   }
 
@@ -39,6 +48,10 @@
     cursor: pointer;
     box-shadow: 0 0 @thin @highlight;
     transform: scale(1.1);
+  }
+
+  .card-img-price {
+    color: @lightest;
   }
 
 

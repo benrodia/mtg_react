@@ -1,11 +1,11 @@
 @font-face {
   font-family: 'fontello';
-  src: url('../../fonts/fontello.eot?1163715');
-  src: url('../../fonts/fontello.eot?1163715#iefix') format('embedded-opentype'),
-       url('../../fonts/fontello.woff2?1163715') format('woff2'),
-       url('../../fonts/fontello.woff?1163715') format('woff'),
-       url('../../fonts/fontello.ttf?1163715') format('truetype'),
-       url('../../fonts/fontello.svg?1163715#fontello') format('svg');
+  src: url('../../fonts/fontello.eot?74017952');
+  src: url('../../fonts/fontello.eot?74017952#iefix') format('embedded-opentype'),
+       url('../../fonts/fontello.woff2?74017952') format('woff2'),
+       url('../../fonts/fontello.woff?74017952') format('woff'),
+       url('../../fonts/fontello.ttf?74017952') format('truetype'),
+       url('../../fonts/fontello.svg?74017952#fontello') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -57,12 +57,26 @@
  
 .icon-pencil:before { content: '\e800'; } /* '' */
 .icon-th-large:before { content: '\e801'; } /* '' */
-.icon-clipboard:before { content: '\e802'; } /* '' */
+.icon-download:before { content: '\e802'; } /* '' */
 .icon-heart:before { content: '\e803'; } /* '' */
 .icon-heart-empty:before { content: '\e804'; } /* '' */
 .icon-search:before { content: '\e805'; } /* '' */
-.icon-ccw:before { content: '\e806'; } /* '' */
+.icon-upload:before { content: '\e806'; } /* '' */
+.icon-cog:before { content: '\e807'; } /* '' */
+.icon-cw:before { content: '\e808'; } /* '' */
+.icon-print:before { content: '\e809'; } /* '' */
+.icon-tag:before { content: '\e80a'; } /* '' */
+.icon-minus:before { content: '\e80b'; } /* '' */
+.icon-plus:before { content: '\e80c'; } /* '' */
+.icon-cancel:before { content: '\e80d'; } /* '' */
+.icon-wrench:before { content: '\e80e'; } /* '' */
+.icon-clipboard-1:before { content: '\e80f'; } /* '' */
+.icon-spin2:before { content: '\e831'; } /* '' */
+.icon-menu:before { content: '\f0c9'; } /* '' */
 .icon-list-bullet:before { content: '\f0ca'; } /* '' */
-.icon-sort-down:before { content: '\f0dd'; } /* '' */
-.icon-sort-up:before { content: '\f0de'; } /* '' */
+.icon-paste:before { content: '\f0ea'; } /* '' */
+.icon-folder-open-empty:before { content: '\f115'; } /* '' */
+.icon-help:before { content: '\f128'; } /* '' */
+.icon-sort-alt-up:before { content: '\f160'; } /* '' */
 .icon-sort-alt-down:before { content: '\f161'; } /* '' */
+.icon-trash:before { content: '\f1f8'; } /* '' */

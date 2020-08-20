@@ -1,39 +1,48 @@
-import React from 'react'
+import React,{useState,useEffect,useRef} from 'react'
 
-let cooledDown = true
+import {connect} from 'react-redux'
+import {attackAll} from '../functions/gameLogic'
+import * as actions from '../actionCreators'
 
-export default class TesterShortcuts extends React.Component {
-	constructor(props) {
-		super(props)
-		this.addEvents = this.addEvents.bind(this)
-	}
-	render() {return null}
-
-	componentDidMount() {window.addEventListener('keydown',this.addEvents)}
-
-	componentWillUnmount() {window.removeEventListener('keydown',this.addEvents)}
-
-	addEvents(e) {
-		// console.log('TesterShortcuts',e.key)
-		if (cooledDown && !document.activeElement.id) {	
-			cooledDown = false
-			setTimeout(()=>cooledDown=true,100)
-
-			if (e.key === 'd') {this.props.moveCard({})}
-			else if (e.key === 'r') {this.props.startTest()}
-			else if (e.key === 'u') {this.props.cardState(this.props.deck,'tapped',false)}
-			else if (e.key === 't') {this.props.cardState(this.props.deck,'tapped',true)}
-			else if (e.key === 'n') {this.props.handleTurns()}
-			else if (e.key === 'a') {this.props.gameFunction('attack')}
-			else if (e.key === 'l') {this.props.gameFunction('playLand')}
-			else if (e.key === 's') {this.props.handleShuffle()}
-			else if (e.key === ',') {this.props.gameState('life',1,true,"You gained 1 life")}
-			else if (e.key === '.') {this.props.gameState('life',-1,true,"You lost 1 life")}
-			else if (e.key === '<') {this.props.gameState('eLife',1,true,"Enemy gained 1 life")}
-			else if (e.key === '>') {this.props.gameState('eLife',-1,true,"Enemy lost 1 life")}
-			else if (e.key === 'z') {this.props.undoAction(-1)}
-		}
-	}
+function TesterShortcuts({
+	moveCard,
+	startTest,
+	untap,
+	handleTurns,
+	handleCombat,
+	landDrop,
+	resStack,
+	handleShuffle,
+	gameState,
+}) {
 	
+	const [cooledDown,coolDown] = useState(true)
+	useEffect(_=>{
+		const keyEvent = e => {
+			if (cooledDown && !document.activeElement.id) {	
+				coolDown(false)
+				setTimeout(_=>coolDown(true),100)
+				// console.log(e.key)
+
+				switch (e.key) {
+					case 'd': return moveCard()
+					case 'r': return startTest()
+					case 'u': return untap()
+					case 'n': return handleTurns()
+					case 'a': return handleCombat()
+					case 'l': return landDrop()
+					case 's': return handleShuffle()
+					case ',': return gameState('life',1,true)
+					case '.': return gameState('life',-1,true)
+					case '<': return gameState('eLife',1,true)
+					case '>': return gameState('eLife',-1,true)
+				}
+			}
+		}
+		window.addEventListener('keydown',keyEvent)
+		return _=> window.removeEventListener('keydown',keyEvent)
+	},[])
+	return null
 }
 
+export default connect(null,actions)(TesterShortcuts)

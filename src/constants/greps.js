@@ -1,17 +1,30 @@
 import {Q} from '../functions/cardFunctions'
 import {matchStr} from '../functions/utility'
-import {COUNTERS,NUMBER_WORDS} from './data_objects'
-import {TOKEN_NAME,CARD_TYPES,COLORS} from './definitions'
+import {COUNTERS,NUMBER_WORDS,SUB_TYPES} from './data'
+import {COLORS,CARD_TYPES} from './definitions'
+
+let _
+
+
+export const TOKEN_NAME = t => {
+	const color = COLORS('name')[COLORS('symbol').indexOf(t.color_identity[0])]||'colorless'
+	return !t.power?t.name:
+	`${t.power}/${t.toughness} ${color.toLowerCase()} ${t.name}`
+}
+export const SINGLETON = format => format === 'commander' || format === 'brawl'
+
 
 export const MANA = {
-	source: ['oracle_text',['{T}','add '],true],
-	any: ['oracle_text',['mana','of','any'],true],
-	twoC: ['oracle_text',['add','{C}{C}'],true],
-
+	source: card => !!Q(card,'oracle_text',['{T}','add '],true),
+	any: card => !!Q(card,'oracle_text',['mana','of','any'],true),
+	amt: (card,co) => ((card.oracle_text||'').match(new RegExp(`{${co}}`,'g'))||[]).length
 }
 
+export const CAN_TAP = card => card.zone==="Battlefield"&&!card.tapped&&(!Q(card,'type_line','creature')||Q(card,'oracle_text','haste')||!card.sickness)
 
 export const DUAL_COMMANDER = ['name',[' and ','triad','sisters','brothers','ruric','stangg']]
+export const EXTRA_LAND_DROP = ['oracle_text',['you can play','additional land'],true]
+export const LAND_DROPS = deck => 1+Q(deck.filter(c=>c.zone==='Battlefield'),...EXTRA_LAND_DROP).length
 
 export const TUTOR = types =>{
 	const type = types&&Array.isArray(types)?types:types?[types]:['']
@@ -21,61 +34,82 @@ export const TUTOR = types =>{
 
 export const NUMBERS = [...Array(100)].map((_,i)=>i)
 
-export const NUM_FROM_WORD = text => Math.max(0,
+export const NUM_FROM_WORD = (text,single) => single&&matchStr(text,[single])?1:Math.max(0,
 	NUMBER_WORDS.indexOf(NUMBER_WORDS.filter(N=>matchStr(text,[N]))[0]),
 	NUMBERS.indexOf(NUMBERS.filter(N=>matchStr(text,[N]))[0]),
 )
 
 
-export const ETB = card => {
-	if(card) {	
-		const typeText = card.oracle_text.substring(card.oracle_text.indexOf('When')+4,card.oracle_text.indexOf('enters the battlefield'))
-		const types = CARD_TYPES.filter(T=>matchStr(typeText,[T]))
-		const effect = card.oracle_text.indexOf('enters the battlefield')<0?''
-		:card.oracle_text.substring(card.oracle_text.indexOf('enters the battlefield')+22,card.oracle_text.indexOf('.'))
-		return{
-			types: types,
-			effect: BASIC_ABILITIES(effect),
-			self: Q(card,'oracle_text',['this card enters the battlefield',`${card.name} enters the battlefield`]),
-			tapped: Q(card,'oracle_text',[card.name, 'enters the battlefield tapped'],true),
-			counters:(!effect.includes('counter')||NUM_FROM_WORD(effect)<=0)?{}:{[COUNTERS.filter(C=>matchStr(effect,[C]))[0]||'PlusOne']:NUM_FROM_WORD(effect)},
-			copier: Q(card,'oracle_text',['entering the battlefield causes a triggered ability of a permanent you control to trigger']),
-			text: card.oracle_text
-		}
-	}
-}
-
-
-export const BASIC_ABILITIES = text => {
+export const BASIC_ABILITIES = (text='') => {
+	const m = (arr=[],single,all) => matchStr(text,arr,all)?NUM_FROM_WORD(text,single):0
 	return {		
-		look: matchStr(text,['look at the top','scry','reveal the top'])?matchStr(text,[' top card '])?1:NUM_FROM_WORD(text):0,
-		draw: text.includes('draw')?text.includes('draw a card')?1:NUM_FROM_WORD(text):0,
-		mill: text.includes('mill')&&!text.includes('opponent')?text.includes('a card')?1:NUM_FROM_WORD(text):0,
-		life: matchStr(text,['player','gains','life'],true)||matchStr(text,['you','gain','life'],true)?NUM_FROM_WORD(text):
-			  matchStr(text,['you','lose','life'],true)?-1*NUM_FROM_WORD(text):0,
-		eLife: matchStr(text,['opponent','gains','life'],true)?NUM_FROM_WORD(text):
-			  matchStr(text,['opponent','loses','life'],true)||matchStr(text,['player','loses','life'],true)?-1*NUM_FROM_WORD(text):0,
-		token: matchStr(text,['create','token'])?matchStr(text,[' a '])?1:NUM_FROM_WORD(text):0,
+		damage: m(['deal','damage','to','target'],_,true),
+		look: m(['look at the top','reveal the top','scry'],' the top card '),
+		draw: m(['draw'],'a card'),
+		mill: m(['mill'],'a card'),
+		life: m(['you','gain','life'],_,true)||-1*m(['you','lose','life'],_,true),
+		eLife: m(['opponent','gains','life'],_,true)||-1*m(['opponent','lose','life'],_,true)||-1*m(['player','loses','life'],_,true),
+		token: m(['create','token'],' a '),
 	}
 }
 
+export const snippet = (text='',start='',end='.') => {
+	let snip,line = ''
+	const lines = text.split('\n')
+	for(let i=0;i< lines.length;i++) 
+	if(matchStr(lines[i],[start,end],true)) {
+		snip = (lines[i].slice(lines[i].indexOf(start)+start.length,lines[i].indexOf(end))||'').trim()
+		line = lines[i]
+		break
+	}
+	return {snip,line}
+}
 
-
-export const REMOVAL = types => {
-	const type = types&&Array.isArray(types)?types:types?[types]:['']
+export const WHEN = (card={},phrase) => {
+	const text = card.oracle_text||''
+	const src = card.name||''
+	const targets = snippet(text,'When',phrase).snip
 	return {
-	destroy: ['oracle_text',['destroy target',...type],true],
-	exile: ['oracle_text',['exile target',...type],true],
-	bounce: ['oracle_text',['return target',...type,"to its owner's hand"],true],
-	wipe: ['oracle_text',['destroy all',...type],true],
-	counter: ['oracle_text',['counter target',...type,'spell'],true],
+		src,text:snippet(text,phrase).line,
+		effect: BASIC_ABILITIES(snippet(text,phrase).snip),
+		self: matchStr(targets,['this',src]),
+		youControl: matchStr(text,['you','control'],true),
+		types: CARD_TYPES.filter(T=>matchStr(targets,[T]))
+			.concat(SUB_TYPES.filter(S=>matchStr(targets,[S]))),
 	}
+
 }
 
-export const RAMP_LAND = ['oracle_text',['search your library for','land','battlefield'],true]
+export const ENTERS_TAPPED = card => 
+	matchStr(card.oracle_text,[`${card.name} enters the battlefield tapped`])
 
-export const NO_QUANT_LIMIT = card => Q(card,'name',COLORS('basic'))||Q(card,'oracle_text','A deck can have any number of cards named')
+export const ENTERS_COUNTERS = card => {
+	const counters = NUM_FROM_WORD(card.oracle_text,' a ')
+ 	return counters&&card.oracle_text.includes('counter')
+ 	?{[COUNTERS.filter(C=>matchStr(card.oracle_text,[C]))[0]||'PlusOne']:counters}
+ 	:{}
+}
+
+export const FOR_EACH = (text='',cards=[{type_line:'',zone:''}]) => {
+	let result = 0
+	const check = [
+		{grep:'you control',zone:'Battlefield'},
+		{grep:'in your hand',zone:'Hand'},
+		{grep:'in your graveyard',zone:'graveyard'},
+	]
+	for (var i = 0; i < check.length; i++) {
+		const targets = snippet(text,'for each',check[i].grep).snip
+		if (targets) result = cards.filter(c=>c.zone===check[i].zone&&matchStr(c.type_line,[targets])).length		
+		console.log('FOR_EACH',targets,result)
+	}
+	return result
+}
+
+
+export const NO_QUANT_LIMIT = (card={}) => Q(card,'name',COLORS('basic'))||Q(card,'oracle_text','A deck can have any number of cards named')
 
 export const SAC_AS_COST = name => ['oracle_text',['sacrifice',name,':'],true]
 
 export const IS_SPELL = card => card&&(card.zone==="Hand"||card.zone==="Command")&&!card.type_line.includes('Land')
+export const IS_PERMANENT = card => card&&!Q(card,'type_line',['instant','sorcery'])
+export const HAS_FLASH = card => card&&(!!Q(card,'type_line','instant')||!!Q(card,'oracle_text','flash'))

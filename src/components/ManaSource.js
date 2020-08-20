@@ -1,11 +1,11 @@
 import React from 'react'
+import {connect} from 'react-redux'
+import * as actions from '../actionCreators'
 import {Q} from '../functions/cardFunctions'
 import {COLORS} from '../constants/definitions'
-import {MANA} from '../constants/greps'
 
-export default function ManaSource (props) {
-	const {card,cardState,handleMana} = props
-
+export default connect(null,actions)
+(({card,cardState,handleMana})=> {
 	const addMana = (type,amt) => {
 		if (!card.tapped) {
 			cardState(card,'tapped',true)
@@ -13,23 +13,15 @@ export default function ManaSource (props) {
 		}
 	}
 
-	if (Q(card,...MANA.source)) {
-		let types = COLORS('symbol').map(C=>card.oracle_text.includes("{"+C+"}")?C:false)
-		if (Q(card,...MANA.any)) types = COLORS('symbol').map(C=>C!=='C'?C:false)
-		if (types.filter(t=>!!t).length===1) types = []
-		const amt = Q(card,...MANA.twoC)?2:1
-
-		const manaTapDisplay =  types.map((C,i)=>!C?null
-			:<div key={`tapfor${C}`} className={`tap-for`} onClick={()=>addMana(i,amt)}>
-				{[...Array(amt)].map(_=><span key={amt} className={`ms ms-${C.toLowerCase()}`}/>)}
-			</div>
+	if (card.mana_source) {
+		const manaTapDisplay = card.mana_source.map((amt,i)=>!amt?null
+			: <div key={`tapfor${COLORS('symbol')[i]}`} className={`tap-for`} onClick={_=>addMana(i,amt)}>
+				{[...Array(amt)].map(_=><span key={amt} className={`ms ms-${COLORS('symbol')[i].toLowerCase()}`}/>)}
+			  </div>
 		)
-
-		return !types.length?null
-		:<div className="mana-source">
+		return card.mana_source.filter(co=>!!co).length<=1?null: <div className="mana-source">
 			<span className={`ms ms-tap`}/>: Add {manaTapDisplay}
-		</div>
-	}		
+		  </div>
+	} 
 	else return null
-
-}
+})

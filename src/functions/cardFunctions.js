@@ -1,7 +1,7 @@
 import {v4 as uuidv4} from  'uuid'
 
-import {CARD_TYPES,COLORS,ZONES,SINGLETON} from '../constants/definitions'
-import {NO_QUANT_LIMIT} from '../constants/greps'
+import {CARD_TYPES,ZONES,COLORS} from '../constants/definitions'
+import {SINGLETON,NO_QUANT_LIMIT,MANA,NUM_FROM_WORD} from '../constants/greps'
 import {matchStr} from '../functions/utility'
 import {CONTROL_CARD} from '../constants/controlCard.js'
 
@@ -47,43 +47,6 @@ export function itemizeDeckList(list,filters,headers) {
 	return itemized
 }
 
-export function prepCardsForTest(deckInfo,sleeve,isToken) {
-  let list = []
-  if (isToken) list = [deckInfo]
-  else {
-    list = [
-      ...deckInfo.list.filter(c=>c.board==='Main'),
-      ...deckInfo.list.filter(c=>c.board==='Command').map(c=>{c.commander=true;return c})
-    ]
-  }
-  return list.map((c,i)=>{
-    return {
-      key: !isToken?"card_"+i+"_of_"+list.length:"token_"+Math.random(),
-      name: c.name,
-      type_line:c.type_line,
-      oracle_text:c.oracle_text,
-      rulings_uri:c.rulings_uri,
-      mana_cost: c.mana_cost,
-      cmc: c.cmc,
-      color_identity: c.color_identity,
-      image_uris: c.image_uris,
-      power:c.power,
-      toughness:c.toughness,
-
-      zone: isToken?'Battlefield':c.commander?'Command':'Library',
-      order: i,
-      row:1,col:0,
-      counters: {},
-      tapped: false,
-      faceDown: false,//!isToken&&!c.commander
-      flipped: false,
-      sickness: true,
-      sleeve: sleeve,
-      isToken: !!isToken,
-      commander: !!c.commander
-    }
-  })
-}
 
 export function normalizePos(deck) {
   let zoneCards = ZONES.map(z=>deck.filter(c=>c.zone===z))
@@ -107,7 +70,7 @@ export function isLegal(card,format,deckIdentity) {
     :0
 
   if (format === 'casual') {allowed = 4}
-  if (Q(card,'type_line','Token')) {allowed = 0}
+  if (Q(card,'type_line',['Token','Scheme','Plane'])) allowed = 0
   if (SINGLETON(format)) {allowed = 1}
   if (NO_QUANT_LIMIT(card)) allowed = 1000000
   if (card.name==='Seven Dwarves') allowed = 7
@@ -119,50 +82,45 @@ export function isLegal(card,format,deckIdentity) {
   return allowed
 }
 
+export const audit = card => Object.assign(CONTROL_CARD(),card)
 
-export function filterSearch(options,filters,limit) {
-    let sorted = options
-    if (!filters||!filters.colors) return sorted
-    const colorF = filters.colors
-    
+export function filterColors(options,colorFilter,all,only) {
+  const colorsF = COLORS('symbol').filter((co,i)=>colorFilter[i])
+  const filtered = options.filter(c=>{
+    const colorsC = (c.colors||[]).length?c.colors:['C'] 
+    return (all 
+      ? colorsF.every(co=>colorsC.includes(co)) 
+      : colorsF.some(co=>colorsC.includes(co))
+    )&&(
+      !only || !colorsC.some(C=>COLORS('symbol').filter(co=>!colorsF.includes(co)).includes(C))
+    )
+  }) 
 
-    sorted = sorted.orderBy('name').filter((c,i)=>{
-      let included = true
-      if (c.colors) {
-        included = (colorF.vals['C']&&!c.colors.length)||c.colors.some(co=>colorF.vals[co])
-        if(colorF.op['all']) included = Object.entries(colorF).every(co=>!co[1]||co[0]==='C'||c.colors.includes(co[0]))
-        if(colorF.op['only']) included = c.colors.every(co=> colorF.vals[co])
-          // if (i<10) {console.log(c.name,
-          //   '\nfilter all',Object.entries(colorF).every(co=>!co[1]||c.colors.includes(co[0])),
-          //   '\nfilter only',c.colors.every(co=> colorF.vals[co]),
-          //   )}
-      }
-      return included
-    })
-
-
-    // sorted.length = Math.min(sorted.length,(limit||20))
-    // sorted = sorted.unique('name')
-
-    console.log('filterSearch',sorted)
-
-    return sorted
+  console.log('filterSearch',options,filtered,'\ncolorFilter',colorFilter,'all',all,'only',only)
+  return filtered
 }
 
 
-export function audit(card) {
 
-  const audit = Object.assign(...Object.keys(CONTROL_CARD).map(k=>({[k]: card[k]})))
-  
-  const notOK = ['type_line','img_uris','name','cmc','colors','color_identity','oracle_text']
+export const convertedSymbols = cost => {
+  const symbols = cost.split('{').map(m=>m.replace('}','').replace('/','')) 
+  symbols.shift()
+  return [
+    COLORS('symbol').map(C=>symbols.filter(co=>co===C).length),
+    isNaN(symbols[0])?0:parseInt(symbols[0])
+  ]
 
-  const missingVals = Object.entries(audit)
-  .filter(a=>a[1]===undefined)
-  .filter(a=>notOK.includes(a[0]))
-
-  if(missingVals.length){
-    console.error('"'+card.name+'"','Missing vals for:\n',missingVals.map(m=>m[0]).join('\n'))
-    return null
-  }
-    return card
 }
+
+export const optimizePrices = _ => {
+  return null
+}
+
+export const filterCardType = (list,category,val) => 
+  list.filter(c=>{
+    const cVal = category.subKey?c[category.key][category.subKey]:c[category.key]
+    return cVal===undefined?false
+    : !isNaN(parseFloat(cVal))? parseFloat(cVal)>=val
+    : Array.isArray(cVal) ? cVal.length?cVal.join('')===val:'C'===val
+    : Q(c,category.key,val) 
+  })
