@@ -53,12 +53,12 @@ export const BASIC_ABILITIES = (text='') => {
 	}
 }
 
-const snippet = (text='',start='',end='.') => {
+export const snippet = (text='',start='',end='.') => {
 	let snip,line = ''
 	const lines = text.split('\n')
 	for(let i=0;i< lines.length;i++) 
 	if(matchStr(lines[i],[start,end],true)) {
-		snip = (lines[i].substring(lines[i].indexOf(start)+start.length,lines[i].indexOf(end))||'').trim()
+		snip = (lines[i].slice(lines[i].indexOf(start)+start.length,lines[i].indexOf(end))||'').trim()
 		line = lines[i]
 		break
 	}

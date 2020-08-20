@@ -2,134 +2,111 @@
   .fixed-full-page();
   .flex-centered();
   z-index: 100;
+  transition: .5s;
   .exit {
     .fixed-full-page();
     position: absolute;
     z-index: -1;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.75);
+    cursor: pointer;
+    transition: .2s;
+    &:hover {
+      background: rgba(0, 0, 0, 0.65);
+      .icon {color: @red;}
+    }
+    .icon {
+      font-size: @bigger;
+      position: absolute;
+      top: 3rem;
+      left: 1rem;
+      z-index: 100;
+      transition: .2s;
+    } 
+
   }
   .modal-box {
-    .flex-centered();
+    .flex-row();
+    justify-content: flex-start;
+    align-items: flex-start;
+
+    transition: .3s ease-out;
     background: @dark;
     padding: 1rem;
-    height: 30rem;
+    max-height: calc(100vh - 6rem);
     margin: auto;
     border-radius: @thinner;
     box-shadow: 0 0 3rem rgba(0, 0, 0, .9);
+    overflow-y: auto;
+    &>* {
+      position: relative;
+      top: 0;
+    }
 
     .inspect-container {
-      .flex-centered();
-      img {
-        object-fit: cover;
-        height: 28rem;
-        width: 20rem;
-        // min-width: 20rem;
-        border-radius: @thin;
-        box-shadow: 0 0 1rem rgba(0,0,0,0,.6);
+      .header {
+        .flex-row();
+        justify-content: space-between;
+        height: 2rem;
+        margin-bottom: 1rem;
       }
 
-      .inspect-info {
-        .flex-col();
-        color: @lightest;
-        padding:  0 0 0 2rem;
-        height: 28rem;
-        width: 20rem;
-        text-shadow: 0 0 @thin rgba(0,0,0,0.3);
-        h2 {
-          font-size: 1.3em;
-          padding-bottom: 1rem;
-          white-space: nowrap;
-          display: flex;
-          justify-content: space-between;
-        }
-        p {
-          font-size: .9em;
-          line-height: 1.2em;
-          padding-bottom: @thin;
-        }
-
-        .field-label {color: @darkest;}
-        .rulings {
-          height: 100%;
+      .info {
+        .flex-centered();
+        img {
+          object-fit: cover;
+          height: 28rem;
+          width: 20rem;
           border-radius: @thin;
-          background: @darker;
-          box-shadow: inset 0 0 1rem rgba(0,0,0,0,.5);
-          padding: 1rem;
-          margin-top: @thin;
-          overflow-y: scroll;
-          .ruling {
-            margin-bottom: 2rem;
-            h4 {
-              color: @lighter;
-              font-weight: bold;
-              margin-bottom: @thin;
-            }
-            p {
-              color: @lightest;
-            }
-          }
+          box-shadow: 0 0 1rem rgba(0,0,0,0,.6);
         }
-      }
-    }
 
-    .scryContainer {
-      .flex-col();
-      align-items: center;
-      justify-content: space-between;
-      height: 100%;
-      .scryOptions {
-        h1 {color: @lightest;}
-        .flex-row();
-        button {
-          margin-left: 2rem;
-        }
-      }
-      .scryTargets {
-        .flex-row();
-        max-width: 100vw;
-        overflow-x: auto;
-
-        .scryTarget {
+        .text {
           .flex-col();
-          align-items: center;
-          text-align: center;
-          justify-content: flex-end;
-          width: 8rem;
-          height: auto;
-          margin-right: 1rem;
-
-          .scryImg {
-            width: 8rem;
-            height: 11.2rem;
+          color: @lightest;
+          padding:  0 0 0 2rem;
+          height: 28rem;
+          width: 20rem;
+          h2 {
+            font-size: 1.3em;
+            padding-bottom: 1rem;
+            white-space: nowrap;
+            display: flex;
+            justify-content: space-between;
+          }
+          p {
+            font-size: .9em;
+            line-height: 1.2em;
+            padding-bottom: @thin;
           }
 
-          button {
-            .small-button();
-            width: 6rem;
-            margin: @thin 0 0;
-          }
-          .choice {
-            background: @highlight;
-            pointer-events: none;
-          }
-          .not {
-            opacity: 0;
-            pointer-events: none;
+          .field-label {color: @darkest;}
+          .rulings {
+            height: 100%;
+            border-radius: @thin;
+            background: @darker;
+            box-shadow: inset 0 0 1rem rgba(0,0,0,0,.5);
+            padding: 1rem;
+            margin-top: @thin;
+            overflow-y: scroll;
+            .ruling {
+              margin-bottom: 2rem;
+              h4 {
+                color: @lighter;
+                font-weight: bold;
+                margin-bottom: @thin;
+              }
+              p {
+                color: @lightest;
+              }
+            }
           }
         }
       }
-
-      .scried {
-        transform: scale(.8);
-        opacity: .5;
-      }
-
     }
-
     .choose-print {
       min-width: calc(@cardW*2);
       max-width: 60rem;
-      height: 24rem;
+      // height: 24rem;
       .options {
         .flex-row();
         flex-wrap: wrap;
@@ -149,5 +126,13 @@
         }
       }
     }
+  }
+}
+.hide-modal {
+  opacity: 0;
+  pointer-events: none;
+  .modal-box {
+    transform: scale(0);
+    padding: 0;
   }
 }

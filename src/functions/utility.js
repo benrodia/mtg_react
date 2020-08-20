@@ -1,15 +1,28 @@
 
 export const cache = (obj,key,val) => {
   const data = key==='all' ? val : {...(JSON.parse(localStorage.getItem(obj))||{}),[key]:val}
-  localStorage.setItem(obj,JSON.stringify(data,))
+  localStorage.setItem(obj,JSON.stringify(data))
+}
+
+export const session = (obj,key,val) => {
+  const data = key==='all' ? val : {...(JSON.parse(sessionStorage.getItem(obj))||{}),[key]:val}
+  sessionStorage.setItem(obj,JSON.stringify(data))
 }
 
 
-export const sum = nums => !(nums&&nums.length)?0:parseInt(nums.reduce((a, b)=>a+b,0),10) 
+export const sum = nums =>!nums||!nums.length?0: nums.reduce((a, b)=>Number(a)+Number(b),0)
 
 export const average = nums => nums.reduce((a, b) => a + b, 0)/nums.length
 
+export const rem = (num=1) => num * parseFloat(window.getComputedStyle(document.getElementsByTagName("html")[0]).fontSize||16)
 
+export const rnd = (arr,num) => {
+  const rand = _=> arr[Math.floor(Math.random()*arr.length)]
+  if (!num) return rand()
+  else return [...Array(num)].map(_=>rand())
+}
+
+export const paginate = (arr=[],per=1) =>  [...Array(Math.ceil(arr.length/per)||1)].map((_,i)=>arr.slice(per*i,per*i+per))
 
 export const timestamp = _ => {
 	const today = new Date()
@@ -21,12 +34,23 @@ export const timestamp = _ => {
 	return timestamp
 }
 
-export const matchStr = (text,searchWords,every) => {
-  return every===true?searchWords.every(el=>text&& typeof text=='string'?text.match(new RegExp(el,"i")):false)
-  :every===false?!searchWords.every(el=>text&& typeof text=='string'?text.match(new RegExp(el,"i")):false)
-  :searchWords.some(el=>text&& typeof text=='string'?text.match(new RegExp(el,"i")):false)
+export const matchStr = (text='',searchWords=[],every=null) => {
+  text = text.toString()
+  return every===true?searchWords.every(el=>text.match(new RegExp(el,"i")))
+  :every===false?!searchWords.every(el=>text.match(new RegExp(el,"i")))
+  :searchWords.some(el=>text.match(new RegExp(el,"i")))
 }
 
+
+export const log = objs => {
+  if (typeof objs === 'object') {
+    let log = []
+    for (var i = 0; i < Object.keys(objs).length; i++) 
+      log.push(Object.keys(objs)[i],': ',Object.values(objs)[i],'\n')
+    
+    console.log(...log)
+  }
+}
 
 
 

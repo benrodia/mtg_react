@@ -4,7 +4,7 @@ import {v4 as uuidv4} from  'uuid'
 import store from './store'
 import * as A from './constants/actionNames'
 
-import {HOME_DIR,PHASES,COLORS} from './constants/definitions'
+import {HOME_DIR,PHASES,COLORS,MAIN_BOARD} from './constants/definitions'
 import {
   SINGLETON,
   TOKEN_NAME,
@@ -50,7 +50,12 @@ import attack from './functions/attack'
 import payMana from './functions/payMana'
 
 
-import {cache,sum} from './functions/utility'
+import {cache,session,sum} from './functions/utility'
+
+export const setPage = page => dispatch => {
+  dispatch({type: A.MAIN,key:'page',val:page})
+  dispatch({type: A.MAIN,key:'modal',val:null})
+}
 
 export const loadAppData = _ => dispatch => {
   dispatch(getCardData("https://api.scryfall.com/bulk-data/unique_artwork"))
@@ -83,30 +88,26 @@ export const newMsg = (message,type) => dispatch => dispatch({type: A.NEW_MSG,va
 
 
 export const changeDeck = (key,val) => dispatch => {
-  if (key==='clear') {
-    console.log("CLEARING",INIT_DECK_STATE)
+  if (key==='clear' && window.confirm('Clear Deck?')) {
+    dispatch(newMsg('CLEARED DECK'))
     cache(A.DECK,'all',INIT_DECK_STATE)
     dispatch({type: A.DECK,val: INIT_DECK_STATE})
   }
   else {
     let update = {...store.getState().deck}
-    if (key==='format' && val!== update.format) {
+    if (key==='format' && val!== update.format)
       dispatch(getLegalCards(store.getState().main.cardData,val)) 
-      if (!SINGLETON(val)) update.list = update.list.filter(c=>c.board!=='Command')
-    }
-    else if (key==='list') {
-      update.colors = getColorIdentity(Q(val,'board','Main'),'colors')
-      update.color_identity = getColorIdentity(Q(val,'board','Command'),'color_identity')     
-      val = val.orderBy('name')
-    }
+    
     update[key] = val
     cache(A.DECK,'all',update)
     dispatch({type: A.DECK,val: update})
   }
 }
+export const changeCard = (card={},assign={}) => dispatch => dispatch(changeDeck('list',store.getState().deck.list.map(c=>c.key===card.key?{...Object.assign(card,assign)}:c)))
+
 
 export const changeSettings = (key,val) => dispatch => {
-  if (key==='clear' && window.confirm('Clear deck?')) {
+  if (key==='clear' && window.confirm('Revert to Default Settings?')) {
     cache(A.SETTINGS,'all',INIT_SETTINGS_STATE)
     dispatch({type: A.RESET_SETTINGS})
   }
@@ -118,15 +119,11 @@ export const changeSettings = (key,val) => dispatch => {
 }
 
 export const changeFilters = (key,val) => dispatch => {
-  if (key==='clear') {
-    cache(A.FILTERS,'all',INIT_FILTERS_STATE)
-    dispatch({type: A.RESET_FILTERS})
-  }
-  else {
-    cache(A.FILTERS,key,val)
-    dispatch({type: A.RESET_FILTERS,key,val})
-  }
+
+    session(A.FILTERS,key,val)
+    dispatch({type: A.FILTERS,key,val})
 }
+export const changeAdvanced = assign => dispatch => dispatch(changeFilters('advanced',{...Object.assign(store.getState().filters.advanced,assign)}))
 
 
 export const addCard = (cards,board,remove) => dispatch => {
@@ -135,10 +132,9 @@ export const addCard = (cards,board,remove) => dispatch => {
   const newCard = card => {return {
       ...audit(card),
       customField: card.customField || null,
-      board: board||'Main',
-      key: legalCommanders(state.deck.format,state.main.legalCards).filter(com=>com.name===card.name)[0]
-        ? "CommanderID__"+uuidv4()
-        : "CardID__"+uuidv4()
+      board: board||card.board||MAIN_BOARD,
+      commander: card.commander||false,
+      key: "CardID__"+uuidv4()
     }
   }
   const list = remove
@@ -147,6 +143,7 @@ export const addCard = (cards,board,remove) => dispatch => {
       ...state.deck.list,
       ...cards.map(card=>newCard(card)).filter(c=>!!c)
     ] 
+  console.log('addCard',list)
   dispatch(changeDeck('list',list))
 }
 
@@ -234,7 +231,7 @@ export const moveCard = (payload,bypass) => dispatch => {
   const toDest = dest || "Hand" 
   const interZone = toMove.zone!==toDest
 
-  const resolveMove = _ => {
+  const resolveMove = willCast => {
     const {deck,look} = store.getState().playtest
     if (interZone) dispatch(handleAbilities(toDest,toMove))
     if (toMove.zone!=='Library') dispatch({type:A.PLAYTEST,key:'look',val:0}) 
@@ -254,7 +251,8 @@ export const moveCard = (payload,bypass) => dispatch => {
   }
 
   if(!toMove) return console.error('no card to move')
-  else if (!bypass && interZone && store.getState().playtest.stack.length && !HAS_FLASH(toMove)) dispatch(newMsg("Can't use sorcery-speed actions if the stack isn't empty. (Change game settings on User page)",'error')) 
+  else if (!bypass && interZone && toDest==='Battlefield' && store.getState().playtest.stack.length && !HAS_FLASH(toMove)) 
+    dispatch(newMsg("Can't use sorcery-speed actions if the stack isn't empty. (Change game settings on User page)",'error')) 
   else if (IS_SPELL(toMove) && toDest==='Battlefield') {
     dispatch(addStack({
       options:[{    

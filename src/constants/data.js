@@ -1,5 +1,6 @@
-import {COLORS,CARD_TYPES,HOME_DIR} from './definitions'
+import {COLORS,CARD_TYPES,HOME_DIR,RARITY_COLOR} from './definitions'
 import {SINGLETON} from './greps'
+import {pluralize} from '../functions/text'
 
 function importAll(r) {
   let images = {}
@@ -12,6 +13,7 @@ export const ItemTypes = {
 	CARD: 'CARD',
 	COMMANDER: 'COMMANDER'
 }
+export const FORMATS = ['brawl','commander','duel','future','legacy','modern','oldschool','pauper','penny','standard','vintage','casual']
 
 export const CARD_SLEEVES = importAll(require.context('../../public/images/sleeves', false, /\.(png|jpe?g|svg)$/))
 export const PLAYMATS = importAll(require.context('../../public/images/playmats', false, /\.(png|jpe?g|svg)$/))
@@ -51,19 +53,24 @@ export const EXAMPLE_DECK_DESCS = [
 
 
 const priceThresholds = [
-	{val:600, label:'filthy blood money'},
-	{val:300, label:'sends a message'},
-	{val:100, label:'expensive'},
-	{val:50,  label:'valuable'},
-	{val:10,  label:'moderate'},
 	{val:2,   label:'bulk'},
+	{val:5,   label:'$'},
+	{val:15,  label:'$$'},
+	{val:25,  label:'$$$'},
+	{val:50, label:'$$$$'},
+	{val:100, label:'$$$$$'},
+	{val:300, label:'$$$$$$'},
+	{val:600, label:'$$$$$$$'},
+	{val:1000, label:'TOO MUCH'},
 ]
 
 export const FILTER_TERMS = [
 	{
 		name: "Type",
 		key: "type_line",
-		vals: CARD_TYPES
+		vals: CARD_TYPES,
+		valNames: CARD_TYPES.map(T=>pluralize(T)),
+		icon: true,
 	},
 	{
 		name: "Custom",
@@ -81,7 +88,9 @@ export const FILTER_TERMS = [
 		key: "colors",
 		vals: COLORS('symbol'),
 		valNames: COLORS('name'),
-		other: 'multicolor'
+		fill: COLORS('fill'),
+		other: 'multicolor',
+		icon: true,
 	},
 	{
 		name: "Price (USD)",
@@ -119,9 +128,16 @@ export const FILTER_TERMS = [
 		'rare',
 		'uncommon',
 		'common',
-		]
+		],
+		fill: [
+		'mythic',
+		'rare',
+		'uncommon',
+		'common',
+		].map(r=>RARITY_COLOR[r])
 	},
 ]
+
 
 export const SUB_TYPES = [
 	"Advisor",

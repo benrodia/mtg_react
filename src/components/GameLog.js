@@ -29,11 +29,5 @@ function GameLog({history,current,timeTravel}) {
   </div>
 }
 
-const select = state=> {
-  return {
-    history:state.playtest.history,
-    current:state.playtest.current,
-  }
-}
 
-export default connect(select,actions)(GameLog)
+export default connect(({playtest:{history,current}})=>{return {history,current}},actions)(GameLog)

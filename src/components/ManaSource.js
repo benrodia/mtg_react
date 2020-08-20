@@ -4,8 +4,8 @@ import * as actions from '../actionCreators'
 import {Q} from '../functions/cardFunctions'
 import {COLORS} from '../constants/definitions'
 
-function ManaSource ({card,cardState,handleMana}) {
-
+export default connect(null,actions)
+(({card,cardState,handleMana})=> {
 	const addMana = (type,amt) => {
 		if (!card.tapped) {
 			cardState(card,'tapped',true)
@@ -24,7 +24,4 @@ function ManaSource ({card,cardState,handleMana}) {
 		  </div>
 	} 
 	else return null
-}
-
-
-export default connect(null,actions)(ManaSource)
+})

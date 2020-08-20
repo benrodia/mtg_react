@@ -50,11 +50,5 @@ function TestControls({
     </div>
 }
 
-const select = state => {
-  return {
-    ...state.playtest,
-    gameLog: state.settings.gameLog,
-  }
-}
 
-export default connect(select,actions)(TestControls)
+export default connect(({playtest,settings:{gameLog}})=>{return{...playtest,gameLog}},actions)(TestControls)

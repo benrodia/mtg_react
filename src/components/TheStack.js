@@ -18,7 +18,7 @@ function TheStack({resStack,stack}) {
           	</div>
           	<div className="stackOp">
               {!active?null:options.map((op,num)=>op.hide?null:
-  	            <button autoFocus={num===0} className={`small-button ${op.color}`} onClick={_=>{
+  	            <button key={num} autoFocus={num===0} className={`small-button ${op.color}`} onClick={_=>{
                   resStack()
                   if(typeof op.res === 'function') op.res()
                 }}>{op.effect}</button>

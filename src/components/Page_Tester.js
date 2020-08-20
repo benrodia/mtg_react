@@ -9,7 +9,7 @@ import Zone from './Zone'
 import TestControls from './TestControls'
 import TesterShortcuts from './TesterShortcuts'
 import TheStack from './TheStack'
-import BasicSelect from './BasicSelect'
+import BasicSearch from './BasicSearch'
 import CardControls from './CardControls'
 
 import {TOKEN_NAME} from '../constants/greps'
@@ -23,9 +23,14 @@ function Page_Tester({
   startTest,
   spawnToken,
   handleShuffle,
-  gameState
+  gameState,
+  setPage,
 }) {
-    useEffect(_=>startTest(),[])
+    useEffect(_=>{
+      setPage('Test')
+      startTest()
+    },[])
+
     const zone = (name,{context,header,cardHeadOnly}) => 
       <Zone zone={name} key={name} 
       context={context} 
@@ -37,7 +42,7 @@ function Page_Tester({
       <TesterShortcuts/>
       <TheStack/>
       <div className="side-col">                
-        {!list.filter(c=>c.board==='Command').length?null:
+        {!list.filter(c=>c.commander).length?null:
         zone("Command",{context: 'single'})}
         {zone("Exile",{
             context: 'list',
@@ -49,7 +54,7 @@ function Page_Tester({
             cardHeadOnly: true,
             header: true
           })}
-        <BasicSelect 
+        <BasicSearch 
         searchable
         placeholder='Create Token'
         options={tokens} 
@@ -75,13 +80,4 @@ function Page_Tester({
 }
 
 
-
-const select = state => {
-  return {
-    tokens: state.main.tokens,
-    look: state.playtest.look,
-    list: state.deck.list,
-  }
-}
-
-export default connect(select,actions)(Page_Tester)
+export default connect(({main:{tokens},playtest:{look},deck:{list}})=>{return {tokens,look,list}},actions)(Page_Tester)

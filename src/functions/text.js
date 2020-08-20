@@ -1,10 +1,11 @@
-import React from 'react'
-import {COLORS,CARD_TYPES,ZONES} from '../constants/definitions'
+import React,{Fragment} from 'react'
+import {COLORS,CARD_TYPES,ZONES,SIDE_BOARD} from '../constants/definitions'
 import {SINGLETON,TOKEN_NAME} from '../constants/greps'
 import {SPECIAL_SYMBOLS,NUMBER_WORDS} from '../constants/data'
+import {sum} from '../functions/utility'
+import {convertedSymbols,itemizeDeckList} from '../functions/cardFunctions'
 
-
-export const formatManaSymbols = text => {
+export const formatManaSymbols = (text='') => {
 	if(text && typeof text === 'string') {		
 		const textAr = text.split('{')
 		return textAr.map((m,i)=>{
@@ -20,10 +21,10 @@ export const formatManaSymbols = text => {
 				'ms ms-cost ms-'+ms
 				:''
 
-				return <span key={ms+i}>
-					<span key={cName+i} className={cName}/>
+				return <Fragment key={m+i}>
+					<span className={cName}/>
 					<span>{m.substring(m.indexOf("}")+1,m.length)}</span>
-				</span>
+				</Fragment>
 			}
 			return null
 		})
@@ -60,41 +61,40 @@ export const BGcolor = (colors,identity,type) => {
 	return colorVal
 }
 
-export const formatText = text => {
+export const formatText = (text='') => {
 	return text.split('\n')
 	.map(l=>formatManaSymbols(l))
 	.map((l,i)=><p key={l+i}>{l}</p>)
 }
 
+export const subType = (type='') => type.includes('Basic')?'': type.slice(Math.max(0,type.indexOf('—')+1)).trim()
 
-export const subTitle = deckInfo => {
-  const subTitle = deckInfo.list.filter(c=>c.board==='Command').length
-  ?": "+ deckInfo.list.filter(c=>c.board==='Command')
+
+export const subTitle = ({list,format}) => {
+  const subTitle = list.filter(c=>c.commander).length
+  ?": "+ list.filter(c=>c.commander)
     .map(c=>c.name.indexOf(',')!== -1 ? c.name.substr(0,c.name.indexOf(',')):c.name)
-    .join(' / ')
+    .join(' & ')
   :null
-
-  const colorBy = SINGLETON(deckInfo.format)?'color_identity':'colors'
-
-  return <span className="subtitle">
+  return <>
     {" ("}
-    {titleCaps(deckInfo.format)}
-    {subTitle} {deckInfo[colorBy].map(c=><span key={'subtitle'+c} className={`ms ms-${c.toLowerCase()}`}/>)}
-    )
-  </span>
+    {titleCaps(format)}
+    {subTitle}) 
+  </>
 }
 
 export function cardMoveMsg(card,dest) {
     const {zone,name,type_line} = card
     return (
-        dest==="Exile" ? `Exiled "${name}" from ${zone}` :
-        dest==="Hand"&&zone!=="Library" ? `Returned "${name}" from ${zone} to hand` :
-        dest!=="Library"&&(zone==="Hand"||zone==="Command")&&!type_line.includes('Land') ? `Cast "${name}"` :
-        dest==="Hand"&&zone==="Library" ? `Drew "${name}"` :
-        dest==="Battlefield"&&(zone==="Graveyard"||zone==="Exile") ? `Returned "${name}" from ${zone} to Battlefield` :
-        dest==="Battlefield" ? `Played "${name}"` :
-        dest==="Graveyard"&&zone==="Library" ? `Milled "${name}"` :
-        dest==="Graveyard"&&zone==="Battlefield" ? `Sacrificed "${name}"` :
+        dest==="Exile" ? `Exile "${name}" from ${zone}` :
+        dest==="Hand"&&zone!=="Library" ? `Return "${name}" from ${zone} to hand` :
+        dest==="Hand"&&zone==="Library" ? `Draw "${name}"` :
+        dest==="Battlefield"&&(zone==="Graveyard"||zone==="Exile") ? `Return "${name}" from ${zone} to Battlefield` :
+        dest==="Battlefield"&&(zone==="Hand"||zone==="Command")&&!type_line.includes('Land') ? `Cast "${name}"` :
+        dest==="Battlefield" ? `Play "${name}"` :
+        dest==="Graveyard"&&zone==="Library" ? `Mill "${name}"` :
+        dest==="Graveyard"&&zone==="Battlefield" ? `Sacrifice "${name}"` :
+        dest==="Graveyard"&&zone==="Hand" ? `Discard "${name}"` :
         `Put "${name}" into ${dest} from ${zone}`
     )
 }
@@ -128,6 +128,15 @@ export const paidCostMsg = paid => {
     const usedLands = paid.tapped.length?`${NUMBER_WORDS[paid.tapped.length]} mana source${paid.tapped.length!==1?'s':''}`:null
     return formatText(`${usedMana} ${usedMana.length&&usedLands?' and tapped ':usedLands?'Tapped ':''} ${usedLands||''} to pay ${paid.cost}`)
 }
+
+
+export const textList = list => 
+	itemizeDeckList(list,['name'])
+		.map(cards=>{
+			const {board,commander,set,name} = cards[0]
+		return `${board===SIDE_BOARD?'SB: ':commander?'CMDR: ':''}${cards.length} [${set.toUpperCase()}] ${name}`
+		})
+		.join('\n')
 
 
 /*

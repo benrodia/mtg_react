@@ -47,7 +47,7 @@ export default function ItemImput({
 			placeholder={value.name} 
 			onChange={e=>update(e.target.value)}/>
 		}
-		{!addable?null:<button className={`success-button ${!canAdd&&'disabled'}`} onClick={add}>+</button>}
+		{!addable?null:<button className={`success-button icon-plus ${!canAdd&&'disabled'}`} onClick={add}/>}
 		{!changeable?null:<span className='icon-pencil' onClick={change}/>}
 		{!removable?null:<span className='icon-trashcan' onClick={remove}>X</span>}
 	</>

@@ -1,7 +1,6 @@
 export const HOME_DIR = '/reactmtg'
 export const USER_DIR = '/user'
 
-export const FORMATS = ['brawl','commander','duel','future','legacy','modern','oldschool','pauper','penny','standard','vintage','casual']
 
 
 export const LIBRARY = 'Library'
@@ -31,6 +30,11 @@ export const PLANESWALKER = 'Planeswalker'
 export const LAND = 'Land'
 export const CARD_TYPES = [CREATURE,INSTANT,SORCERY,ARTIFACT,ENCHANTMENT,PLANESWALKER,LAND]
 
+export const MAIN_BOARD = 'Main'
+export const SIDE_BOARD = 'Side'
+export const MAYBE_BOARD = 'Maybe'
+export const BOARDS = [MAIN_BOARD,SIDE_BOARD,MAYBE_BOARD]
+
 
 const size_mod = 3
 export const CARD_SIZE = {
@@ -52,32 +56,38 @@ const colors = [
 	{
 		name: 'White',
 		symbol: 'W',
-		basic: 'Plains'
+		basic: 'Plains',
+		fill: '#F0F0E6',
 	},
 	{
 		name: 'Blue',
 		symbol: 'U',
-		basic: 'Island'
+		basic: 'Island',
+		fill: '#64B8ED',
 	},
 	{
 		name: 'Black',
 		symbol: 'B',
-		basic: 'Swamp'
+		basic: 'Swamp',
+		fill: '#2A1630',
 	},
 	{
 		name: 'Red',
 		symbol: 'R',
-		basic: 'Mountain'
+		basic: 'Mountain',
+		fill: '#E8795B',
 	},
 	{
 		name: 'Green',
 		symbol: 'G',
-		basic: 'Forest'
+		basic: 'Forest',
+		fill: '#6CB572',
 	},
 	{
 		name: 'Colorless',
 		symbol: 'C',
-		basic: 'Wastes'
+		basic: 'Wastes',
+		fill: '#888899',
 	},
 ]
 	return key!==undefined && colors[0][key]!==undefined

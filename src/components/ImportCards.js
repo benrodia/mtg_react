@@ -4,89 +4,96 @@ import {v4 as uuidv4} from  'uuid'
 
 import {connect} from 'react-redux'
 import * as actions from '../actionCreators'
+import utilities from '../utilities'
 
-import {titleCaps} from '../functions/text'
-import {chooseCommander,legalCommanders} from '../functions/gameLogic'
-import {sum} from '../functions/utility'
 import FillManabase from './FillManabase'
 import CardControls from './CardControls'
-import ImportTxt from './ImportTxt'
+import ImportFile from './ImportFile'
 
+const {Q,log,sum,titleCaps,rnd,chooseCommander,legalCommanders,FORMATS,MAIN_BOARD,SIDE_BOARD,snippet,NUM_FROM_WORD} = utilities
 
-function ImportCards({list,format,legalCards,addCard,openModal}) {
-	const [cart,changeForm] = useState({form:'',cards:[]})
-
-	const exText = [...Array(7)].map((ex,i)=>{
+export default connect(({
+	deck:{list,format,desc},
+	main:{legalCards,sets}
+})=>{return {list,format,desc,legalCards,sets}},actions)
+(({list,format,desc,sets,legalCards,addCard,openModal,changeDeck})=> {
+	const exText = [...Array(7)].map((_,i)=>{
 		if (!i) return 'ex.'
-		const rng = Math.floor(Math.random()*legalCards.length)
-		const exQuant = Math.floor(Math.random()*3+1)
-		return exQuant+' '+legalCards.map(c=>c.name)[rng]
+		const exQuant = rnd([...Array(3)].map((_,i)=>i))+1
+		return exQuant+' '+rnd(legalCards.map(c=>c.name))
 	}).join('\n')
 
+	const [form,setForm] = useState('')
+	const [cart,setCart] = useState([])
+	const [meta,setMeta] = useState({})
 	
 
-	const interpretForm = (content,imported) => {
+	const interpretForm = content => {
 
-		const raw = content.split('\n')
-		const meta = raw.filter(r=>r.includes('//'))
-		const info = !meta.length?null:Object.assign(...['NAME','CREATOR','FORMAT'].map(l=>{
+		const items = content.split('\n')
+
+		const meta = items.filter(r=>r.includes('\/\/'))
+		setMeta(!meta.length?{}:Object.assign(...['NAME','CREATOR','FORMAT'].map(l=>{
 			const prop = meta.filter(m=>m.includes(l))[0]
-			return {[l.toLowerCase()]:!prop?null:prop.substr(prop.indexOf(":")+1).trim()}
-		}))
+			return {[l.toLowerCase()]:prop&&prop.slice(prop.indexOf(':')+1).trim()}
+		})))
 
-		// const allCards = raw.splice(meta.length)
 
-		const interp = content.split('\n').map(item=> {
-			// const boardArea = item.substr(0,item.indexOf(': ')) || ''
-			// const board = boardArea.length<=0?'Main'
-			// 	:boardArea.includes('SB')?'Side'
-			// 	:boardArea.includes('MB')?'Maybe'
-			// 	:boardArea.includes('CMDR')?'Command'
-			// 	:'Main'
-			
-			const quantArea = item.substr(0,item.indexOf(' ')) 
-			const quantity = quantArea.length<=0?1
-			:!isNaN(parseInt(quantArea))?parseInt(quantArea):1
-			// const setArea = item.substr(item.indexOf('['),item.indexOf(']')) || quantArea
-			// const hasSet = setArea&&setArea.length>2
-
-			const name = item.substr(item.indexOf(' ')).trim()
-			const card = legalCards.filter(c=>c.name.toLowerCase()===name.toLowerCase())[0]
-			// const card = !hasSet?cards[0]:cards.filter(c=>setArea.includes(c.set))[0]
-
-			if (card!==undefined) {
-				return {
-					quantity: quantity,
-					card: {...card},
+		const interp = items.map((item,ind)=> {
+			let [quantity,spaces] = [1,item.split(' ')]
+			for (var i = 0; i < spaces.length; i++) 
+				if (parseInt(spaces[i])>1) {
+				 	quantity = parseInt(spaces[i])
+				 	break
 				}
-			} else return null
-		})
+			
+			const setText = item.indexOf('[')?item.slice(item.indexOf('[')+1,item.indexOf(']')).toLowerCase(): ' '
+			
+			const cards = legalCards
+				.filter(c=>item.includes(c.name))
+				.sort((a,b)=>a.name.length< b.name.length?1:-1)
+			const card = cards.filter(c=>c.set===setText)[0]||cards[0]||null
 
-		const adding = interp.filter(c=>c!==null)
-		changeForm({form:content,cards:[...adding]}) 
+			
+			return card&&{
+				quantity,
+				card: {...card,
+					commander:item.includes('CMDR: '),
+					board: items.slice(0,ind).filter(it=>it.includes('SB:')).length
+						? SIDE_BOARD
+						: MAIN_BOARD,
+				}
+			}
+		})
+		
+		setCart(interp.filter(c=>c!==null)) 
+		setForm(content) 
+
 	}
 
 
 
-	const importCart = () => {
+	const importCart = _ => {
 		let cards = []
-		for (var i = 0; i < cart.cards.length; i++) {
-			cards = cards.concat([...Array(cart.cards[i].quantity)].map(_=>cart.cards[i].card))
-		}	
-		console.log('importCart',cards)
+		for (var i = 0; i < cart.length; i++) 
+			cards = cards.concat([...Array(cart[i].quantity)].map(_=>cart[i].card))
+		
+		if(meta.format) changeDeck('format',meta.format)
+		if(meta.name) changeDeck('name',meta.name)
+		if(meta.creator) changeDeck('desc',`Original Creator: ${meta.creator} \n${desc}`)
 	    addCard(cards)
 	    openModal(null)
 	}
 
-	const total = sum(cart.cards.map(c=>c.quantity))
+	const total = sum(cart.map(c=>c.quantity))
 		
 	return <div className="quick-import">
-			<h2>Import .txt File</h2>
-			<ImportTxt callBack={file=>interpretForm(file,true)}/>
+			<h2>Import File</h2>
+			<ImportFile accept='.txt,.dec,.mwDeck' callBack={file=>interpretForm(file)}/>
 			<h2>Or paste in card names</h2>
 			<form className="import-form">
 				<textarea 
-					value={cart.form}
+					value={form}
 					rows={'15'}
 					onChange={e=>interpretForm(e.target.value)}
 					placeholder={exText}
@@ -97,14 +104,6 @@ function ImportCards({list,format,legalCards,addCard,openModal}) {
 					:null
 				}
 		</div>
-}
+})
 
 
-const select = state => {
-	return {
-		list: state.deck.list,
-		format: state.deck.format,
-		legalCards: state.main.legalCards,
-	}
-}
-export default connect(select,actions)(ImportCards)

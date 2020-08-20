@@ -1,11 +1,13 @@
 import React from 'react'
 import {connect} from 'react-redux'
 import * as actions from '../actionCreators'
-import BasicSelect from './BasicSelect'
-import {Q} from '../functions/cardFunctions'
-import {COUNTERS} from '../constants/data'
+import BasicSearch from './BasicSearch'
+import utilities from '../utilities'
 
-function Counters({card,cardState}) {	
+const {Q,COUNTERS} = utilities
+
+export default connect(null,actions)
+(({card,cardState})=> {	
 	const countersDisplay = Object.entries(card.counters).map(c=>{
 			return <div key={c[0]+c[1]} className="counter" onClick={_=>changeCounters(c[0],-1)}>
 			{
@@ -25,7 +27,7 @@ function Counters({card,cardState}) {
 	return <>
 		<div className="add-counters">	
 			{!defaultCounter?null:<button className='smaller-button' onClick={()=>changeCounters(defaultCounter,1)}>{defaultCounter=="PlusOne"?'+1/+1':defaultCounter}</button>}
-			<BasicSelect 
+			<BasicSearch 
 			searchable
 			placeholder='Add Counter'
 			options={COUNTERS}
@@ -35,6 +37,4 @@ function Counters({card,cardState}) {
 		<h3 className="counters-display">{countersDisplay}</h3>
 	</>
 
-}
-
-export default connect(null,actions)(Counters)
+})

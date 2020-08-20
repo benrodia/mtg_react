@@ -168,17 +168,25 @@
 
 .icon {
 	svg {
-	height: 1.5rem;
-	width: 1.5rem;		
+		min-height: 1.5rem;
+		height: 1.5rem;
+		min-width: 1.5rem;		
+		width: 1.5rem;		
 	}
-	svg.common {fill: #000000;}
-	svg.uncommon {fill: #879795; stroke: 1px;}
-	svg.rare {fill: #B9974E; stroke: 1px;}
-	svg.mythic {fill: #F34800; stroke: 1px;}
-	&:hover {
-		cursor: pointer;
-		transform: scale(1.1);
-	}
+	svg.common,svg.common * {fill: #000000;}
+	svg.uncommon,svg.uncommon * {fill: #879795; stroke: 1px;}
+	svg.rare,svg.rare * {fill: #B9974E; stroke: 1px;}
+	svg.mythic,svg.mythic * {fill: #F34800; stroke: 1px;}
+}
+
+.sticky {
+	position: fixed;
+	top: @headerH;
+	z-index: 1;
+}
+
+.bar {
+	.flex-row();
 }
 
 
@@ -199,7 +207,7 @@
 }
 
 
-h1,h2,h3,h4 {
+h1,h2,h3 {
 	font-family: @header;
 } 
 
@@ -216,12 +224,6 @@ textarea {
 
 button {
 	.clean-button();
-}
-
-section {
-	border-radius: @thinnest;
-	padding: @thin;
-	box-shadow: 0 0 1rem rgba(0,0,0,.5);
 }
 
 
@@ -292,5 +294,10 @@ section {
 
 @keyframes waver {
 	to {opacity: .5;}
+}
+
+@keyframes spin {
+	from {transform: rotateZ(0deg);}
+	to {transform: rotateZ(360deg);}
 }
 

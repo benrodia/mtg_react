@@ -41,7 +41,7 @@ export default function main(playtest = INIT_PLAYTEST_STATE([],null,0), {
 			return {...playtest,deck:afterShuffle,look: 0}
 
 		case A.HISTORY: 
-		const slice = playtest.history.slice(Math.max(0,playtest.history.length-50),playtest.current)
+		const slice = playtest.history.slice(Math.max(0,playtest.history.length-50),playtest.current+1)
 		// console.log('current',playtest.current)
 		return {...playtest,
 				current: playtest.current+1,

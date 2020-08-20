@@ -1,6 +1,6 @@
 import store from '../store'
 
-import {Q} from './cardFunctions'
+import {Q,convertedSymbols} from './cardFunctions'
 import {sum,match} from './utility'
 import {COLORS,CARD_TYPES,ZONES} from '../constants/definitions'
 import {SINGLETON,MANA,TUTOR,SAC_AS_COST,CAN_TAP} from '../constants/greps'
@@ -11,10 +11,7 @@ export default function payMana(cost) {
   const {mana,deck} = store.getState().playtest
 
   let floating = [...mana]
-  const symbols = cost.split('{').map(m=>m.replace('}','').replace('/','')) 
-  symbols.shift()
-  let colored = COLORS('symbol').map(C=>symbols.filter(co=>co===C).length)
-  let generic = isNaN(symbols[0])?0:parseInt(symbols[0])
+  let [colored,generic] = convertedSymbols(cost)
 
   let manaCards = deck.filter(c=>MANA.source(c)&&CAN_TAP(c))||[]
 

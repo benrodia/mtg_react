@@ -1,130 +1,95 @@
-import React from 'react'
-
+import React,{useEffect} from 'react'
 import {connect} from 'react-redux'
 import * as actions from '../actionCreators'
+import utilities from '../utilities'
 
-import DeckInfo from './DeckInfo'
-import BasicSelect from './BasicSelect'
-import ImportCards from './ImportCards'
-import ListBoard from './ListBoard'
-import AddSearch from './AddSearch'
-import ItemInput from './ItemInput'
-
-import DownloadTxt from './DownloadTxt'
-import FillManabase from './FillManabase'
 import CardControls from './CardControls'
+import BasicSearch from './BasicSearch'
+import AdvancedSearch from './AdvancedSearch'
+import DeckInfo from './DeckInfo'
+import DeckStats from './DeckStats'
+import BoardFilters from './BoardFilters'
+import ImportCards from './ImportCards'
+import Board from './Board'
+import DownloadFile from './DownloadFile'
 
-import {DECK,FILTERS} from '../constants/actionNames'
-import {COLORS} from '../constants/definitions'
-import {SINGLETON} from '../constants/greps'
-import {ALL_CARDS,FILTER_TERMS, BOARDS} from '../constants/data'
-import {itemizeDeckList} from '../functions/cardFunctions'
-import {chooseCommander,legalCommanders} from '../functions/gameLogic'
+const {
+	FORMATS,
+	ItemTypes,
+	SINGLETON,
+	legalCommanders,
+	chooseCommander,
+	titleCaps,
+	textList,
+} = utilities
 
-
-function Page_Builder ({
-	view,
-	sortBy,
-	format,
-	list,
-	legalCards,
-	openModal,
-	changeDeck,
-	changeFilters,
-	newMsg,
-	customFields
-}) {
-				
-	const copyItemizedList = () => {
-		const textList = itemizeDeckList(list,['name'])
-			.map(cards=>cards.length+" "+cards[0].name)
-			.join('\n')
-		navigator.clipboard.writeText(textList)
-		newMsg('Copied list to clipboard!','success')
-	}
-
-
-	const changeField = (card,field,val) => {
-	    console.log('changeField',card,field,val)
-	  	changeDeck('list',field==='board'&&val==="Command"
-		    ? chooseCommander(card,list,legalCards)
-		    : list.map(c=>{if(c.key===card.key){c[field]=val};return c})
-	    )
-	}
-
-
-	const layoutHeader = <span className='view-options'>			
-			<button 
-			className={`icon-list-bullet small-button ${view==='list'&&'selected'}`} 
-			onClick={_=>changeFilters('view','list')}/>
-			<button 
-			className={`icon-th-large small-button ${view==='grid'&&'selected'}`} 
-			onClick={_=>changeFilters('view','grid')}/>
-			<BasicSelect 
-				self={FILTER_TERMS.filter(f=>f.name===sortBy)[0]}
-				defImg={<span className="icon-sort-alt-down"/>}
-				options={FILTER_TERMS} labelBy={'name'}
-                callBack={s=>changeFilters('sortBy',s.name)} 
-            />
-			{sortBy!=='Custom'?null: <ItemInput addable value={{name:'New Field',key:'custom'+customFields.length}} list={customFields} callBack={n=>changeFilters('customFields',n)}/>}
-	</span>
-	const commandHeader = <div className="choose-commander">
-		<BasicSelect searchable limit={20}
-		options={legalCommanders(format,legalCards)} 
-		labelBy={'name'} valueBy={'id'}
-		callBack={card=>changeDeck('list',chooseCommander(card,list,legalCards,true))} 
-		placeholder="Choose a Commander"
-		/>
-	</div>
-
-
-	const listBoard = (board,header) => <ListBoard 
-			key={board} 
-			board={board} 
-			header={header}
-			changeField={changeField}
-	    />
-	
+export default connect(({main:{legalCards},deck:{name,list,format}})=>{return {legalCards,name,list,format}},actions)
+(({name,format,list,board,legalCards,openModal,changeDeck,newMsg,setPage,addCard})=> {	
+	useEffect(_=>{setPage('Build')},[])
 
 	return <div className='builder'>
-		<section className='top-bar'>
-			<DeckInfo/>
-			<AddSearch/>
+		<section className='side-bar'>
+			<button onClick={_=>openModal(<DeckInfo/>)} className="edit-deckinfo icon-pencil">{name||'New Deck'}</button>
+			<div className="format">
+				<h3 className='field-label'>Format</h3>
+				<BasicSearch 
+					self={format}
+					options={FORMATS} 
+	                callBack={e=>changeDeck('format',e)} 
+	            />
+				{!SINGLETON(format)?null:
+				<>
+					<BasicSearch
+					searchable
+					limit={20}
+					options={legalCommanders(format,legalCards)}
+					placeholder='Choose Commander'
+					callBack={c=>changeDeck('list',chooseCommander(c,list,legalCards))}
+					/>
+					<div className="commanders">
+						{list.filter(c=>c.commander).map(c=><CardControls type={ItemTypes.COMMANDER} card={c}/>)}
+					</div>
+				</>
+				}
+			</div>
+
+
 			<div className="quick-import">
-				<button onClick={_=>openModal(<ImportCards/>)}>
+				<button className='small-button icon-upload' onClick={_=>openModal(<ImportCards/>)}>
 				Quick Import	
 				</button>
+				<button className='small-button icon-download' onClick={_=>openModal(<DownloadFile/>)}>
+				Download File	
+				</button>
+				<button className="small-button success-button icon-paste" onClick={_=>{
+					navigator.clipboard.writeText(textList(list))
+					newMsg('Copied list to clipboard!','success')
+				}}>
+				Copy List
+				</button>
+				<button className="small-button warning-button icon-trash" onClick={_=>changeDeck('clear')}>Clear List</button>
 			</div>
+			<DeckStats/>
 		</section>
-		
-		<div className="boards">
-			{listBoard('Main',layoutHeader)}
-			<div className="other-boards">
-				{SINGLETON(format)?listBoard('Command',commandHeader):null}	
-				{listBoard('Side')}	
-				{listBoard('Maybe')}	
+		<section className="deck-area">
+			<div className="add-search">
+				<div className="search-bar">
+					<h4>Search Cards</h4>
+					<BasicSearch 
+					searchable
+					unique
+					orderBy={"name"}
+					limit={20}
+					label={c=>c.name}
+					options={legalCards} 
+					callBack={c=>addCard(c,board)} 
+					placeholder={"Search For Cards"}
+					/>
+				</div>
+				<button onClick={_=>openModal(<AdvancedSearch/>)}>Advanced Search</button>
 			</div>
-		</div>
-
-		<div className="export">
-			<DownloadTxt/>
-			<button className="icon-clipboard small-button" onClick={copyItemizedList}>
-			Copy List
-			</button>
-			<button className="small-button warning-button" onClick={_=>changeDeck('clear')}>Clear List</button>
-		</div>
+			<BoardFilters/>
+			<Board/>
+		</section>		
 	</div>
-}
-
-const select = state => {
-	return {
-		view: state.filters.view,
-		sortBy: state.filters.sortBy,
-		customFields: state.filters.customFields,
-		list: state.deck.list,
-		format: state.deck.format,
-		legalCards: state.main.legalCards,
-	}
-}
-
-export default connect(select,actions)(Page_Builder)
+})

@@ -12,7 +12,7 @@ import DropSlot from './DropSlot'
 
 import ManaSource from './ManaSource'
 import Counters from './Counters'
-import BasicSelect from './BasicSelect'
+import BasicSearch from './BasicSearch'
 import CardControls from './CardControls'
 
 function Zone({
@@ -47,8 +47,6 @@ function Zone({
   }
 
 
-  const cols = context==='grid'?size.cols:1
-  const rows = context==='grid'?4:1
   const cards = deck.filter(c=>c.zone===zone).orderBy('order')
 
   const slot = (col,row) => {
@@ -69,9 +67,9 @@ function Zone({
   }
 
 
-  const Zone = () => {
-    const inner = [...Array(rows)].map((und,row)=><div key={"row"+row} className={`row row-${row}`}>
-        {[...Array(cols)].map((und,col)=>slot(col,row))}
+  const Zone = _ => {
+    const inner = [...Array(context==='grid'?4:1)].map((und,row)=><div key={"row"+row} className={`row row-${row}`}>
+        {[...Array(context==='grid'?size.cols:1)].map((und,col)=>slot(col,row))}
       </div>)
     return <div 
     key={zone} 
@@ -79,30 +77,24 @@ function Zone({
     ref={zoneDiv}
     >
       <div className="title" style={{display:!header&&'none'}}>
-          <BasicSelect 
+          <BasicSearch 
             isHeader
             searchable
-            keys={['name','type_line','oracle_text']}
             options={cards} 
-            labelBy={'name'}
             placeholder={`${zone} (${cards.length})`}
             callBack={c=>moveCard({card:c,dest:'Hand'})}
           />
       </div>
-      {context!=='grid'
-        ? inner
-        : <div className="inner">{inner}</div>
+      {context!=='grid' ? inner : <div className="inner">{inner}</div>
       }
     </div>
   }
-
-
-
 
   const renderCard = (card,ind) => { 
     const tutorable = tutorableCards(card,deck)
     return <CardControls key={card.key} card={card} cardHeadOnly={cardHeadOnly}
       itemType={card.commander?ItemTypes.COMMANDER:ItemTypes.CARD}
+      inArea={cards}
       style={{
         position: context!=='list' ? 'absolute':'default',
         top: (zone==='Library'?-ind:ind)+"rem",
@@ -111,7 +103,7 @@ function Zone({
       }}
       >
         {tutorable.from!==zone?null
-        :<BasicSelect 
+        :<BasicSearch 
         options={tutorable.cards} 
         placeholder='Tutor'
         labelBy={'name'}
@@ -122,11 +114,11 @@ function Zone({
         }}
         />}
         {!(zone==="Library"&&look)?null:
-        <div>
-          <button className="small-button" onClick={_=>moveCard({card,dest:'Library',bottom:true})}>Bottom</button>
-          <button className="small-button" onClick={_=>moveCard({card,dest:'Graveyard'})}>Graveyard</button>
-        </div>
-      }
+          <div>
+            <button className="small-button" onClick={_=>moveCard({card,dest:'Library',bottom:true})}>Bottom</button>
+            <button className="small-button" onClick={_=>moveCard({card,dest:'Graveyard'})}>Graveyard</button>
+          </div>
+        }
         {zone!=="Battlefield"?null:
         <>
           <Counters card={card}/>
@@ -140,14 +132,4 @@ function Zone({
   return Zone()
 }
 
-
-
-const select = state => {
-  return {
-    deck: state.playtest.deck,
-    look: state.playtest.look,
-    size: state.playtest.size,
-  }
-}
-
-export default connect(select,actions)(Zone)
+export default connect(({playtest:{deck,look,size}})=>{return{deck,look,size}},actions)(Zone)
