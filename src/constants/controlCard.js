@@ -1,10 +1,9 @@
-export const CONTROL_CARD = _ => {return{
+export const CONTROL_CARD = {
 	"object":"card",
 	"id":"UNKNOWN_ID",
 	"name":"Unknown Card",
 	"lang":"en",
 	"released_at":"2000-01-01",
-	"layout":"normal",
 	"image_uris":{},
 	"mana_cost":"{1}",
 	"cmc":1,
@@ -30,20 +29,15 @@ export const CONTROL_CARD = _ => {return{
 		"duel":"not_legal",
 		"oldschool":"not_legal"
 	},
-	"games":["paper","mtgo"],
-	"reserved":false,
 	"nonfoil":true,
 	"set":"5dn",
 	"set_name":"Fifth Dawn",
-	"set_type":"expansion",
 	"rulings_uri":'',
-	"collector_number":"0",
 	"rarity":"common",
 	"flavor_text":"...",
 	"artist":"Unknown",
 	"border_color":"black",
 	"frame":"2003",
-	"booster":true,
 	"edhrec_rank":100,
 	"prices":{
 		"usd":"1.00",
@@ -51,4 +45,4 @@ export const CONTROL_CARD = _ => {return{
 		"eur":"1.00",
 		"tix":"1.00"
 	}
-}}
+}
