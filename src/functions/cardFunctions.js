@@ -82,7 +82,7 @@ export function isLegal(card,format,deckIdentity) {
   return allowed
 }
 
-export const audit = card => Object.assign(CONTROL_CARD(),card)
+export const audit = card => Object.assign(CONTROL_CARD,card)
 
 export function filterColors(options,colorFilter,all,only) {
   const colorsF = COLORS('symbol').filter((co,i)=>colorFilter[i])
