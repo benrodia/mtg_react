@@ -1,0 +1,443 @@
+// // IMPORTS
+@font-face {
+	font-family: "Arimo";
+	src: url(../../fonts/Arimo-Regular.ttf);
+}
+@font-face {
+	font-family: "Beleren";
+	src: url(../../fonts/beleren-bold_P1.01.ttf);
+}
+
+// // VARIABLES
+
+@para: "Arimo";
+@header: "Beleren";
+
+@lightest: #eff5ff;
+@lighter: #c6cfe4;
+@light: #8895b3;
+@dark: #414f6b;
+@darker: #1f283b;
+@darkest: #020817;
+
+@highlight: #fcd303;
+@red: #ff4466;
+@green: #7be8c0;
+
+@bigger: 2rem;
+@big: 1.5rem;
+@small: 0.8rem;
+@smaller: 0.6rem;
+@thin: 0.5rem;
+@thinner: 0.25rem;
+@thinnest: 0.125rem;
+
+@headerH: 2rem;
+@wrapperH: calc(100vh - 2rem);
+
+@cardW: 7.14rem;
+@cardH: 10rem;
+
+// // MIXINS
+
+.hide {
+	opacity: 0;
+	pointer-events: none;
+}
+
+.flex-row {
+	display: flex;
+	flex-flow: row nowrap;
+}
+.flex-col {
+	display: flex;
+	flex-flow: column nowrap;
+}
+.flex-centered {
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: center;
+	align-items: center;
+}
+
+.fixed-full-page {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	z-index: 1;
+}
+
+.bordered {
+	border: 2px solid @darkest;
+	box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+	border-radius: @thinner;
+}
+
+.clean-input {
+	border: none;
+	border-radius: @thinner;
+	padding: @thinner @thin;
+	margin: @thinnest;
+	background: @lightest;
+	color: @darkest;
+	transition: 0.2s;
+	height: 2rem;
+	box-shadow: inset 0 0 @thin rgba(0, 0, 0, 0.5);
+}
+
+.discrete-input {
+	background: transparent;
+	width: 2rem;
+	color: @lightest;
+	padding: 0;
+	box-shadow: none;
+
+	&:hover {
+		color: @highlight;
+	}
+
+	&[type="number"] {
+		-moz-appearance: textfield;
+	}
+	&::-webkit-outer-spin-button,
+	&::-webkit-inner-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+}
+
+.clean-button {
+	.clean-input();
+	box-shadow: 0 0 @thin rgba(0, 0, 0, 0.5);
+	font-size: 120%;
+	font-family: "MTG-head";
+	cursor: pointer;
+	background: @lighter;
+	font-weight: bold;
+	&:hover {
+		background: @light;
+	}
+}
+
+.small-button {
+	.clean-button();
+	font-size: @small;
+	height: 1.5rem;
+	padding: 0 @thin;
+	width: auto;
+}
+
+.smaller-button {
+	.small-button();
+	height: 1rem;
+}
+
+.selected {
+	background: @highlight !important;
+}
+
+.warning-button {
+	&:hover {
+		background: @red;
+	}
+}
+.success-button {
+	&:hover {
+		background: @green;
+	}
+}
+
+.inverse-button {
+	font-weight: bold;
+	padding: @thinnest;
+	margin: @thinnest;
+	color: @lighter;
+	border-bottom: 1px solid @lighter;
+	border-radius: 0;
+	background: transparent;
+	box-shadow: none;
+	text-shadow: 0 0 @thin rgba(0, 0, 0, 0.5);
+	&:hover {
+		background: transparent;
+		color: @light;
+		border-color: @light;
+	}
+}
+
+.inverse-small-button {
+	.inverse-button();
+	font-size: @small;
+	height: 1.5rem;
+	padding: 0;
+}
+
+.inverse-button.icon {
+	border: none;
+	cursor: pointer;
+}
+
+.inverse-button.warning-button:hover,
+.inverse-small-button.warning-button:hover {
+	background: transparent;
+	color: @red;
+	border-color: @red;
+}
+
+.inverse-button.success-button:hover,
+.inverse-small-button.success-button:hover {
+	background: transparent;
+	color: @green;
+	border-color: @green;
+}
+
+.list-item {
+	.flex-row();
+	padding: @thinnest 0;
+	animation: flash-in 1s ease-out;
+	justify-content: space-between;
+	.item-label {
+		flex-grow: 1;
+	}
+	.printing {
+		min-width: 10rem;
+	}
+}
+
+.field-label {
+	margin: @thin 0 @thinnest;
+	color: @lighter;
+}
+
+.tag {
+	font-size: @small;
+	font-weight: bolder;
+	color: @darkest !important;
+	background: @lighter;
+	border-radius: @thinnest;
+	padding: @thinnest;
+	border-left: @thinner solid @green;
+}
+
+.asterisk {
+	font-size: @small;
+	font-style: italic;
+	font-weight: normal;
+}
+
+.block {
+	margin-top: 1rem;
+	margin-bottom: @thin;
+}
+
+.mini-block {
+	margin-top: @thin;
+	margin-bottom: @thinner;
+}
+
+.thin-block {
+	width: 15rem;
+}
+
+.icon {
+	svg {
+		min-height: 1.5rem;
+		height: 1.5rem;
+		min-width: 1.5rem;
+		width: 1.5rem;
+	}
+	svg.common,
+	svg.common * {
+		fill: #000000;
+	}
+	svg.uncommon,
+	svg.uncommon * {
+		fill: #879795;
+		stroke: 1px;
+	}
+	svg.rare,
+	svg.rare * {
+		fill: #b9974e;
+		stroke: 1px;
+	}
+	svg.mythic,
+	svg.mythic * {
+		fill: #f34800;
+		stroke: 1px;
+	}
+}
+
+.clicky-icon {
+	cursor: pointer;
+	transition: 0.2s;
+	fill: @lighter;
+	color: @lighter;
+	&:hover {
+		transform: scale(1.1);
+		fill: @highlight;
+		color: @highlight;
+	}
+}
+
+.sticky {
+	position: fixed;
+	top: @headerH;
+	z-index: 1;
+}
+
+.bar {
+	.flex-row();
+}
+
+.col {
+	.flex-col();
+}
+
+.even {
+	align-items: center;
+}
+
+.spread {
+	justify-content: space-between;
+}
+
+.full-width {
+	width: 100%;
+}
+
+.spaced-bar {
+	& > * {
+		margin-right: 1.5rem;
+	}
+}
+.mini-spaced-bar {
+	& > * {
+		margin-right: @thin;
+	}
+}
+.spaced-col {
+	& > * {
+		margin-bottom: 1.5rem;
+	}
+}
+
+.mini-spaced-col {
+	& > * {
+		margin-bottom: @thin;
+	}
+}
+
+// GENERAL RULES
+
+* {
+	box-sizing: border-box !important;
+	max-height: 100%;
+	max-width: 100%;
+	text-decoration: none;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	border: none;
+}
+
+h1,
+h2,
+h3 {
+	font-family: @header;
+}
+
+input {
+	.clean-input();
+}
+textarea {
+	.clean-input();
+	height: auto;
+	border-radius: @thinnest;
+	padding: @thinner;
+	transition: 0;
+}
+
+button {
+	.clean-button();
+}
+
+//  ANIMATIONS
+
+@keyframes slide-in-out-top {
+	0% {
+		opacity: 0;
+		margin-top: -5rem;
+		display: flex;
+	}
+	10% {
+		opacity: 1;
+		margin-top: 0;
+	}
+	80% {
+		opacity: 1;
+		margin-top: 0;
+	}
+	99% {
+		opacity: 0;
+		margin-top: -5rem;
+		display: flex;
+	}
+	100% {
+		opacity: 0;
+		margin-top: -5rem;
+		display: none;
+	}
+}
+
+@keyframes slide-in {
+	from {
+		margin-left: -@cardW;
+	}
+	to {
+		margin-left: 0;
+	}
+}
+
+@keyframes flip-in {
+	from {
+		transform: perspective(20rem) rotateY(85deg) translateX(@cardW) scale(1.5);
+	}
+	to {
+		transform: none;
+	}
+}
+
+.disabled {
+	filter: opacity(0.4);
+	pointer-events: none;
+}
+
+@keyframes flash-in {
+	0% {
+		background: @highlight;
+		color: transparent;
+	}
+	30% {
+		color: initial;
+	}
+	100% {
+		background: initial;
+		color: initial;
+	}
+}
+
+@keyframes waver {
+	to {
+		opacity: 0.5;
+	}
+}
+
+@keyframes spin {
+	from {
+		transform: rotateZ(0deg);
+	}
+	to {
+		transform: rotateZ(360deg);
+	}
+}

@@ -1,0 +1,293 @@
+// // IMPORTS
+
+@import "library.less";
+
+// STYLES
+
+html {
+	font-size: 100%;
+	color: @lightest;
+	background: @darker;
+	font-family: @para;
+}
+
+@media screen and (min-width: 1440px) {
+	html {
+		font-size: 120%;
+	}
+}
+@media screen and (min-width: 1920px) {
+	html {
+		font-size: 150%;
+	}
+}
+@media screen and (min-width: 3840px) {
+	html {
+		font-size: 250%;
+	}
+}
+
+.wrapper {
+	padding-top: @headerH;
+	min-height: 100vh;
+	position: relative;
+	overflow-x: hidden;
+	& > * {
+		height: 100%;
+	}
+}
+
+h4 {
+	font-weight: bolder;
+	padding-bottom: @thin;
+}
+
+.bg-img {
+	.fixed-full-page();
+	height: calc(100vh - @headerH);
+	top: @headerH;
+	z-index: -1;
+
+	.playmat {
+		width: 100%;
+		height: 100%;
+		background-color: @darker;
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: cover;
+		filter: brightness(30%);
+	}
+	.darken {
+		.fixed-full-page();
+		position: absolute;
+		z-index: 1;
+		// background: rgba(0,0,0,.8);
+	}
+}
+
+.main-header {
+	.fixed-full-page();
+	height: @headerH;
+	z-index: 150;
+	.flex-centered();
+	justify-content: space-between;
+	background: @darkest;
+	height: @headerH;
+	padding: @thin 1rem;
+	font-size: 120%;
+	font-family: @header;
+	.title {
+		.flex-centered();
+		justify-content: flex-start;
+		font-family: @header;
+
+		a {
+			color: @lightest;
+			width: auto;
+			padding-right: @thin;
+			&:hover {
+				opacity: 0.8;
+			}
+		}
+	}
+	.sub-title {
+		.flex-centered();
+	}
+	.nav {
+		.flex-centered();
+		justify-content: flex-end;
+		.navItem {
+			color: @lightest;
+			margin-right: @thin;
+			cursor: pointer;
+			&:hover {
+				opacity: 0.8;
+			}
+		}
+		.cog {
+			transition: 0.2s;
+		}
+		.cog:hover {
+			transform: rotate(45deg) scale(1.2);
+			cursor: pointer;
+			color: @highlight;
+		}
+		.active {
+			text-decoration: underline;
+			color: @highlight;
+		}
+	}
+}
+
+.notifications {
+	position: fixed;
+	top: 1rem;
+	left: 25%;
+	width: 50%;
+	z-index: 155;
+	pointer-events: none;
+	.notification {
+		.clean-input();
+		.flex-centered();
+		justify-content: flex-start;
+		height: auto;
+		width: 100%;
+		margin-top: @thin;
+		padding: @thin 1rem;
+		color: @darkest;
+		box-shadow: 0 0 1.5rem rgba(0, 0, 0, 0.8);
+		animation: slide-in-out-top 5s ease forwards;
+		.icon {
+			font-size: 2rem;
+		}
+	}
+	.info {
+		background: @lighter;
+	}
+	.warning {
+		background: @highlight;
+	}
+	.error {
+		background: @red;
+	}
+	.success {
+		background: @green;
+	}
+}
+
+.loading {
+	.flex-centered();
+	flex-direction: column;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	padding: 1rem;
+	background: rgba(0, 0, 0, 0.5);
+	color: @lighter;
+	.main-msg {
+		.flex-row();
+		font-size: 4rem;
+		animation-name: waver;
+		animation-duration: 2s;
+		animation-timing-function: ease;
+		animation-direction: alternate;
+		animation-iteration-count: infinite;
+		.spinner {
+			animation-name: spin;
+			animation-duration: 2s;
+			animation-iteration-count: infinite;
+		}
+	}
+	.sub-msg {
+		padding-top: 1rem;
+		font-size: 1.5rem;
+	}
+}
+
+.spinner {
+	animation-name: spin;
+	animation-duration: 2s;
+	animation-timing-function: linear;
+	animation-iteration-count: infinite;
+}
+
+.drop-slot {
+	flex: 1 0 @cardW;
+	position: relative;
+	margin: 0;
+	transition: 0.2s;
+}
+.drop-slot.over {
+	background-color: fade(@highlight, 40%);
+	border-radius: @thin;
+}
+
+.drop-slot.list {
+	display: flex;
+}
+
+.card-select-container {
+	min-width: @cardW;
+	.card-select__indicators {
+		display: none;
+	}
+	.card-select__menu {
+		max-height: 8rem;
+		width: auto;
+		background: @lightest;
+	}
+	.card-select__option {
+		width: 100%;
+		background: @lightest;
+		color: @darkest;
+		cursor: pointer;
+		&:hover {
+			background: @highlight;
+		}
+	}
+}
+
+.custom-select {
+	height: 1.5rem;
+	width: 10rem;
+	border-radius: @thinnest;
+	margin: 0 @thinnest;
+	background: @lightest;
+	cursor: pointer;
+
+	.set-symbol {
+		width: 1.5rem;
+		height: 1.5rem;
+		object-fit: contain;
+	}
+
+	.select-collapsed {
+		padding: @thinner;
+		white-space: nowrap;
+		overflow: hidden;
+		color: @darkest;
+	}
+	.options {
+		position: absolute;
+		z-index: 30;
+		width: auto;
+		max-height: 10rem;
+		overflow-y: auto;
+		overflow-x: hidden;
+		color: @darkest;
+		background: @lightest;
+		.option {
+			.flex-row();
+			justify-content: space-between;
+			padding: @thinner;
+			background: @lightest;
+			border-left: @thinner solid @highlight;
+			cursor: pointer;
+			transition: 0.2s;
+
+			&:hover {
+				background: @highlight;
+			}
+		}
+		.option.active {
+			background: @highlight;
+		}
+	}
+}
+
+.footer {
+	.flex-row();
+	justify-content: space-between;
+	width: 100%;
+	padding: 1rem;
+	margin-top: 2rem;
+	background: @darkest;
+	& > * {
+		margin-right: 1rem;
+	}
+	.inverse-button {
+		font-weight: normal;
+		margin-bottom: @thin;
+	}
+}

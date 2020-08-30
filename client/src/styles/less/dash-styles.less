@@ -1,0 +1,120 @@
+.dash {
+	.hero {
+		.flex-centered();
+		.fixed-full-page();
+		flex-direction: column;
+		position: relative;
+		height: auto;
+		background: linear-gradient(rgba(0, 0, 0, 0.3), transparent);
+		.banner {
+			.flex-centered();
+			flex-direction: column;
+			text-align: center;
+			padding: 3rem 1rem;
+			h1 {
+				font-size: 5rem;
+			}
+		}
+		.log-in-form {
+			padding-top: 1rem;
+			.buttons {
+				display: flex;
+				justify-content: center;
+				margin-bottom: 2rem;
+				font-family: @header;
+			}
+			.log-out {
+				font-size: @big;
+				.flex-centered();
+				button {
+					margin-left: 1rem;
+				}
+			}
+			.in-form,
+			.up-form {
+				width: 16rem;
+				transition: transform 0.2s;
+				transform-origin: 0 0;
+
+				* {
+					width: 100%;
+				}
+				.field {
+					margin-top: 1rem;
+				}
+			}
+			.in-form.hide,
+			.up-form.hide {
+				height: 0;
+				transform: scaleY(0);
+			}
+		}
+	}
+
+	.browse {
+		.flex-centered();
+		flex-direction: column;
+		width: 100%;
+		margin-top: 1rem;
+		.new-deck {
+			font-size: @big;
+			padding: @thin 1rem;
+			height: auto;
+		}
+		.decks {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			width: 100%;
+			padding: 0 2rem;
+			.deck-tile {
+				.flex-centered();
+				justify-content: space-between;
+				padding: @thin;
+				margin-top: 1rem;
+				margin-right: 1rem;
+				min-width: 15rem;
+				background: rgba(0, 0, 0, 0.3);
+				border-radius: @thinner;
+				.to-build a {
+					.flex-centered();
+					transition: 0.2s;
+					flex: 1 0 auto;
+					padding-right: @thin;
+					.thumbnail {
+						width: 5rem;
+						height: 5rem;
+						border-radius: 5rem;
+						background: @lighter;
+						margin-right: @thin;
+					}
+					.info {
+						.flex-col();
+						align-items: flex-start;
+						justify-content: space-between;
+						height: 100%;
+						min-width: 12rem;
+						.tag {
+							margin-top: @thinner;
+						}
+						.updated-at {
+							font-style: italic;
+							margin-top: @thinner;
+						}
+					}
+				}
+				.to-build:hover * {
+					color: @light;
+				}
+				.links {
+					.flex-col();
+					width: 100%;
+					* {
+						width: 100%;
+						font-size: 1.1rem;
+					}
+				}
+			}
+		}
+	}
+}
