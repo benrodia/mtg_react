@@ -1,10 +1,8 @@
 import * as A from "../actions/types"
 import {INIT_PLAYTEST_STATE} from "../constants/initialState"
 import {COLORS} from "../constants/definitions"
-import {MANA, ETB, IS_SPELL, IS_PERMANENT} from "../constants/greps"
 import {timestamp} from "../functions/utility"
-import {Q} from "../functions/cardFunctions"
-import recieveCards from "../functions/recieveCards"
+import {receiveCards} from "../functions/receiveCards"
 
 export default function main(playtest = INIT_PLAYTEST_STATE([], null, 0), {type, key, val, bool, list, format, cards}) {
 	switch (type) {
@@ -17,7 +15,7 @@ export default function main(playtest = INIT_PLAYTEST_STATE([], null, 0), {type,
 		case A.RES_STACK:
 			return {...playtest, stack: [...playtest.stack.slice(0, Math.max(0, playtest.stack.length - 1))]}
 		case A.TOKEN:
-			return {...playtest, deck: [...playtest.deck, ...recieveCards(val, null, true)]}
+			return {...playtest, deck: [...playtest.deck, ...receiveCards(val, null, true)]}
 		case A.HANDLE_MANA:
 			return {
 				...playtest,

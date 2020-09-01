@@ -1,9 +1,8 @@
 import React, {Fragment} from "react"
-import {COLORS, CARD_TYPES, ZONES, SIDE_BOARD} from "../constants/definitions"
-import {SINGLETON, TOKEN_NAME} from "../constants/greps"
+import {TOKEN_NAME} from "../constants/greps"
+import {SIDE_BOARD} from "../constants/definitions"
 import {SPECIAL_SYMBOLS, NUMBER_WORDS} from "../constants/data"
-import {sum} from "../functions/utility"
-import {convertedSymbols, itemizeDeckList} from "../functions/cardFunctions"
+import {itemizeDeckList} from "../functions/receiveCards"
 
 export const formatManaSymbols = (text = "") => {
 	if (text && typeof text === "string") {
@@ -45,7 +44,7 @@ export const BGcolor = (colors, identity, type) => {
 		}
 	} else if (colors.length === 1 || identity.length === 1) {
 		for (var i = 0; i < colorVals.length; i++) {
-			if (colorVals[i].symbol == colors[0] || colorVals[i].symbol == identity[0]) {
+			if (colorVals[i].symbol === colors[0] || colorVals[i].symbol === identity[0]) {
 				colorVal = colorVals[i].val
 			}
 		}

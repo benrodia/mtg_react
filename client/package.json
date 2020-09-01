@@ -25,6 +25,8 @@
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "s-ago": "^2.2.0",
+    "slugify": "^1.4.5",
+    "unique-slug": "^2.0.2",
     "uuid": "^8.2.0"
   },
   "scripts": {

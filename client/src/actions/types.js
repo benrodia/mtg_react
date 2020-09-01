@@ -17,6 +17,7 @@ export const NEW_MSG = "NEW_MSG"
 
 // DECK
 export const DECK = "DECK"
+export const SAVE_DECK = "SAVE_DECK"
 
 // SETTINGS
 export const SETTINGS = "SETTINGS"

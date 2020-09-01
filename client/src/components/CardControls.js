@@ -28,7 +28,7 @@ export default connect(({main: {page}}) => {
 		classes,
 	}) => {
 		const [clicked, clickState] = useState(false)
-		const [{isDragging}, drag, preview] = useDrag({
+		const [{isDragging}, drag] = useDrag({
 			item: {...card, type: itemType || ItemTypes.CARD},
 			collect: monitor => ({isDragging: !!monitor.isDragging()}),
 		})

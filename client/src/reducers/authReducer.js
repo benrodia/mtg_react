@@ -1,8 +1,7 @@
 import * as A from "../actions/types"
 import {INIT_AUTH_STATE} from "../constants/initialState"
 
-export default function auth(auth = INIT_AUTH_STATE, action) {
-	const {type, obj, key, val} = action
+export default function auth(auth = INIT_AUTH_STATE, {type, val}) {
 	switch (type) {
 		case A.USER_LOADING:
 			return {...auth, isLoading: true}

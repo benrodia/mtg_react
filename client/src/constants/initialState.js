@@ -4,7 +4,7 @@ import {COLORS, MAIN_BOARD} from "./definitions"
 import {SINGLETON} from "./greps"
 import {CARD_SLEEVES, PLAYMATS} from "./data"
 import {loadCache} from "../functions/utility"
-import recieveCards from "../functions/recieveCards"
+import {receiveCards} from "../functions/receiveCards"
 
 export const INIT_AUTH_STATE = {
 	token: localStorage.getItem("token"),
@@ -21,13 +21,13 @@ export const INIT_AUTH_STATE = {
 export const INIT_MAIN_STATE = {
 	cardData: [],
 	legalCards: [],
-	decks: [],
 	sets: [],
 	tokens: [],
+	decks: [],
+	users: [],
 	noteLog: [],
 	modal: null,
 	page: "Dash",
-	viewUser: {},
 }
 
 export const INIT_SETTINGS_STATE = {
@@ -48,6 +48,7 @@ export const INIT_DECK_STATE = {
 	format: "casual",
 	desc: "",
 	list: [],
+	changes: false,
 }
 
 export const INIT_FILTERS_STATE = {
@@ -56,6 +57,9 @@ export const INIT_FILTERS_STATE = {
 	sortBy: "Type",
 	customFields: [],
 	focus: {},
+	basic: {
+		by: "name",
+	},
 	advanced: {
 		colors: COLORS("symbol").map(s => true),
 		all: false,
@@ -68,13 +72,14 @@ export const INIT_FILTERS_STATE = {
 	showIllegal: false,
 	showTypes: false,
 	showPrice: false,
+	viewUser: {},
 }
 
 export const INIT_PLAYTEST_STATE = (list, format, num) => {
 	return {
 		number: num || 0,
 		size: {cols: 1, rows: 1},
-		deck: recieveCards(list || []),
+		deck: receiveCards(list || []),
 		life: SINGLETON(format) ? 40 : 20,
 		eLife: SINGLETON(format) ? 40 : 20,
 		poison: 0,

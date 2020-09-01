@@ -37,11 +37,6 @@ html {
 	}
 }
 
-h4 {
-	font-weight: bolder;
-	padding-bottom: @thin;
-}
-
 .bg-img {
 	.fixed-full-page();
 	height: calc(100vh - @headerH);
@@ -124,7 +119,7 @@ h4 {
 	top: 1rem;
 	left: 25%;
 	width: 50%;
-	z-index: 155;
+	z-index: 555;
 	pointer-events: none;
 	.notification {
 		.clean-input();
@@ -174,6 +169,7 @@ h4 {
 		animation-direction: alternate;
 		animation-iteration-count: infinite;
 		.spinner {
+			transform-origin: 50% 50%;
 			animation-name: spin;
 			animation-duration: 2s;
 			animation-iteration-count: infinite;
@@ -207,27 +203,6 @@ h4 {
 	display: flex;
 }
 
-.card-select-container {
-	min-width: @cardW;
-	.card-select__indicators {
-		display: none;
-	}
-	.card-select__menu {
-		max-height: 8rem;
-		width: auto;
-		background: @lightest;
-	}
-	.card-select__option {
-		width: 100%;
-		background: @lightest;
-		color: @darkest;
-		cursor: pointer;
-		&:hover {
-			background: @highlight;
-		}
-	}
-}
-
 .custom-select {
 	height: 1.5rem;
 	width: 10rem;
@@ -235,6 +210,10 @@ h4 {
 	margin: 0 @thinnest;
 	background: @lightest;
 	cursor: pointer;
+
+	* {
+		box-shadow: none;
+	}
 
 	.set-symbol {
 		width: 1.5rem;
@@ -260,6 +239,7 @@ h4 {
 		.option {
 			.flex-row();
 			justify-content: space-between;
+			width: 100%;
 			padding: @thinner;
 			background: @lightest;
 			border-left: @thinner solid @highlight;
@@ -273,6 +253,20 @@ h4 {
 		.option.active {
 			background: @highlight;
 		}
+	}
+}
+
+.custom-select.big {
+	.flex-col();
+	height: 3rem;
+	width: 100%;
+	font-size: 1.2rem;
+	.options {
+		max-height: 25rem;
+	}
+	.select-collapsed {
+		padding: 1rem;
+		color: #888;
 	}
 }
 

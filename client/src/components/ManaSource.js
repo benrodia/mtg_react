@@ -1,7 +1,6 @@
 import React from "react"
 import {connect} from "react-redux"
 import actions from "../actions"
-import {Q} from "../functions/cardFunctions"
 import {COLORS} from "../constants/definitions"
 
 export default connect(

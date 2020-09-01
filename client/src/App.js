@@ -10,25 +10,19 @@ import Notifications from "./components/Notifications"
 import Modal from "./components/Modal"
 import Loading from "./components/Loading"
 import Footer from "./components/Footer"
-import Page_Dash from "./components/Page_Dash"
-import Page_User from "./components/Page_User"
-import Page_Builder from "./components/Page_Builder"
-import Page_Tester from "./components/Page_Tester"
+import Dash from "./components/_Page_Dash"
+import User from "./components/_Page_User"
+import Deck from "./components/_Page_Deck"
+import Playtest from "./components/_Page_Playtest"
 
 const {HOME_DIR, DECK_ID, rnd} = utilities
 export default connect(
-  ({
-    auth,
-    main: {page, cardData, legalCards, tokens},
-    deck: {format},
-    settings: {scale, randomPlaymat, randomSleeves},
-  }) => {
-    return {auth, page, cardData, legalCards, tokens, format, scale, randomSleeves, randomPlaymat}
+  ({main: {page, cardData, legalCards, tokens}, deck: {format}, settings: {scale, randomPlaymat, randomSleeves}}) => {
+    return {page, cardData, legalCards, tokens, format, scale, randomSleeves, randomPlaymat}
   },
   actions
 )(
   ({
-    auth,
     page,
     cardData,
     legalCards,
@@ -41,12 +35,14 @@ export default connect(
     getLegalCards,
     getTokens,
     changeSettings,
+    getDecks,
   }) => {
     useEffect(
       _ => {
         if (cardData.length) {
           !tokens.length && getTokens(cardData)
           !legalCards.length && getLegalCards(cardData, format)
+          getDecks()
 
           const randImg = _ =>
             rnd(cardData.map(c => c.highres_image && c.image_uris && c.image_uris.art_crop).filter(c => !!c))
@@ -59,10 +55,21 @@ export default connect(
 
     const routes = (
       <Switch>
-        <Route exact path={HOME_DIR} component={Page_Dash} />
-        <Route path={`${HOME_DIR}/build`} component={Page_Builder} />
-        <Route path={`${HOME_DIR}/test`} component={Page_Tester} />
-        <Route path={`${HOME_DIR}/user`} component={Page_User} />
+        <Route exact path={HOME_DIR}>
+          <Dash />
+          <Footer />
+        </Route>
+        <Route exact path={`${HOME_DIR}/deck/:slug`}>
+          <Deck />
+          <Footer />
+        </Route>
+        <Route exact path={`${HOME_DIR}/deck/:slug/playtest`}>
+          <Playtest />
+        </Route>
+        <Route exact path={`${HOME_DIR}/user/:slug`}>
+          <User />
+          <Footer />
+        </Route>
         <Route>
           <Redirect to={HOME_DIR} />
         </Route>
@@ -78,7 +85,6 @@ export default connect(
           <Modal />
           {cardData.length ? routes : <Loading full message="Loading card data..." />}
         </div>
-        {page === "Test" ? null : <Footer />}
       </>
     )
   }

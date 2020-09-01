@@ -1,9 +1,7 @@
-import {v4 as uuidv4} from "uuid"
-
 import {CARD_TYPES, ZONES, COLORS} from "../constants/definitions"
 import {SINGLETON, NO_QUANT_LIMIT, MANA, NUM_FROM_WORD} from "../constants/greps"
 import {matchStr} from "../functions/utility"
-import {CONTROL_CARD} from "../constants/controlCard.js"
+import {audit} from "../functions/receiveCards"
 
 export function Q(scope = [{}], keys = [""], vals = [], every) {
   let query = [],
@@ -29,18 +27,6 @@ export function Q(scope = [{}], keys = [""], vals = [], every) {
   } else query = scope.map(s => s[keys[0]])
 
   return query.length ? query : falsey
-}
-
-export function itemizeDeckList(list, filters, headers) {
-  let itemized = []
-  let remaining = list
-  const filterFor = filters || ["name"]
-  while (remaining.length) {
-    const matches = remaining.filter(card => filterFor.every(f => card[f] === remaining[0][f]))
-    remaining = remaining.filter(r => !matches.filter(c => c.key === r.key).length)
-    itemized.push(matches)
-  }
-  return itemized
 }
 
 export function normalizePos(deck) {
@@ -95,8 +81,6 @@ export function isLegal(card = {legalities: {}}, format = "", deckIdentity) {
   return allowed
 }
 
-export const audit = card => Object.assign(CONTROL_CARD, card)
-
 export function filterColors(options, colorFilter, all, only) {
   const colorsF = COLORS("symbol").filter((co, i) => colorFilter[i])
   const filtered = options.filter(c => {
@@ -142,21 +126,3 @@ export const filterCardType = (list, category, val) =>
         : "C" === val
       : Q(c, category.key, val)
   })
-
-export const collapseDeckData = (list = []) => list.map((c = {}) => `${c.board}__ID__${c.id}`)
-
-export const expandDeckData = (list = [], cardData = [{}]) =>
-  list.map(l => {
-    const id = l.slice(l.indexOf("ID__") + 4)
-    const card = cardData.filter(d => d.id === id)[0] || {}
-    const board = l.slice(0, l.indexOf("__ID"))
-    return {...card, board}
-  })
-
-export const TCGplayerMassEntryURL = list => {
-  const urlBase = `https://store.tcgplayer.com/massentry?productline=Magic&c=`
-  const listUrl = itemizeDeckList(list)
-    .map(l => `${l.length} ${l[0].name}`.replaceAll("/ /gi", "%20"))
-    .join("||")
-  return urlBase + listUrl
-}

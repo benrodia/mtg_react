@@ -5,7 +5,7 @@ import utilities from "../utilities"
 
 import BasicSearch from "./BasicSearch"
 
-const {textList, titleCaps, SIDE_BOARD} = utilities
+const {textList, titleCaps} = utilities
 
 export default connect(({deck: {name, format, list}, auth: {user}}) => {
   return {name, format, list, user}

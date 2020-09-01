@@ -31,6 +31,20 @@
 				}
 			}
 			margin-top: 2rem;
+			.stats-header {
+				top: -2rem;
+				height: 3rem;
+				transition: 0.2s;
+			}
+
+			.stats-header.sticky {
+				top: 2rem;
+				right: 0;
+				width: 18rem;
+				background: @darker;
+				padding: @thin;
+				box-shadow: 0 0 1.5rem rgba(0, 0, 0, 0.7);
+			}
 			.stat {
 				margin-top: 2rem;
 				h3 {
@@ -53,8 +67,8 @@
 				}
 			}
 		}
-		.sticky + .exports {
-			padding-top: 2.5rem;
+		.sticky + .graphs {
+			padding-top: 3rem;
 		}
 	}
 
@@ -69,16 +83,6 @@
 			height: 6rem;
 			padding: @thin 1rem;
 			border-bottom: 1px solid @lighter;
-			.custom-select {
-				.flex-col();
-				height: 3.4rem;
-				width: 15rem;
-				.select-collapsed {
-					font-size: 1.2rem;
-					padding: 1rem;
-					color: #888;
-				}
-			}
 		}
 
 		.list-head {
@@ -86,6 +90,7 @@
 			justify-content: space-between;
 			align-items: center;
 			transition: 0.3s;
+			height: 3rem;
 			.view-options {
 				.flex-row();
 			}
@@ -114,7 +119,7 @@
 			right: 18rem;
 			left: 0;
 			z-index: 80;
-			box-shadow: 0 0 1rem rgba(0, 0, 0, 0.5);
+			box-shadow: 0 0 1.5rem rgba(0, 0, 0, 0.7);
 		}
 
 		.board {
@@ -194,7 +199,7 @@
 			padding: @thin;
 			.of-name {
 				margin: 0 0 @thinner;
-				background: linear-gradient(90deg, rgba(255, 255, 255, 0.25), transparent);
+				background: linear-gradient(90deg, rgba(0, 0, 0, 0.4), transparent);
 				border-radius: @thinner;
 			}
 			.card-container {

@@ -27,7 +27,7 @@ const {
 
 export default connect(({deck: {list, format, desc}, main: {legalCards, sets}}) => {
 	return {list, format, desc, legalCards, sets}
-}, actions)(({list, format, desc, sets, legalCards, addCard, openModal, changeDeck}) => {
+}, actions)(({clean, callBack, useCards, list, format, desc, sets, legalCards, addCard, openModal, changeDeck}) => {
 	const exText = [...Array(7)]
 		.map((_, i) => {
 			if (!i) return "ex."
@@ -37,7 +37,7 @@ export default connect(({deck: {list, format, desc}, main: {legalCards, sets}}) 
 		.join("\n")
 
 	useEffect(_ => {
-		interpretForm(textList(list))
+		interpretForm(textList(clean ? [] : list))
 	}, [])
 
 	const [form, setForm] = useState()
@@ -60,34 +60,40 @@ export default connect(({deck: {list, format, desc}, main: {legalCards, sets}}) 
 				  )
 		)
 
-		const interp = items.map((item, ind) => {
-			let [quantity, spaces] = [1, item.split(" ")]
-			for (var i = 0; i < spaces.length; i++)
-				if (parseInt(spaces[i]) > 1) {
-					quantity = parseInt(spaces[i])
-					break
-				}
+		const interp = items
+			.map((item, ind) => {
+				let [quantity, spaces] = [1, item.split(" ")]
+				for (var i = 0; i < spaces.length; i++)
+					if (parseInt(spaces[i]) > 1) {
+						quantity = parseInt(spaces[i])
+						break
+					}
 
-			const setText = item.indexOf("[") ? item.slice(item.indexOf("[") + 1, item.indexOf("]")).toLowerCase() : " "
+				const setText = item.indexOf("[") ? item.slice(item.indexOf("[") + 1, item.indexOf("]")).toLowerCase() : " "
 
-			const cards = legalCards
-				.filter(c => item.includes(c.name))
-				.sort((a, b) => (a.name.length < b.name.length ? 1 : -1))
-			const card = cards.filter(c => c.set === setText)[0] || cards[0] || null
+				const cards = (useCards || legalCards)
+					.filter(c => item.toLowerCase().includes(c.name.toLowerCase()))
+					.sort((a, b) => (a.name.length < b.name.length ? 1 : -1))
+				const card = cards.filter(c => c.set === setText)[0] || cards[0] || null
 
-			return (
-				card && {
-					quantity,
-					card: {
-						...card,
-						commander: item.includes("CMDR: "),
-						board: items.slice(0, ind).filter(it => it.includes("SB:")).length ? SIDE_BOARD : MAIN_BOARD,
-					},
-				}
-			)
-		})
+				return (
+					card && {
+						quantity,
+						card: {
+							...card,
+							commander: item.includes("CMDR: "),
+							board: items.slice(0, ind).filter(it => it.includes("SB:")).length ? SIDE_BOARD : MAIN_BOARD,
+						},
+					}
+				)
+			})
+			.filter(c => !!c)
+		let returned = []
+		for (var i = 0; i < interp.length; i++)
+			returned = returned.concat([...Array(interp[i].quantity)].map(_ => interp[i].card))
 
-		setCart(interp.filter(c => !!c))
+		setCart(interp)
+		callBack && callBack(returned)
 		setForm(items.filter(r => !comment(r)).join("\n"))
 	}
 
@@ -118,10 +124,10 @@ export default connect(({deck: {list, format, desc}, main: {legalCards, sets}}) 
 	const difs = [...inCart, ...removedFromList].filter(c => c.dif !== 0)
 	const changes = (
 		<div className="changes">
-			<h3>Changes</h3>
+			<h4>Changes</h4>
 			<div className="difs">
 				{difs.map(({name, dif}) => (
-					<div className={`dif ${dif > 0 ? "plus" : "minus"}`}>
+					<div key={name + dif} className={`dif ${dif > 0 ? "plus" : "minus"}`}>
 						{dif > 0 ? "+" : ""}
 						{dif} {name}
 					</div>
@@ -133,20 +139,24 @@ export default connect(({deck: {list, format, desc}, main: {legalCards, sets}}) 
 
 	return (
 		<div className="quick-import">
-			<h3>Import File</h3>
-			<ImportFile
-				accept=".txt,.dec,.mwDeck"
-				callBack={file => {
-					if (overWrite) interpretForm(file)
-					else interpretForm(form + "\n" + file)
-				}}
-			/>
-			<div className="bar">
-				<div className="form">
-					<h3>Deck List</h3>
-					<textarea value={form} rows={"15"} onChange={e => interpretForm(e.target.value)} placeholder={exText} />
+			<div className="block">
+				<h4>Import From File</h4>
+				<ImportFile
+					accept=".txt,.dec,.mwDeck"
+					callBack={file => {
+						if (overWrite) interpretForm(file)
+						else interpretForm(form + "\n" + file)
+					}}
+				/>
+			</div>
+			<div className="block">
+				<div className="bar spaced-bar">
+					<div className="form">
+						<h4>Deck List</h4>
+						<textarea value={form} rows={"15"} onChange={e => interpretForm(e.target.value)} placeholder={exText} />
+					</div>
+					{!clean && difs.length ? changes : null}
 				</div>
-				{difs.length ? changes : null}
 			</div>
 		</div>
 	)

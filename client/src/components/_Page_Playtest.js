@@ -1,24 +1,28 @@
 import React, {useEffect} from "react"
+import {useParams} from "react-router-dom"
 
 import {connect} from "react-redux"
 import actions from "../actions"
 
 //Components
-import Loading from "./Loading"
 import Zone from "./Zone"
 import TestControls from "./TestControls"
 import TesterShortcuts from "./TesterShortcuts"
 import TheStack from "./TheStack"
 import BasicSearch from "./BasicSearch"
-import CardControls from "./CardControls"
 
 import {TOKEN_NAME} from "../constants/greps"
 
-function Page_Tester({list, tokens, look, startTest, spawnToken, handleShuffle, gameState, setPage}) {
-  useEffect(_ => {
-    setPage("Test")
-    startTest()
-  }, [])
+function Page_Tester({list, tokens, look, startTest, spawnToken, handleShuffle, gameState, setPage, openDeck}) {
+  const {slug} = useParams()
+
+  useEffect(
+    _ => {
+      openDeck(slug)
+      startTest()
+    },
+    [slug]
+  )
 
   const zone = (name, {context, header, cardHeadOnly}) => (
     <Zone zone={name} key={name} context={context} header={header} cardHeadOnly={cardHeadOnly} />

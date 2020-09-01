@@ -230,6 +230,17 @@
   margin-top: 1rem;
   margin-bottom: 0.5rem;
 }
+.block h4 {
+  margin-bottom: 0.25rem;
+}
+.big-block {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  margin-bottom: 2rem;
+}
+.big-block h4 {
+  margin-bottom: 0.25rem;
+}
 .mini-block {
   margin-top: 0.5rem;
   margin-bottom: 0.25rem;
@@ -289,27 +300,73 @@
 .even {
   align-items: center;
 }
+.wrap {
+  flex-wrap: wrap;
+}
+.center {
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+}
 .spread {
   justify-content: space-between;
 }
 .full-width {
   width: 100%;
 }
+.fill > * {
+  flex: 1 0 1%;
+}
 .spaced-bar > * {
   margin-right: 1.5rem;
+}
+.spaced-bar > *:last-child {
+  margin-right: 0;
 }
 .mini-spaced-bar > * {
   margin-right: 0.5rem;
 }
+.mini-spaced-bar > *:last-child {
+  margin-right: 0;
+}
 .spaced-col > * {
   margin-bottom: 1.5rem;
+}
+.spaced-col > *:last-child {
+  margin-bottom: 0;
 }
 .mini-spaced-col > * {
   margin-bottom: 0.5rem;
 }
+.mini-spaced-col > *:last-child {
+  margin-bottom: 0;
+}
+.spaced-grid > * {
+  margin-right: 1.5rem;
+}
+.spaced-grid > *:last-child {
+  margin-right: 0;
+}
+.spaced-grid > * {
+  margin-bottom: 1.5rem;
+}
+.spaced-grid > *:last-child {
+  margin-bottom: 0;
+}
+.mini-spaced-grid > * {
+  margin-right: 0.5rem;
+}
+.mini-spaced-grid > *:last-child {
+  margin-right: 0;
+}
+.mini-spaced-grid > * {
+  margin-bottom: 0.5rem;
+}
+.mini-spaced-grid > *:last-child {
+  margin-bottom: 0;
+}
 * {
   box-sizing: border-box !important;
-  max-height: 100%;
   max-width: 100%;
   text-decoration: none;
   list-style: none;
@@ -321,6 +378,15 @@ h1,
 h2,
 h3 {
   font-family: "Beleren";
+}
+h4,
+h5,
+h6 {
+  font-family: "Arimo";
+  font-weight: bolder;
+}
+a {
+  color: #eff5ff;
 }
 input {
   border: none;
@@ -469,10 +535,6 @@ html {
 .wrapper > * {
   height: 100%;
 }
-h4 {
-  font-weight: bolder;
-  padding-bottom: 0.5rem;
-}
 .bg-img {
   position: fixed;
   top: 0;
@@ -575,7 +637,7 @@ h4 {
   top: 1rem;
   left: 25%;
   width: 50%;
-  z-index: 155;
+  z-index: 555;
   pointer-events: none;
 }
 .notifications .notification {
@@ -640,6 +702,7 @@ h4 {
   animation-iteration-count: infinite;
 }
 .loading .main-msg .spinner {
+  transform-origin: 50% 50%;
   animation-name: spin;
   animation-duration: 2s;
   animation-iteration-count: infinite;
@@ -667,26 +730,6 @@ h4 {
 .drop-slot.list {
   display: flex;
 }
-.card-select-container {
-  min-width: 7.14rem;
-}
-.card-select-container .card-select__indicators {
-  display: none;
-}
-.card-select-container .card-select__menu {
-  max-height: 8rem;
-  width: auto;
-  background: #eff5ff;
-}
-.card-select-container .card-select__option {
-  width: 100%;
-  background: #eff5ff;
-  color: #020817;
-  cursor: pointer;
-}
-.card-select-container .card-select__option:hover {
-  background: #fcd303;
-}
 .custom-select {
   height: 1.5rem;
   width: 10rem;
@@ -694,6 +737,9 @@ h4 {
   margin: 0 0.125rem;
   background: #eff5ff;
   cursor: pointer;
+}
+.custom-select * {
+  box-shadow: none;
 }
 .custom-select .set-symbol {
   width: 1.5rem;
@@ -720,6 +766,7 @@ h4 {
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
+  width: 100%;
   padding: 0.25rem;
   background: #eff5ff;
   border-left: 0.25rem solid #fcd303;
@@ -731,6 +778,20 @@ h4 {
 }
 .custom-select .options .option.active {
   background: #fcd303;
+}
+.custom-select.big {
+  display: flex;
+  flex-flow: column nowrap;
+  height: 3rem;
+  width: 100%;
+  font-size: 1.2rem;
+}
+.custom-select.big .options {
+  max-height: 25rem;
+}
+.custom-select.big .select-collapsed {
+  padding: 1rem;
+  color: #888;
 }
 .footer {
   display: flex;
@@ -747,44 +808,6 @@ h4 {
 .footer .inverse-button {
   font-weight: normal;
   margin-bottom: 0.5rem;
-}
-.info {
-  color: #eff5ff;
-  max-width: 60rem;
-}
-.info .themes {
-  margin: 1rem 0;
-}
-.info .themes h4 {
-  margin-bottom: 0.5rem;
-}
-.info .themes .inner {
-  max-width: 100%;
-  padding: 0.5rem;
-  overflow-x: auto;
-  overflow-y: hidden;
-  display: flex;
-  flex-flow: row nowrap;
-}
-.info .themes .inner .sleeves,
-.info .themes .inner .playmat {
-  object-fit: cover;
-  margin-right: 0.5rem;
-  height: 10rem;
-  width: 14rem;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-.info .themes .inner .sleeves:hover,
-.info .themes .inner .playmat:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 0.5rem #fcd303;
-}
-.info .themes .inner .sleeves {
-  max-width: 7.14rem;
-}
-.info .themes .inner .selected {
-  box-shadow: 0 0 1rem #fcd303;
 }
 .dash .hero {
   display: flex;
@@ -852,7 +875,7 @@ h4 {
   height: 0;
   transform: scaleY(0);
 }
-.dash .browse {
+.browse {
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;
@@ -861,19 +884,19 @@ h4 {
   width: 100%;
   margin-top: 1rem;
 }
-.dash .browse .new-deck {
+.browse .new-deck {
   font-size: 1.5rem;
   padding: 0.5rem 1rem;
   height: auto;
 }
-.dash .browse .decks {
+.browse .decks {
   display: flex;
+  flex-flow: row nowrap;
   flex-wrap: wrap;
-  align-items: center;
   width: 100%;
   padding: 0 2rem;
 }
-.dash .browse .decks .deck-tile {
+.browse .decks .deck-tile {
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;
@@ -886,7 +909,7 @@ h4 {
   background: rgba(0, 0, 0, 0.3);
   border-radius: 0.25rem;
 }
-.dash .browse .decks .deck-tile .to-build a {
+.browse .decks .deck-tile .to-build {
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;
@@ -895,14 +918,7 @@ h4 {
   flex: 1 0 auto;
   padding-right: 0.5rem;
 }
-.dash .browse .decks .deck-tile .to-build a .thumbnail {
-  width: 5rem;
-  height: 5rem;
-  border-radius: 5rem;
-  background: #c6cfe4;
-  margin-right: 0.5rem;
-}
-.dash .browse .decks .deck-tile .to-build a .info {
+.browse .decks .deck-tile .to-build .info {
   display: flex;
   flex-flow: column nowrap;
   align-items: flex-start;
@@ -910,24 +926,61 @@ h4 {
   height: 100%;
   min-width: 12rem;
 }
-.dash .browse .decks .deck-tile .to-build a .info .tag {
+.browse .decks .deck-tile .to-build .info .tag {
   margin-top: 0.25rem;
 }
-.dash .browse .decks .deck-tile .to-build a .info .updated-at {
+.browse .decks .deck-tile .to-build .info .updated-at {
   font-style: italic;
   margin-top: 0.25rem;
 }
-.dash .browse .decks .deck-tile .to-build:hover * {
+.browse .decks .deck-tile .to-build:hover * {
   color: #8895b3;
 }
-.dash .browse .decks .deck-tile .links {
+.browse .decks .deck-tile .to-build:hover * img {
+  filter: brightness(0.8);
+}
+.browse .decks .deck-tile .links {
   display: flex;
   flex-flow: column nowrap;
   width: 100%;
 }
-.dash .browse .decks .deck-tile .links * {
+.browse .decks .deck-tile .links * {
   width: 100%;
   font-size: 1.1rem;
+}
+.feature {
+  width: 5rem;
+  height: 5rem;
+}
+.feature .pie {
+  position: absolute;
+  z-index: 1;
+  filter: drop-shadow(0 0 0.5rem rgba(0, 0, 0, 0.5));
+  margin: -0.25rem 0 0 -0.25rem;
+}
+.feature .pie svg {
+  height: 2rem;
+  width: 2rem;
+}
+.feature img {
+  background-color: #c6cfe4;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 5rem;
+}
+.feature .change-img {
+  position: absolute;
+  z-index: 1;
+  height: 5rem;
+  width: 5rem;
+  border-radius: 5rem;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  cursor: pointer;
+}
+.feature:hover .change-img {
+  opacity: 1;
 }
 .builder {
   display: flex;
@@ -960,6 +1013,19 @@ h4 {
 .builder .side-bar .stats .price-stats .total h3 {
   margin-bottom: 0.25rem;
 }
+.builder .side-bar .stats .stats-header {
+  top: -2rem;
+  height: 3rem;
+  transition: 0.2s;
+}
+.builder .side-bar .stats .stats-header.sticky {
+  top: 2rem;
+  right: 0;
+  width: 18rem;
+  background: #1f283b;
+  padding: 0.5rem;
+  box-shadow: 0 0 1.5rem rgba(0, 0, 0, 0.7);
+}
 .builder .side-bar .stats .stat {
   margin-top: 2rem;
 }
@@ -982,8 +1048,8 @@ h4 {
   margin-bottom: 0.25rem;
   white-space: nowrap;
 }
-.builder .side-bar .sticky + .exports {
-  padding-top: 2.5rem;
+.builder .side-bar .sticky + .graphs {
+  padding-top: 3rem;
 }
 .builder .deck-area {
   display: flex;
@@ -1000,23 +1066,13 @@ h4 {
   padding: 0.5rem 1rem;
   border-bottom: 1px solid #c6cfe4;
 }
-.builder .deck-area .add-search .custom-select {
-  display: flex;
-  flex-flow: column nowrap;
-  height: 3.4rem;
-  width: 15rem;
-}
-.builder .deck-area .add-search .custom-select .select-collapsed {
-  font-size: 1.2rem;
-  padding: 1rem;
-  color: #888;
-}
 .builder .deck-area .list-head {
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
   align-items: center;
   transition: 0.3s;
+  height: 3rem;
 }
 .builder .deck-area .list-head .view-options {
   display: flex;
@@ -1047,7 +1103,7 @@ h4 {
   right: 18rem;
   left: 0;
   z-index: 80;
-  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 1.5rem rgba(0, 0, 0, 0.7);
 }
 .builder .deck-area .board {
   color: #020817;
@@ -1124,7 +1180,7 @@ h4 {
 }
 .builder .board-inner .list-inner .of-name {
   margin: 0 0 0.25rem;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.25), transparent);
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.4), transparent);
   border-radius: 0.25rem;
 }
 .builder .board-inner .list-inner .card-container {
@@ -1271,8 +1327,11 @@ h4 {
   border-radius: 0.25rem;
   background: rgba(255, 255, 255, 0.7);
   padding: 0.125rem 0.25rem;
-  font-family: "Beleren";
   text-align: left;
+}
+.card-head h4 {
+  font-size: 1rem;
+  font-family: "Beleren";
 }
 .card-head:hover {
   cursor: pointer;
@@ -1280,6 +1339,7 @@ h4 {
 }
 .card-head .types {
   font-size: 0.8rem;
+  font-family: "Arimo";
 }
 .card-head .types .ms {
   height: 1rem;
@@ -1356,7 +1416,7 @@ h4 {
   justify-content: flex-start;
   align-items: flex-start;
   transition: 0.3s ease-out;
-  background: #414f6b;
+  background: #313f56;
   padding: 1rem;
   max-height: calc(100vh - 6rem);
   min-width: 30rem;
@@ -1455,6 +1515,44 @@ h4 {
   height: 2rem;
   margin-bottom: 0.5rem;
 }
+.modal-cont .info {
+  color: #eff5ff;
+  max-width: 60rem;
+}
+.modal-cont .info .themes {
+  margin: 1rem 0;
+}
+.modal-cont .info .themes h4 {
+  margin-bottom: 0.5rem;
+}
+.modal-cont .info .themes .inner {
+  max-width: 100%;
+  padding: 0.5rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: flex;
+  flex-flow: row nowrap;
+}
+.modal-cont .info .themes .inner .sleeves,
+.modal-cont .info .themes .inner .playmat {
+  object-fit: cover;
+  margin-right: 0.5rem;
+  height: 10rem;
+  width: 14rem;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+.modal-cont .info .themes .inner .sleeves:hover,
+.modal-cont .info .themes .inner .playmat:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 0.5rem #fcd303;
+}
+.modal-cont .info .themes .inner .sleeves {
+  max-width: 7.14rem;
+}
+.modal-cont .info .themes .inner .selected {
+  box-shadow: 0 0 1rem #fcd303;
+}
 .hide-modal {
   opacity: 0;
   pointer-events: none;
@@ -1545,7 +1643,7 @@ h4 {
   justify-content: space-between;
   height: 1.5rem;
   color: #eff5ff;
-  background: #414f6b;
+  background: #313f56;
 }
 .tester .test-controls p {
   font-family: "Beleren";

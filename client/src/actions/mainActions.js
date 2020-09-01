@@ -1,11 +1,9 @@
 import {v4 as uuidv4} from "uuid"
 import axios from "axios"
-import store from "../store"
 import * as A from "./types"
-import {getDecks} from "./authActions"
 import utilities from "../utilities"
 
-const {Q, isLegal} = utilities
+const {Q, isLegal, expandDeckData} = utilities
 
 export const setPage = page => dispatch => {
   dispatch({type: A.MAIN, key: "page", val: page})
@@ -15,6 +13,7 @@ export const setPage = page => dispatch => {
 export const loadAppData = _ => dispatch => {
   dispatch(getCardData())
   dispatch(getSetData())
+  dispatch(getUsers())
   dispatch(getDecks())
 }
 
@@ -34,7 +33,6 @@ export const getSetData = _ => dispatch => {
 
 export const getLegalCards = (cards, format) => dispatch => {
   const legal = cards.filter(c => isLegal(c, format, null) > 0)
-  dispatch(newMsg(`${legal.length} cards legal in ${format}.`, "success"))
   dispatch({type: A.MAIN, key: "legalCards", val: legal})
 }
 
@@ -44,10 +42,28 @@ export const getTokens = cards => dispatch =>
     key: "tokens",
     val: cards.filter(c => Q(c, "type_line", "Token")),
   })
+
+export const getUsers = _ => dispatch => {
+  axios
+    .get("/api/users")
+    .then(res => dispatch({type: A.MAIN, key: "users", val: res.data}))
+    .catch(err => console.error(err))
+}
+
+export const getDecks = _ => (dispatch, getState) => {
+  axios
+    .get("/api/decks")
+    .then(res =>
+      dispatch({
+        type: A.MAIN,
+        key: "decks",
+        val: res.data.map(d => {
+          return {...d, list: expandDeckData(d.list, getState().main.cardData)}
+        }),
+      })
+    )
+    .catch(err => console.error(err))
+}
+
 export const openModal = modal => dispatch => dispatch({type: A.MAIN, key: "modal", val: modal})
 export const newMsg = (message, type) => dispatch => dispatch({type: A.NEW_MSG, val: {key: uuidv4(), message, type}})
-
-export const viewUser = user => (dispatch, getState) => {
-  console.log("openUser", user)
-  dispatch({type: A.MAIN, key: "viewUser", val: user})
-}

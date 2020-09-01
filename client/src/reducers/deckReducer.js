@@ -1,11 +1,12 @@
 import * as A from "../actions/types"
 import {INIT_DECK_STATE} from "../constants/initialState"
 
-export default function deck(deck = INIT_DECK_STATE, action) {
-	const {type, obj, key, val} = action
+export default function deck(deck = INIT_DECK_STATE, {type, val}) {
 	switch (type) {
 		case A.DECK:
-			return {...deck, ...val}
+			return {...deck, ...val, changes: true}
+		case A.SAVE_DECK:
+			return {...deck, changes: false}
 		default:
 			return deck
 	}

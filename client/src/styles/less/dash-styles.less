@@ -50,71 +50,99 @@
 			}
 		}
 	}
-
-	.browse {
-		.flex-centered();
-		flex-direction: column;
+}
+.browse {
+	.flex-centered();
+	flex-direction: column;
+	width: 100%;
+	margin-top: 1rem;
+	.new-deck {
+		font-size: @big;
+		padding: @thin 1rem;
+		height: auto;
+	}
+	.decks {
+		.flex-row();
+		flex-wrap: wrap;
 		width: 100%;
-		margin-top: 1rem;
-		.new-deck {
-			font-size: @big;
-			padding: @thin 1rem;
-			height: auto;
-		}
-		.decks {
-			display: flex;
-			flex-wrap: wrap;
-			align-items: center;
-			width: 100%;
-			padding: 0 2rem;
-			.deck-tile {
+		padding: 0 2rem;
+		.deck-tile {
+			.flex-centered();
+			justify-content: space-between;
+			padding: @thin;
+			margin-top: 1rem;
+			margin-right: 1rem;
+			min-width: 15rem;
+			background: rgba(0, 0, 0, 0.3);
+			border-radius: @thinner;
+			.to-build {
 				.flex-centered();
-				justify-content: space-between;
-				padding: @thin;
-				margin-top: 1rem;
-				margin-right: 1rem;
-				min-width: 15rem;
-				background: rgba(0, 0, 0, 0.3);
-				border-radius: @thinner;
-				.to-build a {
-					.flex-centered();
-					transition: 0.2s;
-					flex: 1 0 auto;
-					padding-right: @thin;
-					.thumbnail {
-						width: 5rem;
-						height: 5rem;
-						border-radius: 5rem;
-						background: @lighter;
-						margin-right: @thin;
-					}
-					.info {
-						.flex-col();
-						align-items: flex-start;
-						justify-content: space-between;
-						height: 100%;
-						min-width: 12rem;
-						.tag {
-							margin-top: @thinner;
-						}
-						.updated-at {
-							font-style: italic;
-							margin-top: @thinner;
-						}
-					}
-				}
-				.to-build:hover * {
-					color: @light;
-				}
-				.links {
+				transition: 0.2s;
+				flex: 1 0 auto;
+				padding-right: @thin;
+				.info {
 					.flex-col();
-					width: 100%;
-					* {
-						width: 100%;
-						font-size: 1.1rem;
+					align-items: flex-start;
+					justify-content: space-between;
+					height: 100%;
+					min-width: 12rem;
+					.tag {
+						margin-top: @thinner;
+					}
+					.updated-at {
+						font-style: italic;
+						margin-top: @thinner;
 					}
 				}
 			}
+			.to-build:hover * {
+				color: @light;
+				img {
+					filter: brightness(0.8);
+				}
+			}
+			.links {
+				.flex-col();
+				width: 100%;
+				* {
+					width: 100%;
+					font-size: 1.1rem;
+				}
+			}
 		}
+	}
+}
+.feature {
+	width: 5rem;
+	height: 5rem;
+	.pie {
+		position: absolute;
+		z-index: 1;
+		filter: drop-shadow(0 0 @thin @opaque);
+		margin: -@thinner 0 0 -@thinner;
+		svg {
+			height: 2rem;
+			width: 2rem;
+		}
+	}
+	img {
+		background-color: @lighter;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		border-radius: 5rem;
+	}
+	.change-img {
+		position: absolute;
+		z-index: 1;
+		height: 5rem;
+		width: 5rem;
+		border-radius: 5rem;
+		background: @opaque;
+		opacity: 0;
+		cursor: pointer;
+	}
+	&:hover .change-img {
+		opacity: 1;
 	}
 }

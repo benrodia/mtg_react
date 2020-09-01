@@ -44,11 +44,15 @@ export default connect(
 	actions
 )(
 	({
+		header,
+		customFields,
 		legalCards,
 		sets,
 		list,
 		format,
-		color_identity,
+		author,
+		_id,
+		isAuthenticated,
 		view,
 		sortBy,
 		focus,
@@ -59,15 +63,10 @@ export default connect(
 		changeCard,
 		changeDeck,
 		changeFilters,
-		header,
-		customFields,
-		_id,
-		isAuthenticated,
-		author,
+		canEdit,
 	}) => {
 		let inBoard = list.filter(c => c.board === board && !c.commander)
 		const commanders = list.filter(c => board === MAIN_BOARD && !!c.commander)
-		const canEdit = isAuthenticated && author === _id
 
 		const boardInner = _ => {
 			const Filter_By = FILTER_TERMS.filter(t => t.name === sortBy)[0] || {}
@@ -126,7 +125,7 @@ export default connect(
 					<h3>
 						<div className={`icon`} /> {pluralize("Commander", commanders.length)}
 					</h3>
-					{canEdit ? (
+					{canEdit(author) ? (
 						<BasicSearch
 							searchable
 							limit={20}
@@ -205,7 +204,7 @@ export default connect(
 										pointerEvents: cardInd !== cardsOfSet.length - 1 && view === "grid" && "none",
 										marginBottom: cardsOfSet.length > 1 && !cardInd && view === "grid" && cardsOfSet.length + "rem",
 									}}>
-									{canEdit ? controls : null}
+									{canEdit(author) ? controls : null}
 								</CardControls>
 							)
 						})

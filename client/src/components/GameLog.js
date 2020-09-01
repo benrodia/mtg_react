@@ -1,13 +1,17 @@
 import React, {useState, useRef, useEffect} from "react"
 
 import {connect} from "react-redux"
-import {v4 as uuidv4} from "uuid"
 import actions from "../actions"
 
 function GameLog({history, current, timeTravel}) {
   const [open, openLog] = useState(false)
   const bottom = useRef()
-  useEffect(_ => bottom.current.scrollIntoView())
+  useEffect(
+    _ => {
+      bottom.current.scrollIntoView()
+    },
+    [open]
+  )
 
   const past = open ? history : [{...history[history.length - 1]}]
 
@@ -17,7 +21,7 @@ function GameLog({history, current, timeTravel}) {
         {past.map(p => (
           <div
             onClick={_ => open && timeTravel(p.current)}
-            key={uuidv4()}
+            key={"GameLog_" + current}
             className={`log ${p.current > current && "inactive"} ${
               open && p.current === current && current < history.length && "pointer"
             }`}>

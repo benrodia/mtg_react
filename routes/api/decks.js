@@ -11,12 +11,8 @@ router.get("/", (req, res) => {
 })
 
 router.post("/", (req, res) => {
-	const newDeck = new Deck({author: req.body.author})
+	const newDeck = new Deck(req.body)
 	newDeck.save().then(deck => res.json(deck))
-})
-
-router.put("/:id", (req, res) => {
-	Deck.findById(req.params.id).then(deck => req.body)
 })
 
 router.patch("/:id", (req, res) => {

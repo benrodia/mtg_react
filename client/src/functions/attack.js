@@ -1,6 +1,5 @@
 import {Q} from "./cardFunctions"
 import {sum} from "./utility"
-import {CAN_TAP} from "../constants/greps"
 
 export default function attackAll(attackers = []) {
 	if (!attackers || !attackers.length) return false

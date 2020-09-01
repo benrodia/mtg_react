@@ -16,13 +16,15 @@
 @lightest: #eff5ff;
 @lighter: #c6cfe4;
 @light: #8895b3;
-@dark: #414f6b;
+@dark: #313f56;
 @darker: #1f283b;
 @darkest: #020817;
 
 @highlight: #fcd303;
 @red: #ff4466;
 @green: #7be8c0;
+
+@opaque: rgba(0, 0, 0, 0.5);
 
 @bigger: 2rem;
 @big: 1.5rem;
@@ -124,7 +126,7 @@
 .small-button {
 	.clean-button();
 	font-size: @small;
-	height: 1.5rem;
+	height: @big;
 	padding: 0 @thin;
 	width: auto;
 }
@@ -169,7 +171,7 @@
 .inverse-small-button {
 	.inverse-button();
 	font-size: @small;
-	height: 1.5rem;
+	height: @big;
 	padding: 0;
 }
 
@@ -229,6 +231,14 @@
 .block {
 	margin-top: 1rem;
 	margin-bottom: @thin;
+	h4 {
+		margin-bottom: @thinner;
+	}
+}
+
+.big-block {
+	.block();
+	margin-bottom: 2rem;
 }
 
 .mini-block {
@@ -242,10 +252,10 @@
 
 .icon {
 	svg {
-		min-height: 1.5rem;
-		height: 1.5rem;
-		min-width: 1.5rem;
-		width: 1.5rem;
+		min-height: @big;
+		height: @big;
+		min-width: @big;
+		width: @big;
 	}
 	svg.common,
 	svg.common * {
@@ -298,6 +308,16 @@
 	align-items: center;
 }
 
+.wrap {
+	flex-wrap: wrap;
+}
+
+.center {
+	justify-content: center;
+	text-align: center;
+	align-items: center;
+}
+
 .spread {
 	justify-content: space-between;
 }
@@ -305,34 +325,61 @@
 .full-width {
 	width: 100%;
 }
+.fill {
+	& > * {
+		flex: 1 0 1%;
+	}
+}
 
 .spaced-bar {
 	& > * {
-		margin-right: 1.5rem;
+		margin-right: @big;
+		&:last-child {
+			margin-right: 0;
+		}
 	}
 }
 .mini-spaced-bar {
 	& > * {
 		margin-right: @thin;
+		&:last-child {
+			margin-right: 0;
+		}
 	}
 }
 .spaced-col {
 	& > * {
-		margin-bottom: 1.5rem;
+		margin-bottom: @big;
+		&:last-child {
+			margin-bottom: 0;
+		}
 	}
 }
 
 .mini-spaced-col {
 	& > * {
 		margin-bottom: @thin;
+		&:last-child {
+			margin-bottom: 0;
+		}
 	}
+}
+
+.spaced-grid {
+	.spaced-bar();
+	.spaced-col();
+}
+
+.mini-spaced-grid {
+	.mini-spaced-bar();
+	.mini-spaced-col();
 }
 
 // GENERAL RULES
 
 * {
 	box-sizing: border-box !important;
-	max-height: 100%;
+	// max-height: 100%;
 	max-width: 100%;
 	text-decoration: none;
 	list-style: none;
@@ -345,6 +392,17 @@ h1,
 h2,
 h3 {
 	font-family: @header;
+}
+
+h4,
+h5,
+h6 {
+	font-family: @para;
+	font-weight: bolder;
+}
+
+a {
+	color: @lightest;
 }
 
 input {

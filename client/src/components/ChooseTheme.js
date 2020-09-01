@@ -3,13 +3,12 @@ import {connect} from "react-redux"
 import actions from "../actions"
 import utilities from "../utilities"
 
-const {titleCaps, CARD_SLEEVES, PLAYMATS, log} = utilities
+const {titleCaps, CARD_SLEEVES, PLAYMATS} = utilities
 
 export default connect(({settings: {sleeves, randomSleeves, playmat, randomPlaymat}, main: {legalCards}}) => {
 	return {playmat, sleeves, randomPlaymat, randomSleeves, legalCards}
 }, actions)(({type, playmat, sleeves, randomPlaymat, randomSleeves, legalCards, changeSettings}) => {
 	const [hiRes, shuffleHiRes] = useState([])
-	const [artist, setArtist] = useState(null)
 
 	const Constant = type === "sleeves" ? CARD_SLEEVES : PLAYMATS
 	const val = type === "sleeves" ? sleeves : playmat
@@ -40,13 +39,13 @@ export default connect(({settings: {sleeves, randomSleeves, playmat, randomPlaym
 				</button>
 			</div>
 			<div className="inner">
-				<img className={`${type} selected`} src={val} />
+				<img className={`${type} selected`} src={val} alt={val} />
 				{valRnd
 					? null
-					: show.map(c => {
+					: show.map((c, i) => {
 							const s = (c.image_uris && c.image_uris.art_crop) || c
 							return (
-								<div>
+								<div key={s + i}>
 									<img
 										className={`${type} ${val === s ? "selected" : ""}`}
 										onClick={_ => changeSettings(type, s)}

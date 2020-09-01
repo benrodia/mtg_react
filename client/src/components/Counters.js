@@ -40,7 +40,7 @@ export default connect(
 			<div className="add-counters">
 				{!defaultCounter ? null : (
 					<button className="smaller-button" onClick={() => changeCounters(defaultCounter, 1)}>
-						{defaultCounter == "PlusOne" ? "+1/+1" : defaultCounter}
+						{defaultCounter === "PlusOne" ? "+1/+1" : defaultCounter}
 					</button>
 				)}
 				<BasicSearch

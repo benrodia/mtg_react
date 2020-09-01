@@ -1,5 +1,4 @@
 const mongoose = require("mongoose")
-const {v4} = require("uuid")
 const Schema = mongoose.Schema
 
 const UserSchema = new Schema({
@@ -22,7 +21,8 @@ const UserSchema = new Schema({
 	},
 	slug: {
 		type: String,
-		default: v4(),
+		required: true,
+		unique: true,
 	},
 })
 

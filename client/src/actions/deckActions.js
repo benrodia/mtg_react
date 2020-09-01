@@ -1,18 +1,30 @@
 import {v4 as uuidv4} from "uuid"
+import {useHistory} from "react-router-dom"
 import axios from "axios"
 
 // Constants
 import * as A from "./types"
 
+import {updateDeck} from "./authActions"
 import {getLegalCards} from "./mainActions"
 import utilities from "../utilities"
-const {MAIN_BOARD, audit, cache} = utilities
+const {HOME_DIR, MAIN_BOARD, audit, cache, expandDeckData} = utilities
+
+export const openDeck = slug => (dispatch, getState) => {
+  const deck = getState().main.decks.filter(d => d.slug === slug)[0]
+  if (deck) {
+    console.log("OPEN DECK", deck)
+    cache(A.DECK, "all", deck)
+    dispatch({type: A.DECK, val: deck})
+  }
+}
 
 export const changeDeck = (key, val) => (dispatch, getState) => {
   let update = {...getState().deck}
   if (key === "format" && val !== update.format) dispatch(getLegalCards(getState().main.cardData, val))
 
   update[key] = val
+
   cache(A.DECK, "all", update)
   dispatch({type: A.DECK, val: update})
 }

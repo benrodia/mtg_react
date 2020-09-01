@@ -1,4 +1,3 @@
-import React from "react"
 import * as definitions from "./constants/definitions"
 import * as data from "./constants/data"
 import * as greps from "./constants/greps"
@@ -9,7 +8,7 @@ import * as gameLogic from "./functions/gameLogic"
 import * as payMana from "./functions/payMana"
 import * as text from "./functions/text"
 import * as utility from "./functions/utility"
-import * as recieveCards from "./functions/recieveCards"
+import * as receiveCards from "./functions/receiveCards"
 
 const utilities = {
 	...definitions,
@@ -22,7 +21,7 @@ const utilities = {
 	...payMana,
 	...text,
 	...utility,
-	...recieveCards,
+	...receiveCards,
 }
 
 export default utilities

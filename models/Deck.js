@@ -14,9 +14,30 @@ const DeckSchema = new Schema({
 		type: Date,
 		default: Date.now,
 	},
-	url: {
+	slug: {
 		type: String,
-		default: "new-deck",
+		required: true,
+		unique: true,
+	},
+	published: {
+		type: Boolean,
+		default: false,
+	},
+	privacy: {
+		type: String,
+		default: "Public",
+	},
+	views: {
+		type: Number,
+		default: 0,
+	},
+	comments: {
+		type: Array,
+		default: [],
+	},
+	upvotes: {
+		type: Number,
+		default: 0,
 	},
 	name: {
 		type: String,
@@ -24,7 +45,7 @@ const DeckSchema = new Schema({
 	},
 	desc: {
 		type: String,
-		default: "",
+		default: "No Description",
 	},
 	format: {
 		type: String,
@@ -34,9 +55,9 @@ const DeckSchema = new Schema({
 		type: Array,
 		default: [],
 	},
-	colors: {
-		type: Array,
-		default: [0, 0, 0, 0, 0, 1],
+	feature: {
+		type: String,
+		default: "",
 	},
 })
 

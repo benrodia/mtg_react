@@ -1,40 +1,35 @@
 import axios from "axios"
 import * as A from "./types"
-
-import {newMsg, openModal, setPage} from "./mainActions"
+import {newMsg, setPage, getDecks} from "./mainActions"
+import {openDeck} from "./deckActions"
 import utilities from "../utilities"
 
-const {cache, expandDeckData, collapseDeckData, INIT_DECK_STATE} = utilities
+const {cache, collapseDeckData, INIT_DECK_STATE, config, createSlug} = utilities
 
-export const loadUser = _ => (dispatch, getState) => {
-	dispatch({type: A.USER_LOADING})
+// export const loadUser = _ => (dispatch, getState) => {
+// 	dispatch({type: A.USER_LOADING})
 
+// 	axios
+// 		.get("/auth/user", config(getState))
+// 		.then(res =>
+// 			dispatch({
+// 				type: A.USER_LOADED,
+// 				val: res.data,
+// 			})
+// 		)
+// 		.catch(err => {
+// 			dispatch(newMsg(err.response.data))
+// 			dispatch(returnErrors(err.response.data, err.response.status))
+// 			dispatch({type: A.AUTH_ERROR})
+// 		})
+// }
+
+export const register = ({name, email, password}) => (dispatch, getState) => {
+	const slug = createSlug(name, getState().main.users)
 	axios
-		.get("/auth/user", tokenConfig(getState))
-		.then(res =>
-			dispatch({
-				type: A.USER_LOADED,
-				val: res.data,
-			})
-		)
-		.catch(err => {
-			dispatch(newMsg(err.response.data))
-			dispatch(returnErrors(err.response.data, err.response.status))
-			dispatch({type: A.AUTH_ERROR})
-		})
-}
-
-export const register = ({name, email, password}) => dispatch => {
-	const config = {
-		headers: {
-			"Content-type": "application/json",
-		},
-	}
-
-	axios
-		.post("/api/users", JSON.stringify({name, email, password}), config)
+		.post("/api/users", {name, email, password, slug}, config())
 		.then(res => {
-			dispatch(newMsg(`Nice to meet you, ${res.data.name}!`))
+			dispatch(newMsg(`Nice to meet you, ${res.data.user.name}!`))
 			dispatch({
 				type: A.REGISTER_SUCCESS,
 				val: res.data,
@@ -46,16 +41,11 @@ export const register = ({name, email, password}) => dispatch => {
 			dispatch({type: A.REGISTER_FAIL})
 		})
 }
+
 export const login = ({email, password}) => dispatch => {
-	const config = {
-		headers: {
-			"Content-type": "application/json",
-		},
-	}
 	axios
-		.post("/api/auth", JSON.stringify({email, password}), config)
+		.post("/api/auth", JSON.stringify({email, password}), config())
 		.then(res => {
-			console.log("SUCCESS", res)
 			dispatch(newMsg(`Welcome back, ${res.data.user.name}!`))
 			dispatch({
 				type: A.LOGIN_SUCCESS,
@@ -84,60 +74,51 @@ export const clearErrors = _ => dispatch => {
 	return {type: A.CLEAR_ERRORS}
 }
 
-export const tokenConfig = getState => {
-	console.log("getState().auth.token", getState().auth.token)
-	const config = {
-		headers: {
-			"Content-type": "application/json",
-		},
-	}
-	const token = getState().auth.token
-	if (token) config["x-auth-token"] = token
-	return config
-}
-
-export const updateUserName = (_id, name = "") => dispatch => {
+export const updateUser = (_id, data = {}) => (dispatch, getState) => {
 	// VALIDATE USERNAME AND GET NEW SLUG
 	axios
-		.put(`/api/users/${_id}`, {name})
+		.patch(`/api/users/${_id}`, config(getState), data)
 		.then(res => console.log(res.data))
 		.catch(err => console.error(err))
 }
 
-export const updateUserPassword = (_id, password = "") => {
-	// VALIDATE PASSWORD
-	axios
-		.put(`/api/users/${_id}`, {password})
-		.then(res => console.log(res.data))
-		.catch(err => console.error(err))
+export const deleteUser = _id => (dispatch, getState) => {
+	if (_id === getState().auth.user_id && window.confirm("Are you super duper sure you want to delete your account??")) {
+		axios
+			.patch(`/api/users/${_id}`, config(getState))
+			.then(res => console.log(res.data))
+			.catch(err => console.error(err))
+	}
 }
 
-export const openDeck = deck => (dispatch, getState) => {
-	console.log("openDeck", deck)
-	dispatch({type: A.DECK, val: {...deck, list: expandDeckData(deck.list, getState().main.cardData)}})
-}
-
-export const canEdit = _id => (dispatch, getState) => getState().auth.isAuthenticated && getState().auth._id === _id
+export const canEdit = author => (dispatch, getState) =>
+	getState().auth.isAuthenticated && getState().auth.user._id === author
 
 export const updateDeck = deck => {
 	axios
-		.put(`/api/decks/${deck._id}`, {...deck, list: collapseDeckData(deck.list), updated: Date.now})
-		.then(res => console.log(res.data))
+		.patch(`/api/decks/${deck._id}`, {...deck, list: collapseDeckData(deck.list), updated: Date.now}, config())
+		.then(res => {
+			console.log(res.data)
+			// dispatch(newMsg("SAVED DECK", "success"))
+		})
 		.catch(err => console.error(err))
 }
 
-export const newDeck = author => dispatch => {
-	axios
-		.post(`/api/decks`, {author})
-		.then(res => {
-			dispatch(getDecks())
-			dispatch(openDeck(res.data))
-		})
-		.catch(err => console.error("COULD NOT CREATE DECK", err))
+export const newDeck = (author, {name, format, list}) => (dispatch, getState) => {
+	if (author) {
+		const slug = createSlug(name, getState().main.decks)
+		axios
+			.post(`/api/decks`, {author, name, format, list, slug})
+			.then(res => {
+				dispatch(newMsg("CREATED DECK", "success"))
+				dispatch(getDecks())
+				dispatch(openDeck(res.data))
+			})
+			.catch(err => console.error("COULD NOT CREATE DECK", err))
+	}
 }
 
-export const cloneDeck = _ => (dispatch, getState) => {
-	const author = getState().auth.user._id
+export const cloneDeck = author => (dispatch, getState) => {
 	const {name, format, list} = getState().deck
 	axios
 		.post(`/api/decks`, {name, format, list, author, desc: "Cloned Deck"})
@@ -150,17 +131,15 @@ export const cloneDeck = _ => (dispatch, getState) => {
 
 export const deleteDeck = _id => (dispatch, getState) => {
 	if (window.confirm("Delete Deck?")) {
-		axios.delete(`/api/decks/${_id}`).then(res => dispatch(getDecks()))
-		cache(A.DECK, "all", INIT_DECK_STATE)
-		dispatch({type: A.DECK, val: INIT_DECK_STATE})
-		dispatch(newMsg("DELETED DECK"))
-		dispatch(setPage("Dash"))
+		axios
+			.delete(`/api/decks/${_id}`, config(getState))
+			.then(res => {
+				dispatch(getDecks())
+				cache(A.DECK, "all", INIT_DECK_STATE)
+				dispatch({type: A.DECK, val: INIT_DECK_STATE})
+				dispatch(newMsg("DELETED DECK"))
+				dispatch(setPage("Dash"))
+			})
+			.catch(err => dispatch(newMsg("Problem deleting deck.", "error")))
 	}
-}
-
-export const getDecks = _ => dispatch => {
-	axios
-		.get("/api/decks")
-		.then(res => dispatch({type: A.MAIN, key: "decks", val: res.data}))
-		.catch(err => console.error(err))
 }

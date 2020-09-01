@@ -1,9 +1,7 @@
 import React, {useState, useEffect} from "react"
 import {connect} from "react-redux"
 import actions from "../actions"
-import utilities from "../utilities"
-
-const {ItemTypes} = utilities
+// import utilities from "../utilities"
 
 export default connect(({auth: {isAuthenticated, errors, user: {name, email, password}}}) => {
 	return {
@@ -46,7 +44,7 @@ export default connect(({auth: {isAuthenticated, errors, user: {name, email, pas
 	)
 
 	const buttons = (
-		<div className="buttons">
+		<div className="bar center mini-spaced-bar">
 			<button
 				className={`${activeForm === "in" && "selected"}`}
 				onClick={_ => setActiveForm(activeForm === "in" ? null : "in")}>
@@ -66,7 +64,7 @@ export default connect(({auth: {isAuthenticated, errors, user: {name, email, pas
 		<div className="log-in-form">
 			{isAuthenticated ? outForm : buttons}
 			<div className={`in-form ${(!isAuthenticated && activeForm === "in") || "hide"}`}>
-				<div className="field">
+				<div className="block">
 					<h4>Email</h4>
 					<input
 						value={inForm.name}
@@ -77,7 +75,7 @@ export default connect(({auth: {isAuthenticated, errors, user: {name, email, pas
 						required
 					/>
 				</div>
-				<div className="field">
+				<div className="block">
 					<h4>
 						Password{" "}
 						<span
@@ -94,22 +92,22 @@ export default connect(({auth: {isAuthenticated, errors, user: {name, email, pas
 						required
 					/>
 				</div>
-				<button className={`field success-button ${validate(inForm) || "disabled"}`} onClick={_ => login(inForm)}>
+				<button className={`block success-button ${validate(inForm) || "disabled"}`} onClick={_ => login(inForm)}>
 					Log In
 					<span className="icon-login" />
 				</button>
 			</div>
 
 			<div className={`up-form ${(!isAuthenticated && activeForm === "up") || "hide"}`}>
-				<div className="field">
+				<div className="block">
 					<h4>User Name</h4>
 					<input type="text" name="name" onChange={e => setForm("up", e)} placeholder={"username"} required />
 				</div>
-				<div className="field">
+				<div className="block">
 					<h4>Email</h4>
 					<input name="email" onChange={e => setForm("up", e)} placeholder={"your email"} required />
 				</div>
-				<div className="field">
+				<div className="block">
 					<h4>Password</h4>
 					<input
 						type="password"
@@ -119,7 +117,7 @@ export default connect(({auth: {isAuthenticated, errors, user: {name, email, pas
 						required
 					/>
 				</div>
-				<div className="field">
+				<div className="block">
 					<h4>Confirm Password</h4>
 					<input
 						type="password"
@@ -130,7 +128,7 @@ export default connect(({auth: {isAuthenticated, errors, user: {name, email, pas
 					/>
 				</div>
 				<button
-					className={`field success-button ${validate(upForm, true, true) || "disabled"}`}
+					className={`block success-button ${validate(upForm, true, true) || "disabled"}`}
 					onClick={_ => register(upForm)}>
 					Sign Up
 					<span className="icon-login" />

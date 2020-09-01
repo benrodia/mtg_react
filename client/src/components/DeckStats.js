@@ -1,28 +1,15 @@
 import React, {useState} from "react"
-import {PieChart} from "react-minimal-pie-chart"
 import {connect} from "react-redux"
 import actions from "../actions"
 import utilities from "../utilities"
 import Graph from "./Graph"
-const {
-	Q,
-	COLORS,
-	sum,
-	average,
-	rem,
-	log,
-	titleCaps,
-	pluralize,
-	FILTER_TERMS,
-	filterCardType,
-	TCGplayerMassEntryURL,
-} = utilities
+import Sticky from "./Sticky"
+
+const {Q, sum, average, titleCaps, TCGplayerMassEntryURL} = utilities
 
 export default connect(({auth: {isAuthenticated, user: {_id}}, main: {legalCards}, deck: {list, author}}) => {
 	return {isAuthenticated, author, _id, legalCards, list}
-}, actions)(({isAuthenticated, author, _id, list, legalCards, changeFilters, openModal}) => {
-	const canEdit = isAuthenticated && author === _id
-
+}, actions)(({offset, isAuthenticated, author, _id, list, legalCards, changeFilters, openModal}) => {
 	const [graph, setGraph] = useState("pie")
 
 	return (
@@ -45,27 +32,30 @@ export default connect(({auth: {isAuthenticated, user: {_id}}, main: {legalCards
 
 			<br />
 			<br />
-
-			<div className="bar even mini-spaced-bar">
-				<h2>Statistics </h2>
-				<button
-					className={`small-button icon-chart-${graph !== "pie" ? "bar" : "pie"}`}
-					onClick={_ => setGraph(graph === "pie" ? "bar" : "pie")}>
-					{titleCaps(graph)}
-				</button>
-			</div>
-			<Graph graphType={graph} dataType={"Color"} />
-			<Graph graphType={graph} dataType={"Type"} />
-			<Graph graphType={graph} dataType={"CMC"} />
-			<div className="block">
-				<h4>Average CMC {average(Q(list, "type_line", "land", false).map(l => l.cmc)).toFixed(2)}</h4>
-				<h4>
-					{Q(Q(list, "board", "main"), "type_line", "land").length}/{Q(list, "board", "main").length} (
-					{Math.round(
-						(100 * Q(Q(list, "board", "main"), "type_line", "land").length) / Q(list, "board", "main").length
-					)}
-					%) Lands
-				</h4>
+			<Sticky offset={offset}>
+				<div className="stats-header bar even mini-spaced-bar">
+					<h2>Statistics </h2>
+					<button
+						className={`small-button icon-chart-${graph !== "pie" ? "bar" : "pie"}`}
+						onClick={_ => setGraph(graph === "pie" ? "bar" : "pie")}>
+						{titleCaps(graph)}
+					</button>
+				</div>
+			</Sticky>
+			<div className="graphs">
+				<Graph graphType={graph} dataType={"Color"} />
+				<Graph graphType={graph} dataType={"Type"} />
+				<Graph graphType={graph} dataType={"CMC"} />
+				<div className="block">
+					<h4>Average CMC {average(Q(list, "type_line", "land", false).map(l => l.cmc)).toFixed(2)}</h4>
+					<h4>
+						{Q(Q(list, "board", "main"), "type_line", "land").length}/{Q(list, "board", "main").length} (
+						{Math.round(
+							(100 * Q(Q(list, "board", "main"), "type_line", "land").length) / Q(list, "board", "main").length
+						)}
+						%) Lands
+					</h4>
+				</div>
 			</div>
 		</div>
 	)

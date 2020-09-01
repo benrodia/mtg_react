@@ -1,8 +1,7 @@
 import * as A from "../actions/types"
 import {INIT_MAIN_STATE} from "../constants/initialState"
 
-export default function main(main = INIT_MAIN_STATE, action) {
-	const {type, obj, key, val} = action
+export default function main(main = INIT_MAIN_STATE, {type, key, val}) {
 	switch (type) {
 		case A.MAIN:
 			return {...main, [key]: val}

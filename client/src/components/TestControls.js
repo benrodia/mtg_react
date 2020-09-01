@@ -4,7 +4,6 @@ import {connect} from "react-redux"
 import actions from "../actions"
 
 import {COLORS} from "../constants/definitions"
-import {Q} from "../functions/cardFunctions"
 import GameLog from "./GameLog"
 import CounterInput from "./CounterInput"
 

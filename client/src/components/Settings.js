@@ -3,25 +3,11 @@ import React from "react"
 import {connect} from "react-redux"
 import actions from "../actions"
 
-import CardControls from "./CardControls"
 import ChooseTheme from "./ChooseTheme"
 
 import utilities from "../utilities"
 
-const {
-	FORMATS,
-	CARD_TYPES,
-	SINGLETON,
-	CARD_SLEEVES,
-	PLAYMATS,
-	EXAMPLE_DECK_NAMES,
-	EXAMPLE_DECK_DESCS,
-	titleCaps,
-	pluralize,
-	Q,
-	chooseCommander,
-	legalCommanders,
-} = utilities
+const {pluralize} = utilities
 
 export default connect(
 	({settings}) => settings,
@@ -102,7 +88,7 @@ export default connect(
 						{manaT.map((msg, i) => (
 							<button
 								key={manaT[i]}
-								className={`smaller-button mini-block ${manaTolerance == i && "selected"}`}
+								className={`smaller-button mini-block ${manaTolerance === i && "selected"}`}
 								onClick={_ => changeSettings("manaTolerance", i)}>
 								{msg}
 							</button>
