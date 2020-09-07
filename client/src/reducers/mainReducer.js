@@ -7,6 +7,8 @@ export default function main(main = INIT_MAIN_STATE, {type, key, val}) {
 			return {...main, [key]: val}
 		case A.NEW_MSG:
 			return {...main, noteLog: [val, ...main.noteLog.slice(0, 3)]}
+		case A.REFRESH:
+			return {...main, refresh: !main.refresh}
 		default:
 			return main
 	}

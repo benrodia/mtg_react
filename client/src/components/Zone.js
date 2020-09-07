@@ -36,7 +36,8 @@ export default connect(({playtest: {deck, look, size, hideHand}}) => {
     spawnToken,
     toggleHand,
   }) => {
-    const zoneDiv = useRef()
+    const zoneDiv = useRef("")
+    const bottom = useRef(0)
     const [sizeFlag, setSizeFlag] = useState(false)
     const getSize = _ => {
       return {
@@ -54,6 +55,12 @@ export default connect(({playtest: {deck, look, size, hideHand}}) => {
       setSizeFlag(true)
       setTimeout(_ => setSizeFlag(false), 1000)
     }
+    useEffect(
+      _ => {
+        bottom.current && bottom.current.scrollIntoView()
+      },
+      [bottom]
+    )
 
     const cards = deck.filter(c => c.zone === zone).orderBy("order")
 
@@ -95,12 +102,20 @@ export default connect(({playtest: {deck, look, size, hideHand}}) => {
             <BasicSearch
               isHeader
               searchable
+              preview
               options={cards}
               placeholder={`${zone} (${cards.length})`}
               callBack={c => moveCard({card: c, dest: "Hand"})}
             />
           </div>
-          {context !== "grid" ? inner : <div className="inner">{inner}</div>}
+          {context !== "grid" ? (
+            inner
+          ) : (
+            <div className="inner">
+              <div ref={bottom} className="bottom" />
+              {inner}
+            </div>
+          )}
         </div>
       )
     }
@@ -114,7 +129,6 @@ export default connect(({playtest: {deck, look, size, hideHand}}) => {
           faceDown={zone === "Hand" && hideHand}
           cardHeadOnly={cardHeadOnly}
           itemType={card.commander ? ItemTypes.COMMANDER : ItemTypes.CARD}
-          inArea={cards}
           style={{
             position: context !== "list" ? "absolute" : "default",
             top: (zone === "Library" ? -ind : ind) + "rem",

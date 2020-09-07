@@ -8,7 +8,10 @@ const port = process.env.PORT || 5000
 app.use(express.json())
 
 mongoose
-	.connect(config.get("mongoUri"))
+	.connect(config.get("mongoUri"), {
+		useNewUrlParser: true,
+		autoIndex: false,
+	})
 	.then(_ => console.log("\nMongoDB Connected...\n"))
 	.catch(err => console.error(err))
 

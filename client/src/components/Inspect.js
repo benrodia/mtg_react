@@ -11,7 +11,10 @@ export default connect(({main: {page}, deck: {list}}) => {
 	const [target, setTarget] = useState(card)
 	const [rulings, setRulings] = useState([])
 	const [cooledDown, coolDown] = useState(true)
-	const {id, name, oracle_text, mana_cost, rulings_uri, image_uris, type_line, ind} = audit(target)
+	const [flipped, flip] = useState(false)
+
+	const {id, card_faces, rulings_uri, ind} = target
+	const {name, oracle_text, mana_cost, image_uris, type_line} = card_faces ? card_faces[flipped ? 1 : 0] : target
 
 	const shiftList = by => {
 		if (inArea && ind) {
@@ -132,7 +135,12 @@ export default connect(({main: {page}, deck: {list}}) => {
 						</>
 					)}
 				</div>
-				<img src={image_uris["png" || "large"]} alt={name} />
+				<img src={image_uris && image_uris["png" || "large"]} alt={name} />
+				{!card_faces ? null : (
+					<button className="small-button" onClick={_ => flip(!flipped)}>
+						Flip
+					</button>
+				)}
 			</div>
 		</div>
 	)

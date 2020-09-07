@@ -16,7 +16,9 @@ router.post("/", (req, res) => {
 })
 
 router.patch("/:id", (req, res) => {
-	Deck.findById(req.params.id).then(deck => req.body)
+	Deck.findById(req.params.id)
+		.then(deck => deck.update(req.body).then(updated => res.json(updated)))
+		.catch(err => res.status(404).json({success: false}))
 })
 
 router.delete("/:id", auth, (req, res) => {

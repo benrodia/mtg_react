@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react"
-import {Link, useParams} from "react-router-dom"
+import {Link, useParams, useHistory} from "react-router-dom"
 import {connect} from "react-redux"
 import actions from "../actions"
 import utilities from "../utilities"
@@ -9,7 +9,7 @@ import Login from "./Login"
 import DeckFeed from "./DeckFeed"
 import DeckTile from "./DeckTile"
 
-const {HOME_DIR, formattedDate} = utilities
+const {HOME_DIR, formattedDate, canEdit} = utilities
 
 export default connect(({main: {decks, users}, auth: {isAuthenticated}}) => {
 	return {
@@ -17,10 +17,9 @@ export default connect(({main: {decks, users}, auth: {isAuthenticated}}) => {
 		users,
 		isAuthenticated,
 	}
-}, actions)(({decks, users, setPage, isAuthenticated, updateUser, newDeck, canEdit, logout, deleteUser}) => {
+}, actions)(({decks, users, setPage, isAuthenticated, updateUser, newDeck, logout, deleteAccount}) => {
 	const {slug} = useParams()
-	const [user, setUser] = useState({})
-	const {name, joined, _id} = user
+	const [{name, joined, _id, followed}, setUser] = useState({})
 
 	useEffect(
 		_ => {
@@ -29,9 +28,14 @@ export default connect(({main: {decks, users}, auth: {isAuthenticated}}) => {
 		[slug, users]
 	)
 
+	const handleDelete = _ => {
+		const rusure = window.confirm("Are you super duper sure you want to delete your account??")
+		if (rusure) deleteAccount()
+	}
+
 	return (
 		<div className="user">
-			<section className="profile bar">
+			<div className="profile big-block bar even center">
 				<div className="avatar" />
 				<div className="col">
 					<EditableText
@@ -41,19 +45,33 @@ export default connect(({main: {decks, users}, auth: {isAuthenticated}}) => {
 						<h1 className={"name block"}>{name}</h1>
 					</EditableText>
 					<div className="joined asterisk">Joined {formattedDate(new Date(joined))}</div>
-					<Link to={HOME_DIR}>
-						<div className="bar even">
+					<div className="bar even">
+						<Link to={HOME_DIR}>
 							<button className="icon-logout inverse-small-button" onClick={logout}>
 								Logout
 							</button>
-							<button className="icon-trash inverse-small-button warning-button" onClick={_ => deleteUser(_id)}>
-								Delete Account
-							</button>
-						</div>
-					</Link>
+						</Link>
+						<button className="icon-trash inverse-small-button warning-button" onClick={handleDelete}>
+							Delete Account
+						</button>
+					</div>
 				</div>
-			</section>
-			<DeckFeed user={user} you={isAuthenticated && slug === user.slug} />
+			</div>
+			<DeckFeed direct={decks.filter(d => d.author === _id)} />
 		</div>
 	)
 })
+
+// const Inheritence = _ => {
+// 	const [chosen, choose] = useState(null)
+// 	return (
+// 		<div className="block">
+// 			<h4>Would you like another user to inherit your stuff?</h4>
+// 			<div className="col">
+// 				{followed.map(f => (
+// 					<div onClick={choose(f)}>{creator(f).name}</div>
+// 				))}
+// 			</div>
+// 		</div>
+// 	)
+// }

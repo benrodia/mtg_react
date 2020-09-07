@@ -3,7 +3,7 @@ import axios from "axios"
 import * as A from "./types"
 import utilities from "../utilities"
 
-const {Q, isLegal, expandDeckData} = utilities
+const {Q, isLegal, expandDeckData, getDecks} = utilities
 
 export const setPage = page => dispatch => {
   dispatch({type: A.MAIN, key: "page", val: page})
@@ -14,7 +14,6 @@ export const loadAppData = _ => dispatch => {
   dispatch(getCardData())
   dispatch(getSetData())
   dispatch(getUsers())
-  dispatch(getDecks())
 }
 
 export const getCardData = _ => dispatch => {
@@ -50,20 +49,12 @@ export const getUsers = _ => dispatch => {
     .catch(err => console.error(err))
 }
 
-export const getDecks = _ => (dispatch, getState) => {
-  axios
-    .get("/api/decks")
-    .then(res =>
-      dispatch({
-        type: A.MAIN,
-        key: "decks",
-        val: res.data.map(d => {
-          return {...d, list: expandDeckData(d.list, getState().main.cardData)}
-        }),
-      })
-    )
-    .catch(err => console.error(err))
+export const loadDecks = val => (dispatch, getState) => {
+  axios.get("/api/decks").then(res => dispatch({type: A.MAIN, key: "decks", val: res.data}))
 }
 
 export const openModal = modal => dispatch => dispatch({type: A.MAIN, key: "modal", val: modal})
 export const newMsg = (message, type) => dispatch => dispatch({type: A.NEW_MSG, val: {key: uuidv4(), message, type}})
+export const refreshData = _ => dispatch => {
+  getDecks().then(res => dispatch(loadDecks(res)))
+}

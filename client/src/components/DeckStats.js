@@ -15,7 +15,7 @@ export default connect(({auth: {isAuthenticated, user: {_id}}, main: {legalCards
 	return (
 		<div className="stats">
 			<div className="price-stats">
-				<h3>Total List Price:</h3>
+				<h3>Est. List Price:</h3>
 				<h2 className="total">
 					${sum(list.map(c => c.prices.usd)).toFixed(2)} / {sum(list.map(c => c.prices.tix)).toFixed(2)} TIX
 					{!list.filter(c => !c.prices.usd).length ? null : (

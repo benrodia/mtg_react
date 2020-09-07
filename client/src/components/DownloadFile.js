@@ -1,4 +1,4 @@
-import React, {useState} from "react"
+import React, {useState, useEffect} from "react"
 import {connect} from "react-redux"
 import actions from "../actions"
 import utilities from "../utilities"
@@ -24,8 +24,16 @@ export default connect(({deck: {name, format, list}, auth: {user}}) => {
   ].join("\n")
 
   const [fileName, setFileName] = useState(fn)
-  const [fileText, setFileText] = useState(meta + textList(list))
   const [fileExt, setFileExt] = useState(".txt")
+  const [fileText, setFileText] = useState(textList(list))
+
+  useEffect(
+    _ => {
+      const simple = fileExt !== ".mwDeck"
+      setFileText((simple ? "" : meta) + textList(list, simple))
+    },
+    [fileExt]
+  )
 
   return (
     <div className="download-box">
@@ -37,14 +45,14 @@ export default connect(({deck: {name, format, list}, auth: {user}}) => {
 
       <br />
       <br />
-      <div className="bar">
+      <div className="bar even">
         <a
           onClick={_ => openModal(null)}
           download={`${fileName}${fileExt}`}
           href={URL.createObjectURL(new Blob([...fileText], {type: "text/plain"}))}>
           <button className="success-button">Download</button>
         </a>
-        <BasicSearch self={fileExt} options={[".txt", ".dec"]} callBack={e => setFileExt(e)} />
+        <BasicSearch self={fileExt} options={[".dek", ".txt", ".mwDeck"]} callBack={e => setFileExt(e)} />
       </div>
     </div>
   )

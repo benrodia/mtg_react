@@ -1,8 +1,9 @@
 import * as A from "../actions/types"
 import {INIT_PLAYTEST_STATE} from "../constants/initialState"
 import {COLORS} from "../constants/definitions"
+import {v4 as uuidv4} from "uuid"
 import {timestamp} from "../functions/utility"
-import {receiveCards} from "../functions/receiveCards"
+import {prepForPlaytest} from "../functions/receiveCards"
 
 export default function main(playtest = INIT_PLAYTEST_STATE([], null, 0), {type, key, val, bool, list, format, cards}) {
 	switch (type) {
@@ -15,7 +16,7 @@ export default function main(playtest = INIT_PLAYTEST_STATE([], null, 0), {type,
 		case A.RES_STACK:
 			return {...playtest, stack: [...playtest.stack.slice(0, Math.max(0, playtest.stack.length - 1))]}
 		case A.TOKEN:
-			return {...playtest, deck: [...playtest.deck, ...receiveCards(val, null, true)]}
+			return {...playtest, deck: [...playtest.deck, ...prepForPlaytest(val, null, true)]}
 		case A.HANDLE_MANA:
 			return {
 				...playtest,
@@ -48,7 +49,6 @@ export default function main(playtest = INIT_PLAYTEST_STATE([], null, 0), {type,
 
 		case A.HISTORY:
 			const slice = playtest.history.slice(Math.max(0, playtest.history.length - 50), playtest.current + 1)
-			// console.log('current',playtest.current)
 			return {
 				...playtest,
 				current: playtest.current + 1,
@@ -57,6 +57,7 @@ export default function main(playtest = INIT_PLAYTEST_STATE([], null, 0), {type,
 					{
 						...playtest,
 						history: [],
+						timeID: uuidv4(),
 						current: slice.length,
 						timestamp: timestamp(),
 						msg: val,
@@ -64,7 +65,7 @@ export default function main(playtest = INIT_PLAYTEST_STATE([], null, 0), {type,
 				],
 			}
 		case A.TIME_TRAVEL:
-			return {...(playtest.history[val] || playtest.current), history: playtest.history}
+			return {...(playtest.history.filter(h => h.timeID === val)[0] || playtest.current), history: playtest.history}
 
 		// NO OP
 		default:

@@ -1,18 +1,14 @@
-import slugify from "slugify"
-import uniqueSlug from "unique-slug"
-
 export const cache = (obj, key, val) => {
   const stored = JSON.parse(localStorage.getItem(obj)) || {}
   const data = key === "all" ? {...stored, ...val} : {...stored, [key]: val}
   localStorage.setItem(obj, JSON.stringify(data))
 }
 
-export const loadCache = (obj, init = {}, session, wipe) =>
-  wipe
-    ? init
-    : session
-    ? Object.assign(init, JSON.parse(sessionStorage.getItem(obj) || "{}"))
-    : Object.assign(init, JSON.parse(localStorage.getItem(obj) || "{}"))
+export const loadCache = (key, init = {}, session, clear) => {
+  let data = session ? sessionStorage.getItem(key) : localStorage.getItem(key)
+  data = !data || data === "undefined" ? {} : JSON.parse(data)
+  return clear ? init : Object.assign(init, data)
+}
 
 export const session = (obj, key, val) => {
   const data = key === "all" ? val : {...(JSON.parse(sessionStorage.getItem(obj)) || {}), [key]: val}
@@ -27,6 +23,7 @@ export const rem = (num = 1) =>
   num * parseFloat(window.getComputedStyle(document.getElementsByTagName("html")[0]).fontSize || 16)
 
 export const rnd = (arr, num) => {
+  if (typeof arr === "number") return Math.floor(Math.random() * arr)
   const rand = _ => arr[Math.floor(Math.random() * arr.length)]
   if (!num) return rand()
   else return [...Array(num)].map(_ => rand())
@@ -76,30 +73,6 @@ export const log = objs => {
 
     console.log(...log)
   }
-}
-
-export const config = getState => {
-  // console.log("getState().auth.token", getState().auth.token)
-  const config = {
-    headers: {
-      "Content-type": "application/json",
-      "x-auth-token": (getState && getState().auth.token) || undefined,
-    },
-  }
-  return config
-}
-
-export const createSlug = (name = "", from) => {
-  if (name && name.length) {
-    const named = slugify(name, {
-      replacement: "-",
-      lower: true,
-      strict: true,
-      locale: "en",
-    })
-    const existing = from ? from.filter(f => f.slug === named).length : 0
-    return !existing ? named : named + "-" + existing
-  } else return uniqueSlug()
 }
 
 Array.prototype.shuffle = function () {

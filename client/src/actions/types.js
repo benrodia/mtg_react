@@ -14,9 +14,11 @@ export const CLEAR_ERRORS = "CLEAR_ERRORS"
 // MAIN
 export const MAIN = "MAIN"
 export const NEW_MSG = "NEW_MSG"
+export const REFRESH = "REFRESH"
 
 // DECK
 export const DECK = "DECK"
+export const OPEN_DECK = "OPEN_DECK"
 export const SAVE_DECK = "SAVE_DECK"
 
 // SETTINGS

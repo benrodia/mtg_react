@@ -1,5 +1,4 @@
 // Constants
-import store from "../store"
 import * as A from "./types"
 
 //Functions
@@ -47,7 +46,7 @@ export const cardState = (card, key, val) => dispatch =>
     val,
   })
 
-export const untap = () => dispatch => dispatch({type: A.CARD, key: "tapped", val: false})
+export const untap = _ => dispatch => dispatch({type: A.CARD, key: "tapped", val: false})
 export const handleMana = (mana, replace) => dispatch => dispatch({type: A.HANDLE_MANA, val: mana, bool: replace})
 export const handleShuffle = bool => dispatch => {
   dispatch({type: A.SHUFFLE})
@@ -66,14 +65,14 @@ export const spawnToken = token => dispatch => dispatch({type: A.TOKEN, val: tok
 let canRestart = true
 
 const drawHand = init => dispatch =>
-  setTimeout(() => {
+  setTimeout(_ => {
     let toDraw = init
-    const keep = () => {
+    const keep = _ => {
       dispatch(addHistory(`Draw Opening Hand (${init || 7})`))
       dispatch(handleTurns())
     }
 
-    const drawTimer = setInterval(() => {
+    const drawTimer = setInterval(_ => {
       if (!--toDraw) {
         clearInterval(drawTimer)
         canRestart = true
@@ -82,7 +81,7 @@ const drawHand = init => dispatch =>
             options: [
               {
                 effect: `Keep Hand`,
-                res: () => {
+                res: _ => {
                   if (init < 7) {
                     dispatch({type: A.PLAYTEST, key: "look", val: 1})
                     dispatch(
@@ -90,7 +89,7 @@ const drawHand = init => dispatch =>
                         options: [
                           {
                             effect: "Resolve Scry",
-                            res: () => keep(),
+                            res: _ => keep(),
                           },
                         ],
                       })
@@ -99,8 +98,8 @@ const drawHand = init => dispatch =>
                 },
               },
               {
-                res: () => dispatch(startTest(init - 1 || 1)),
-                effect: `Mulligan to ${init - 1 || 1}`,
+                res: _ => dispatch(startTest(init - 1 || 1)),
+                effect: `Mull to ${init - 1 || 1}`,
               },
             ],
           })
@@ -110,27 +109,27 @@ const drawHand = init => dispatch =>
     }, 100)
   }, 150)
 
-export const startTest = init => dispatch => {
+export const startTest = (init = 7) => (dispatch, getState) => {
   if (canRestart) {
     canRestart = false
-    const {list, format} = store.getState().deck
+    const {list, format} = getState().deck
     dispatch({type: A.INIT_GAME, list, format})
 
     dispatch(handleShuffle())
-    dispatch(drawHand(init || 7))
+    dispatch(drawHand(init))
   }
 }
 
-export const moveCard = (payload, bypass) => dispatch => {
+export const moveCard = (payload, bypass) => (dispatch, getState) => {
   const {card, dest, col, row, bottom} = payload || {}
-  const inLibrary = store.getState().playtest.deck.filter(c => c.zone === "Library")
+  const inLibrary = getState().playtest.deck.filter(c => c.zone === "Library")
   const toMove = card !== undefined ? card : inLibrary[inLibrary.length - 1]
   const toDest = dest || "Hand"
   if (!toMove) return console.error("no card to move")
   const interZone = toMove.zone !== toDest
 
   const resolveMove = willCast => {
-    const {deck, look} = store.getState().playtest
+    const {deck, look} = getState().playtest
     if (interZone) dispatch(handleAbilities(toDest, toMove))
     if (toMove.zone !== "Library") dispatch({type: A.PLAYTEST, key: "look", val: 0})
     if (look && (toDest !== toMove.zone || bottom)) dispatch({type: A.PLAYTEST, key: "look", val: look - 1})
@@ -159,7 +158,7 @@ export const moveCard = (payload, bypass) => dispatch => {
     if (interZone && !bypass) dispatch(addHistory(cardMoveMsg(toMove, toDest)))
   }
 
-  if (!bypass && interZone && toDest === "Battlefield" && store.getState().playtest.stack.length && !HAS_FLASH(toMove))
+  if (!bypass && interZone && toDest === "Battlefield" && getState().playtest.stack.length && !HAS_FLASH(toMove))
     dispatch(
       newMsg("Can't use sorcery-speed actions if the stack isn't empty. (Change game settings on User page)", "error")
     )
@@ -168,7 +167,7 @@ export const moveCard = (payload, bypass) => dispatch => {
       addStack({
         options: [
           {
-            res: () => {
+            res: _ => {
               dispatch(handleCost({mana: toMove.mana_cost}))
               resolveMove()
               dispatch(handleAbilities("Cast", toMove))
@@ -184,7 +183,7 @@ export const moveCard = (payload, bypass) => dispatch => {
   } else resolveMove()
 }
 
-export const cardClick = (card, dblclick, toDest) => dispatch => {
+export const cardClick = (card, dblclick, toDest) => (dispatch, getState) => {
   if (card.zone === "Battlefield" && !dblclick) {
     if (MANA.source(card) && CAN_TAP(card))
       for (let i = 0; i < card.mana_source.length; i++)
@@ -194,12 +193,12 @@ export const cardClick = (card, dblclick, toDest) => dispatch => {
         }
     return dispatch(cardState(card, "tapped", !card.tapped))
   }
-  const inPlay = store.getState().playtest.deck.filter(c => c.zone === "Battlefield")
+  const inPlay = getState().playtest.deck.filter(c => c.zone === "Battlefield")
   dispatch(moveCard(clickPlace(card, inPlay, toDest, dblclick)))
 }
 
-export const handleTurns = () => dispatch => {
-  const {turn, phase, stack} = store.getState().playtest
+export const handleTurns = _ => (dispatch, getState) => {
+  const {turn, phase, stack} = getState().playtest
   if (!stack.length && !!turn) {
     dispatch(goToPhase("End"))
   }
@@ -211,11 +210,11 @@ export const handleTurns = () => dispatch => {
   dispatch(goToPhase("Main One"))
 }
 
-export const landDrop = () => dispatch => dispatch(cardClick(playLand(store.getState().playtest.deck)))
+export const landDrop = _ => (dispatch, getState) => dispatch(cardClick(playLand(getState().playtest.deck)))
 
-export const handleCost = ({mana, life}) => dispatch => {
+export const handleCost = ({mana, life}) => (dispatch, getState) => {
   const paidMana = payMana(mana || "")
-  const paidLife = (life || 0) >= store.getState().playtest.life
+  const paidLife = (life || 0) >= getState().playtest.life
   if (paidMana) {
     dispatch(newMsg(paidCostMsg(paidMana), "success"))
     dispatch(cardState(paidMana.tapped, "tapped", true))
@@ -223,8 +222,8 @@ export const handleCost = ({mana, life}) => dispatch => {
   }
 }
 
-export const handleCombat = creatures => dispatch => {
-  const {deck, phase} = store.getState().playtest
+export const handleCombat = creatures => (dispatch, getState) => {
+  const {deck, phase} = getState().playtest
   if (phase === "Main One") {
     dispatch(goToPhase("Combat"))
     dispatch(
@@ -232,7 +231,7 @@ export const handleCombat = creatures => dispatch => {
         options: [
           {
             effect: "Attack All",
-            res: () => {
+            res: _ => {
               const attackers =
                 creatures ||
                 deck.filter(c => c.type_line.includes("Creature") && !c.type_line.includes("Wall") && CAN_TAP(c))
@@ -253,14 +252,14 @@ export const handleCombat = creatures => dispatch => {
               }
             },
           },
-          {effect: "No Attacks", res: () => dispatch(goToPhase("Main Two"))},
+          {effect: "No Attacks", res: _ => dispatch(goToPhase("Main Two"))},
         ],
       })
     )
   }
 }
 
-export const addStack = ({options, effectType, src, text, cancelable}) => dispatch => {
+export const addStack = ({options, effectType, src, text, cancelable}) => (dispatch, getState) => {
   const stacktion = {
     options: [
       ...(options || [{}]).map(op => {
@@ -280,14 +279,14 @@ export const addStack = ({options, effectType, src, text, cancelable}) => dispat
     text: text || "",
     src: src || "Game",
   }
-  if (store.getState().settings.useStack.includes(stacktion.effectType)) dispatch({type: A.ADD_STACK, val: stacktion})
+  if (getState().settings.useStack.includes(stacktion.effectType)) dispatch({type: A.ADD_STACK, val: stacktion})
   else if (typeof stacktion.options[0].res === "function") stacktion.options[0].res()
 }
 
 export const resStack = res => dispatch => dispatch({type: A.RES_STACK})
 
-export const handleAbilities = (type, card = {}) => dispatch => {
-  const {playtest, main} = store.getState()
+export const handleAbilities = (type, card = {}) => (dispatch, getState) => {
+  const {playtest, main} = getState()
   const inPlay = playtest.deck.filter(c => c.zone === "Battlefield")
 
   const executeAbilities = obj => {
@@ -296,11 +295,11 @@ export const handleAbilities = (type, card = {}) => dispatch => {
     })
     const text = obj.text
     const token = main.tokens.filter(t => obj.text.includes(TOKEN_NAME(t)))[0]
-    const res = () => {
+    const res = _ => {
       for (let i = 0; i < effects.length; i++) {
         let [key, val] = effects[i]
         if (val !== 0) {
-          const takeEffect = setInterval(() => {
+          const takeEffect = setInterval(_ => {
             if (!--val) clearInterval(takeEffect)
             if (Object.keys(playtest).includes(key)) dispatch(gameState(key, 1, true))
             if (key === "draw") dispatch(moveCard(null, true))

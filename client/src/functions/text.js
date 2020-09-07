@@ -138,13 +138,13 @@ export const paidCostMsg = paid => {
 	)
 }
 
-export const textList = list =>
+export const textList = (list, simple) =>
 	itemizeDeckList(list, ["name"])
 		.map(cards => {
 			const {board, commander, set, name} = cards[0]
-			return `${board === SIDE_BOARD ? "SB: " : commander ? "CMDR: " : ""}${
-				cards.length
-			} [${set.toUpperCase()}] ${name}`
+			const bText = simple ? "" : board === SIDE_BOARD ? "SB: " : commander ? "CMDR: " : ""
+			const sText = simple ? " " : ` [${set.toUpperCase()}] `
+			return bText + cards.length + sText + name
 		})
 		.join("\n")
 

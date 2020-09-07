@@ -18,6 +18,7 @@ export default function BasicSelect({
   searchable,
   isHeader,
   limit,
+  preview,
 }) {
   const {titleCaps} = utilities
 
@@ -40,7 +41,7 @@ export default function BasicSelect({
   )
 
   const reduced =
-    searchable && !search.length
+    searchable && !search.length && !preview
       ? []
       : unique
       ? choices.slice(0, limit || 100).unique("name")

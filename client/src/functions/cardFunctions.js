@@ -1,7 +1,7 @@
-import {CARD_TYPES, ZONES, COLORS} from "../constants/definitions"
+import {CARD_TYPES, MAIN_BOARD, ZONES, COLORS} from "../constants/definitions"
 import {SINGLETON, NO_QUANT_LIMIT, MANA, NUM_FROM_WORD} from "../constants/greps"
 import {matchStr} from "../functions/utility"
-import {audit} from "../functions/receiveCards"
+import {audit, itemizeDeckList} from "../functions/receiveCards"
 
 export function Q(scope = [{}], keys = [""], vals = [], every) {
   let query = [],
@@ -126,3 +126,27 @@ export const filterCardType = (list, category, val) =>
         : "C" === val
       : Q(c, category.key, val)
   })
+
+export const canPublish = (list, format) => {
+  const main = list.filter(c => c.board === MAIN_BOARD)
+  const atLimit = !SINGLETON(format) ? main.length >= 60 : main.length === 100
+  const allLegal = !itemizeDeckList(main).filter(cards => cards.length > isLegal(cards[0], format)).length
+  return atLimit && allLegal
+}
+
+export const listDiffs = (pre, post) => {
+  const diffs = (a, b) => {
+    const interp = itemizeDeckList(a).map(acs => {
+      const card = acs[0]
+      const quantity = Math.abs(acs.length - b.filter(({name}) => name === card.name).length)
+      return {card, quantity}
+    })
+    let returned = []
+    for (var i = 0; i < interp.length; i++)
+      returned = [...returned, ...[...Array(interp[i].quantity)].map(_ => interp[i].card)]
+    return returned
+  }
+  const added = diffs(post, pre)
+  const removed = diffs(pre, post)
+  return {added, removed, changed: !!added.length || !!removed.length}
+}

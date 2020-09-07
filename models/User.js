@@ -24,6 +24,11 @@ const UserSchema = new Schema({
 		required: true,
 		unique: true,
 	},
+	liked: Array,
+	followed: Array,
+	blocked: Array,
+	points: Number,
+	acheivements: Array,
 })
 
 module.exports = User = mongoose.model("user", UserSchema)

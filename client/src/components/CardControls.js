@@ -1,5 +1,6 @@
 import React, {useState} from "react"
 import {useDrag} from "react-dnd"
+import {useLocation} from "react-router-dom"
 import {ItemTypes} from "../constants/data"
 
 import {connect} from "react-redux"
@@ -36,10 +37,10 @@ export default connect(({main: {page}}) => {
 			openModal({title: card.name, content: <Inspect card={card} inArea={inArea} options={options} />})
 
 		if (isDragging) clearTimeout(timer)
+		const inPlaytest = useLocation().pathname.includes("playtest")
 
 		const click = _ => {
-			console.log(page)
-			if (page === "Test") {
+			if (inPlaytest) {
 				cardClick(card, clicked)
 				clickState(true)
 				setTimeout(_ => clickState(false), 300)

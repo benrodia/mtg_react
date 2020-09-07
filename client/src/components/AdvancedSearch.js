@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from "react"
 import {connect} from "react-redux"
 import actions from "../actions"
+import matchSorter, {rankings} from "match-sorter"
 import {v4 as uuidv4} from "uuid"
 import utilities from "../utilities"
 
@@ -9,31 +10,36 @@ import CardControls from "./CardControls"
 import Loading from "./Loading"
 import CounterInput from "./CounterInput"
 
-const {BOARDS, COLORS, formatManaSymbols, filterColors, audit, Q, rnd, sum, titleCaps, paginate} = utilities
-export default connect(({main: {legalCards}, filters, deck: {list}}) => {
-	return {legalCards, ...filters, list}
-}, actions)(({list, legalCards, board, advanced, addCard, changeAdvanced, openModal, newMsg}) => {
-	const {colors, all, only, terms, searchBy, cmc, cmcOp} = advanced
+const {
+	BOARDS,
+	COLORS,
+	CARD_TYPES,
+	SUB_TYPES,
+	formatManaSymbols,
+	filterColors,
+	audit,
+	Q,
+	rnd,
+	sum,
+	titleCaps,
+	paginate,
+} = utilities
+export default connect(({main: {legalCards, cardData}, filters: {board, advanced}, deck: {list, format}}) => {
+	return {legalCards, cardData, board, advanced, list, format}
+}, actions)(({list, format, legalCards, cardData, board, advanced, addCard, changeAdvanced, openModal, newMsg}) => {
+	const {legalOnly, colors, all, only, text, types, searchBy, cmc, cmcOp, rarity} = advanced
 
+	const [nameEntry, setNameEntry] = useState("")
+	const [textEntry, setTextEntry] = useState("")
 	const [results, setResults] = useState([[]])
-	const [search, setSearch] = useState("")
 	const [page, setPage] = useState(0)
 
 	const pageLimit = 20
 	const maxRes = 200
-	// console.log(
-	// 	"advanced results",
-	// 	results.map(r => r.map(c => c.artist)),
-	// 	// legalCards
-	// )
-	const searchTerms = [
-		{label: "Name", key: "name"},
-		{label: "Types", key: "type_line"},
-		{label: "Text", key: "oracle_text"},
-	]
+
 	useEffect(
 		_ => {
-			let filtered = filterColors(legalCards, colors, all, only)
+			let filtered = filterColors(legalOnly ? legalCards : cardData, colors, all, only)
 			filtered =
 				cmcOp === "="
 					? filtered.filter(c => c.cmc === cmc)
@@ -47,16 +53,15 @@ export default connect(({main: {legalCards}, filters, deck: {list}}) => {
 					? filtered.filter(c => c.cmc <= cmc)
 					: filtered
 
-			for (var i = 0; i < searchTerms.length; i++) {
-				const termsI = terms.filter(t => t.searchBy === searchTerms[i].key).map(t => t.text)
-				if (termsI.length) filtered = Q(filtered, searchTerms[i].key, termsI, true)
-			}
+			if (rarity !== "any") filtered = Q(filtered, "rarity", rarity, true)
+			if (text.length) filtered = Q(filtered, "oracle_text", text, true)
+			if (types.length) filtered = Q(filtered, "type_line", types, true)
+			if (nameEntry.length) filtered = matchSorter(filtered, nameEntry, {keys: ["name"]})
 			setResults(paginate(filtered.orderBy("name").slice(0, maxRes), pageLimit))
 			setPage(0)
 		},
-		[legalCards, advanced]
+		[legalCards, advanced, nameEntry]
 	)
-
 	const pages =
 		results.length === 1 ? null : (
 			<div className="pages bar">
@@ -86,73 +91,83 @@ export default connect(({main: {legalCards}, filters, deck: {list}}) => {
 			</div>
 		)
 
-	return (
-		<div className="advanced-search spaced-col big-block gap">
-			<div className="terms big-block col">
-				<h4>Search Terms</h4>
-				<div className="mini-block bar even">
-					{searchTerms.map(s => (
-						<button
-							key={s.label}
-							className={`smaller-button ${searchBy === s.key && "selected"}`}
-							onClick={_ => changeAdvanced({searchBy: s.key})}>
-							{s.label}
-						</button>
+	const listTerms = term => {
+		const [title, arr] = Object.entries(term)[0]
+		return arr.length ? (
+			<div className="block mini-spaced-col">
+				<div className="bar even">
+					<button className="smaller-button warning-button icon-cancel" onClick={_ => changeAdvanced({text: []})} />
+					<h4>{titleCaps(title)} Includes:</h4>
+				</div>
+				<div className="bar mini-spaced-bar">
+					{arr.map((t, i) => (
+						<span
+							key={t.key}
+							className="smaller-button warning-button"
+							onClick={_ => changeAdvanced({[title]: arr.filter(tx => tx !== t)})}>
+							{titleCaps(t)}
+						</span>
 					))}
 				</div>
-				<div className="bar even">
+			</div>
+		) : null
+	}
+
+	const allTypes = [...CARD_TYPES, ...SUB_TYPES]
+		.filter(T => !types.includes(T))
+		.map(t => {
+			return {t}
+		})
+	return (
+		<div className="advanced-search spaced-col big-block gap">
+			<button
+				className={`mini-block ${legalOnly && "selected"}`}
+				onClick={_ => changeAdvanced({legalOnly: !legalOnly})}>
+				Only Cards Legal in {titleCaps(format)}
+			</button>
+			<div className="big-block bar spaced-bar">
+				<div>
+					<h4>Search Name</h4>
 					<input
-						type="terms"
-						value={search}
-						onChange={e => setSearch(e.target.value)}
-						placeholder={`Filter Card ${searchTerms.filter(s => s.key === searchBy)[0].label}`}
+						type="text"
+						value={nameEntry}
+						onChange={e => setNameEntry(e.target.value)}
+						placeholder={`Enter Card Name`}
 					/>
-					<button
-						className={`success-button ${!search.length && "disabled"}`}
-						onClick={_ => {
-							changeAdvanced({
-								terms: [
-									...terms,
-									...search
-										.trim()
-										.split(" ")
-										.map((text, i) => {
-											return {key: text + i + searchBy, text, searchBy}
-										}),
-								],
-							})
-							setSearch("")
-						}}>
-						Add Term
-					</button>
-					<button
-						className={`warning-button ${!terms.length && "disabled"}`}
-						onClick={_ => changeAdvanced({terms: []})}>
-						Clear All
-					</button>
 				</div>
-				<div className="block mini-spaced-col">
-					{searchTerms.map(s =>
-						!terms.filter(t => t.searchBy === s.key).length ? null : (
-							<div key={s.label} className={`${s.label}`}>
-								<h4>{s.label} Includes:</h4>
-								<div className="bar mini-spaced-bar">
-									{terms
-										.filter(t => t.searchBy === s.key)
-										.map((t, i) => (
-											<span
-												key={t.key}
-												className="smaller-button warning-button"
-												onClick={_ => changeAdvanced({terms: terms.filter(term => term.key !== t.key)})}>
-												{titleCaps(t.text)}
-											</span>
-										))}
-								</div>
-							</div>
-						)
-					)}
+				<div className="terms col">
+					<h4>Search Text</h4>
+					<div className="bar even">
+						<input
+							type="text"
+							value={textEntry}
+							onChange={e => setTextEntry(e.target.value)}
+							placeholder={`Filter Card Text`}
+						/>
+						<button
+							className={`success-button ${!textEntry.length && "disabled"}`}
+							onClick={_ => {
+								changeAdvanced({text: [...text, ...textEntry.trim().split(" ")]})
+								setTextEntry("")
+							}}>
+							Add Terms
+						</button>
+					</div>
+				</div>
+				<div className="col">
+					<h4>Types</h4>
+					<BasicSearch
+						searchable
+						preview
+						labelBy={t => t.t}
+						options={allTypes}
+						callBack={t => changeAdvanced({types: [...types, t.t]})}
+					/>
 				</div>
 			</div>
+
+			{listTerms({text})}
+			{listTerms({types})}
 			<div className="bar block spaced-bar">
 				<div className="cmc">
 					<h4>CMC</h4>
@@ -175,7 +190,7 @@ export default connect(({main: {legalCards}, filters, deck: {list}}) => {
 					</div>
 				</div>
 				<div className="filter-colors">
-					<h4>Filter Colors</h4>
+					<h4>Colors</h4>
 					<div className="bar even mini-spaced-bar">
 						<div className="bar even">
 							<button className={`small-button ${all && "selected"}`} onClick={_ => changeAdvanced({all: !all})}>
@@ -196,6 +211,15 @@ export default connect(({main: {legalCards}, filters, deck: {list}}) => {
 							))}
 						</div>
 					</div>
+				</div>
+				<div className="filter-rarity">
+					<h4>Rarity</h4>
+					<BasicSearch
+						self={rarity}
+						labelBy={r => titleCaps(r)}
+						options={["any", "common", "uncommon", "rare", "mythic", "special"]}
+						callBack={r => changeAdvanced({rarity: r})}
+					/>
 				</div>
 			</div>
 

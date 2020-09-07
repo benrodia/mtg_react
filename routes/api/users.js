@@ -58,8 +58,10 @@ router.post("/", (req, res) => {
 })
 
 // UPDATE
-router.patch("/:id", auth, (req, res) => {
-	User.findById(req.params.id).then(deck => req.body)
+router.patch("/:id", (req, res) => {
+	User.findById(req.params.id)
+		.then(user => user.update(req.body).then(updated => res.json(updated)))
+		.catch(err => res.status(404).json({success: false}))
 })
 
 // DELETE

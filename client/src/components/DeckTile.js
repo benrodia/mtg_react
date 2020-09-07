@@ -6,52 +6,50 @@ import ago from "s-ago"
 import {PieChart} from "react-minimal-pie-chart"
 import utilities from "../utilities"
 
-const {HOME_DIR, COLORS, sum} = utilities
+const {HOME_DIR, COLORS, sum, canEdit, creator} = utilities
 
-export default connect(({auth: {user, isAuthenticated}}) => {
-	return {user, isAuthenticated}
-}, actions)(
-	({
-		deck: {_id, author, name, list, format, pie, slug, updated, feature},
-		user,
-		isAuthenticated,
-		openDeck,
-		deleteDeck,
-	}) => {
-		const canEdit = author === user._id && isAuthenticated
-
-		const colorData = COLORS().map(color => {
-			const value = sum(list.map(c => c.mana_cost.split("").filter(i => i === color.symbol).length))
-			return {label: color.name, value, color: color.fill}
+export default connect(
+	null,
+	actions
+)(({deck: {_id, author, name, list, format, colors, slug, updated, feature}, openDeck, deleteDeck}) => {
+	const colorData =
+		colors &&
+		COLORS().map((color, i) => {
+			return {label: "", value: colors[i], color: color.fill}
 		})
-		const featureImg = feature || (list[0] && list[0].image_uris.art_crop)
 
-		return (
-			<div key={_id} className={"deck-tile bar "}>
+	return (
+		<div key={_id} className={"deck-tile bar"}>
+			<div className="bar mini-spaced-bar">
 				<Link to={`${HOME_DIR}/deck/${slug}`}>
-					<span className="bar to-build mini-spaced-bar">
-						<span className="feature icon">
-							<div className="pie">
-								<PieChart data={colorData} startAngle={270} />
-							</div>
-							<img src={featureImg} alt="" />
-						</span>
-						<div className="info">
-							<h3 className="deck-title">{name}</h3>
-							<span className="updated-at">Updated {ago(new Date(updated))}</span>
-							<p className="tag">{format}</p>
+					<span className="feature icon">
+						<div className="pie">
+							<PieChart data={colorData} startAngle={270} />
 						</div>
+						<img src={feature} alt="" />
 					</span>
 				</Link>
-				<div className="links">
-					<Link to={`${HOME_DIR}/deck/${slug}/playtest`}>
-						<button className="small-button">Test</button>
+				<div className="info">
+					<Link to={`${HOME_DIR}/deck/${slug}`}>
+						<h3 className="deck-title">{name}</h3>
+						<span className="updated-at">Updated {ago(new Date(updated))}</span>
 					</Link>
-					{!canEdit ? null : (
-						<button className="warning-button inverse-small-button icon-trash" onClick={_ => deleteDeck(_id)} />
-					)}
+					<div className="bar even mini-spaced-bar">
+						<Link to={`${HOME_DIR}/user/${creator(author) && creator(author).slug}`}>
+							<button className="inverse-button small-button">{creator(author) && creator(author).name}</button>
+						</Link>
+						<p className="tag">{format}</p>
+					</div>
 				</div>
 			</div>
-		)
-	}
-)
+			<div className="links">
+				<Link to={`${HOME_DIR}/deck/${slug}/playtest`}>
+					<button className="small-button">Test</button>
+				</Link>
+				{!canEdit(author) ? null : (
+					<button className="warning-button inverse-small-button icon-trash" onClick={_ => deleteDeck(_id)} />
+				)}
+			</div>
+		</div>
+	)
+})

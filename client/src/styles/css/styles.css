@@ -226,6 +226,15 @@
   font-style: italic;
   font-weight: normal;
 }
+.success {
+  color: #7be8c0;
+}
+.attention {
+  color: #fcd303;
+}
+.error {
+  color: #ff4466;
+}
 .block {
   margin-top: 1rem;
   margin-bottom: 0.5rem;
@@ -289,19 +298,24 @@
   top: 2rem;
   z-index: 1;
 }
+.max {
+  flex-grow: 1 !important;
+}
+.min {
+  flex-shrink: 1 !important;
+}
 .bar {
   display: flex;
   flex-flow: row nowrap;
+  flex-wrap: wrap;
 }
 .col {
   display: flex;
   flex-flow: column nowrap;
+  flex-wrap: wrap;
 }
 .even {
   align-items: center;
-}
-.wrap {
-  flex-wrap: wrap;
 }
 .center {
   justify-content: center;
@@ -702,6 +716,10 @@ html {
   animation-iteration-count: infinite;
 }
 .loading .main-msg .spinner {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
   transform-origin: 50% 50%;
   animation-name: spin;
   animation-duration: 2s;
@@ -891,7 +909,6 @@ html {
 }
 .browse .decks {
   display: flex;
-  flex-flow: row nowrap;
   flex-wrap: wrap;
   width: 100%;
   padding: 0 2rem;
@@ -905,50 +922,45 @@ html {
   padding: 0.5rem;
   margin-top: 1rem;
   margin-right: 1rem;
-  min-width: 15rem;
+  min-width: 22rem;
+  flex-shrink: 1;
   background: rgba(0, 0, 0, 0.3);
   border-radius: 0.25rem;
 }
-.browse .decks .deck-tile .to-build {
-  display: flex;
-  flex-flow: row nowrap;
-  justify-content: center;
-  align-items: center;
-  transition: 0.2s;
-  flex: 1 0 auto;
-  padding-right: 0.5rem;
-}
-.browse .decks .deck-tile .to-build .info {
+.browse .decks .deck-tile .info {
   display: flex;
   flex-flow: column nowrap;
   align-items: flex-start;
   justify-content: space-between;
-  height: 100%;
+  flex: 1 1 45%;
+  text-align: left;
   min-width: 12rem;
 }
-.browse .decks .deck-tile .to-build .info .tag {
+.browse .decks .deck-tile .info .tag {
   margin-top: 0.25rem;
 }
-.browse .decks .deck-tile .to-build .info .updated-at {
+.browse .decks .deck-tile .info .updated-at {
   font-style: italic;
   margin-top: 0.25rem;
 }
-.browse .decks .deck-tile .to-build:hover * {
+.browse .decks .deck-tile:hover .deck-title,
+.browse .decks .deck-tile:hover .updated-at {
   color: #8895b3;
 }
-.browse .decks .deck-tile .to-build:hover * img {
-  filter: brightness(0.8);
+.browse .decks .deck-tile:hover .feature img {
+  filter: brightness(0.7);
 }
 .browse .decks .deck-tile .links {
   display: flex;
   flex-flow: column nowrap;
-  width: 100%;
+  width: 3rem;
 }
 .browse .decks .deck-tile .links * {
   width: 100%;
   font-size: 1.1rem;
 }
 .feature {
+  display: flex;
   width: 5rem;
   height: 5rem;
 }
@@ -1566,13 +1578,14 @@ html {
 }
 .tester .zone .title {
   font-family: "MTG-head";
-  margin: 0.5rem 0 0.25rem;
-  font-size: 0.6rem;
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
   color: #c6cfe4;
   padding: 0.125rem;
 }
 .tester .zone .title .custom-select {
   background: transparent;
+  height: 1rem;
 }
 .tester .zone .title .custom-select .select-collapsed {
   color: #c6cfe4;
@@ -1587,7 +1600,7 @@ html {
   flex-flow: row nowrap;
   height: 100%;
   width: 100%;
-  box-shadow: inset 0 0 1rem rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 0 1rem rgba(0, 0, 0, 0.3);
 }
 .tester .zone .row .card-container .card-img {
   box-shadow: 0 0 1rem rgba(0, 0, 0, 0.5);
@@ -1644,6 +1657,10 @@ html {
   height: 1.5rem;
   color: #eff5ff;
   background: #313f56;
+  align-items: flex-start;
+}
+.tester .test-controls .bar {
+  align-items: flex-start;
 }
 .tester .test-controls p {
   font-family: "Beleren";
@@ -1656,6 +1673,12 @@ html {
 }
 .tester .test-controls .turn {
   width: 10rem;
+}
+.tester .test-controls .counter .discrete-input {
+  height: 1.25rem;
+}
+.tester .test-controls .counter:hover * {
+  color: #fcd303;
 }
 .tester .test-controls .mana-counters {
   display: flex;
@@ -1717,30 +1740,31 @@ html {
   padding: 0.25rem;
   display: flex;
   flex-flow: column nowrap;
-  justify-content: flex-end;
+  justify-content: space-between;
   background: #1f283b;
 }
 .tester .side-col .graveyard,
 .tester .side-col .exile {
-  flex: 1 0 3rem;
+  flex: 1 0 10%;
+  position: relative;
 }
 .tester .side-col .graveyard .row,
 .tester .side-col .exile .row {
-  max-height: 5rem;
-  height: 5rem;
+  height: 3rem;
   flex-flow: column nowrap;
   overflow-y: scroll;
-  overflow-x: hidden;
-  font-size: 0.6rem;
-  font-family: "MTG-para";
 }
 .tester .side-col .graveyard .row .drop-slot,
 .tester .side-col .exile .row .drop-slot {
-  flex: 1 0 1px;
+  height: 3rem;
 }
-.tester .side-col .graveyard .row .drop-slot .header,
-.tester .side-col .exile .row .drop-slot .header {
-  padding: 0.125rem 0.5rem;
+.tester .side-col .graveyard .row .drop-slot .card-container .card-head h4,
+.tester .side-col .exile .row .drop-slot .card-container .card-head h4 {
+  font-size: 0.8rem;
+}
+.tester .side-col .graveyard .row .drop-slot .card-container .card-head p,
+.tester .side-col .exile .row .drop-slot .card-container .card-head p {
+  font-size: 0.6rem;
 }
 .tester .side-col .library-cont {
   display: flex;
@@ -1760,13 +1784,13 @@ html {
   bottom: 0;
   right: 0;
   z-index: 30;
-  height: calc(10rem + 2rem);
   width: calc(100vw - (7.14rem + 1rem));
   transition: 0.3s ease;
 }
 .tester .hand .row {
+  height: calc(10rem);
   box-shadow: none;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
 }
 .tester .hand .row .drop-slot {
   display: grid;
@@ -1789,14 +1813,13 @@ html {
   z-index: 10;
 }
 .tester .battlefield .inner {
-  height: 100%;
   display: flex;
+  flex-flow: column nowrap;
   flex-direction: column-reverse;
 }
 .tester .battlefield .inner .row {
   flex-wrap: nowrap;
-  flex: 1 0 10rem;
-  height: 100%;
+  height: 10rem;
   width: 100%;
 }
 .tester .battlefield .inner .row .drop-slot {
@@ -1812,7 +1835,7 @@ html {
 }
 .tester .battlefield .bottom {
   height: 3rem;
-  background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5));
+  background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.6));
 }
 .tester .stack {
   position: fixed;

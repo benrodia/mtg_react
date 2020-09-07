@@ -3,7 +3,9 @@ import React, {useState, useRef, useEffect} from "react"
 import {connect} from "react-redux"
 import actions from "../actions"
 
-function GameLog({history, current, timeTravel}) {
+export default connect(({playtest: {history, current, timeID}}) => {
+  return {history, current, timeID}
+}, actions)(({history, current, timeID, timeTravel}) => {
   const [open, openLog] = useState(false)
   const bottom = useRef()
   useEffect(
@@ -20,8 +22,8 @@ function GameLog({history, current, timeTravel}) {
       <div className="game-log" tabIndex={"0"} onClick={_ => openLog(true)} onBlur={_ => openLog(false)}>
         {past.map(p => (
           <div
-            onClick={_ => open && timeTravel(p.current)}
-            key={"GameLog_" + current}
+            onClick={_ => open && timeTravel(p.timeID)}
+            key={"GameLog_" + p.timeID}
             className={`log ${p.current > current && "inactive"} ${
               open && p.current === current && current < history.length && "pointer"
             }`}>
@@ -34,8 +36,4 @@ function GameLog({history, current, timeTravel}) {
       </div>
     </div>
   )
-}
-
-export default connect(({playtest: {history, current}}) => {
-  return {history, current}
-}, actions)(GameLog)
+})

@@ -27,6 +27,7 @@ const {
 	MAIN_BOARD,
 	SINGLETON,
 	log,
+	canEdit,
 } = utilities
 
 export default connect(
@@ -56,14 +57,12 @@ export default connect(
 		view,
 		sortBy,
 		focus,
-		showIllegal,
 		board,
 		openModal,
 		addCard,
 		changeCard,
 		changeDeck,
 		changeFilters,
-		canEdit,
 	}) => {
 		let inBoard = list.filter(c => c.board === board && !c.commander)
 		const commanders = list.filter(c => board === MAIN_BOARD && !!c.commander)
@@ -125,7 +124,7 @@ export default connect(
 					<h3>
 						<div className={`icon`} /> {pluralize("Commander", commanders.length)}
 					</h3>
-					{canEdit(author) ? (
+					{canEdit() ? (
 						<BasicSearch
 							searchable
 							limit={20}
@@ -175,7 +174,7 @@ export default connect(
 									</div>
 									<span
 										onClick={_ => openModal({title: "Change Printing", content: <PrintSelector change card={card} />})}>
-										{view === "list" ? (
+										{view === "list" || card.commander ? (
 											setLogo
 										) : (
 											<button>
@@ -194,7 +193,7 @@ export default connect(
 									itemType={card.commander ? ItemTypes.COMMANDER : ItemTypes.CARD}
 									imgSize="small"
 									classes={`
-										${showIllegal && cards.length > legal && cardInd >= legal && "illegal "} 
+										${cards.length > legal && cardInd >= legal && "illegal "} 
 										${Q(card, focus.key, focus.val) && "highlighted"}
 									`}
 									cardHeadOnly={view === "list" && !card.commander}
@@ -204,7 +203,7 @@ export default connect(
 										pointerEvents: cardInd !== cardsOfSet.length - 1 && view === "grid" && "none",
 										marginBottom: cardsOfSet.length > 1 && !cardInd && view === "grid" && cardsOfSet.length + "rem",
 									}}>
-									{canEdit(author) ? controls : null}
+									{canEdit() ? controls : null}
 								</CardControls>
 							)
 						})

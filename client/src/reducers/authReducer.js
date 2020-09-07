@@ -17,8 +17,8 @@ export default function auth(auth = INIT_AUTH_STATE, {type, val}) {
 		case A.LOGOUT_SUCCESS:
 		case A.REGISTER_FAIL:
 			localStorage.removeItem("token")
-			// localStorage.removeItem("user")
-			return {...INIT_AUTH_STATE, token: null, isAuthenticated: false}
+			localStorage.removeItem("user")
+			return {...INIT_AUTH_STATE, user: {}, token: null, isAuthenticated: false}
 
 		case A.GET_ERRORS:
 			return {...auth, errors: val}

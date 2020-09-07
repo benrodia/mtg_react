@@ -4,7 +4,7 @@ import {COLORS, MAIN_BOARD} from "./definitions"
 import {SINGLETON} from "./greps"
 import {CARD_SLEEVES, PLAYMATS} from "./data"
 import {loadCache} from "../functions/utility"
-import {receiveCards} from "../functions/receiveCards"
+import {prepForPlaytest} from "../functions/receiveCards"
 
 export const INIT_AUTH_STATE = {
 	token: localStorage.getItem("token"),
@@ -27,7 +27,7 @@ export const INIT_MAIN_STATE = {
 	users: [],
 	noteLog: [],
 	modal: null,
-	page: "Dash",
+	refresh: false,
 }
 
 export const INIT_SETTINGS_STATE = {
@@ -48,7 +48,7 @@ export const INIT_DECK_STATE = {
 	format: "casual",
 	desc: "",
 	list: [],
-	changes: false,
+	preChanges: [],
 }
 
 export const INIT_FILTERS_STATE = {
@@ -57,29 +57,31 @@ export const INIT_FILTERS_STATE = {
 	sortBy: "Type",
 	customFields: [],
 	focus: {},
+	showPrice: false,
 	basic: {
 		by: "name",
 	},
 	advanced: {
-		colors: COLORS("symbol").map(s => true),
+		legalOnly: true,
+		colors: COLORS("symbol").map(s => s !== "C"),
 		all: false,
 		only: false,
-		terms: [],
-		searchBy: "oracle_text",
 		cmc: 0,
 		cmcOp: "any",
+		rarity: "any",
+		types: [],
+		text: [],
+		keywords: [],
 	},
-	showIllegal: false,
-	showTypes: false,
-	showPrice: false,
-	viewUser: {},
+	deckFilters: [],
+	deckParams: [],
 }
 
 export const INIT_PLAYTEST_STATE = (list, format, num) => {
 	return {
 		number: num || 0,
 		size: {cols: 1, rows: 1},
-		deck: receiveCards(list || []),
+		deck: prepForPlaytest(list || []),
 		life: SINGLETON(format) ? 40 : 20,
 		eLife: SINGLETON(format) ? 40 : 20,
 		poison: 0,
@@ -98,9 +100,9 @@ export const INIT_PLAYTEST_STATE = (list, format, num) => {
 const initialState = {
 	auth: INIT_AUTH_STATE,
 	main: INIT_MAIN_STATE,
-	settings: loadCache(A.SETTINGS, INIT_SETTINGS_STATE),
 	deck: loadCache(A.DECK, INIT_DECK_STATE),
-	filters: loadCache(A.FILTERS, INIT_FILTERS_STATE, true),
+	settings: loadCache(A.SETTINGS, INIT_SETTINGS_STATE),
+	filters: loadCache(A.FILTERS, INIT_FILTERS_STATE, true, true),
 	playtest: INIT_PLAYTEST_STATE([], null, 0),
 }
 

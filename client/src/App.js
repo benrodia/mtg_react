@@ -15,17 +15,21 @@ import User from "./components/_Page_User"
 import Deck from "./components/_Page_Deck"
 import Playtest from "./components/_Page_Playtest"
 
-const {HOME_DIR, DECK_ID, rnd} = utilities
+const {HOME_DIR, DECK_ID, rnd, getDecks} = utilities
 export default connect(
-  ({main: {page, cardData, legalCards, tokens}, deck: {format}, settings: {scale, randomPlaymat, randomSleeves}}) => {
-    return {page, cardData, legalCards, tokens, format, scale, randomSleeves, randomPlaymat}
+  ({
+    main: {cardData, legalCards, tokens, refresh},
+    deck: {format},
+    settings: {scale, randomPlaymat, randomSleeves},
+  }) => {
+    return {cardData, legalCards, tokens, refresh, format, scale, randomSleeves, randomPlaymat}
   },
   actions
 )(
   ({
-    page,
     cardData,
     legalCards,
+    refresh,
     scale,
     randomSleeves,
     randomPlaymat,
@@ -35,15 +39,15 @@ export default connect(
     getLegalCards,
     getTokens,
     changeSettings,
-    getDecks,
+    loadUser,
+    loadDecks,
   }) => {
     useEffect(
       _ => {
         if (cardData.length) {
           !tokens.length && getTokens(cardData)
           !legalCards.length && getLegalCards(cardData, format)
-          getDecks()
-
+          getDecks().then(res => loadDecks(res))
           const randImg = _ =>
             rnd(cardData.map(c => c.highres_image && c.image_uris && c.image_uris.art_crop).filter(c => !!c))
           randomPlaymat && changeSettings("playmat", randImg())
@@ -52,6 +56,14 @@ export default connect(
       },
       [cardData]
     )
+    // loadUser()
+
+    // useEffect(
+    //   _ => {
+    //     if (cardData.length) getDecks().then(res => loadDecks(res))
+    //   },
+    //   [cardData, refresh]
+    // )
 
     const routes = (
       <Switch>

@@ -227,6 +227,17 @@
 	font-style: italic;
 	font-weight: normal;
 }
+.success {
+	color: @green;
+}
+
+.attention {
+	color: @highlight;
+}
+
+.error {
+	color: @red;
+}
 
 .block {
 	margin-top: 1rem;
@@ -296,20 +307,26 @@
 	z-index: 1;
 }
 
+.max {
+	flex-grow: 1 !important;
+}
+
+.min {
+	flex-shrink: 1 !important;
+}
+
 .bar {
 	.flex-row();
+	flex-wrap: wrap;
 }
 
 .col {
 	.flex-col();
+	flex-wrap: wrap;
 }
 
 .even {
 	align-items: center;
-}
-
-.wrap {
-	flex-wrap: wrap;
 }
 
 .center {

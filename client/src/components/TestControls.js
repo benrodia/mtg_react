@@ -32,14 +32,14 @@ export default connect(({playtest, settings: {gameLog}}) => {
   }) => {
     return (
       <div className="test-controls">
-        <div className="mini-spaced-bar bar even">
+        <div className="mini-spaced-bar bar">
           <p className="thin-block turn">
             Turn {turn}: {phase}{" "}
           </p>
           <button className="smaller-button" onClick={handleTurns}>
             Pass
           </button>
-          <button className="smaller-button warning-button" onClick={startTest}>
+          <button className="smaller-button warning-button" onClick={_ => startTest()}>
             Restart
           </button>
           {!gameLog ? null : <GameLog />}

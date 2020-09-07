@@ -62,12 +62,6 @@ export default connect(({auth: {isAuthenticated, user: {_id}}, deck: {list, form
 					</div>
 					<span className="view-options bar even">
 						<button
-							title="Highlight Illegal Cards/Quantities"
-							className={`small-button ${showIllegal && "selected"}`}
-							onClick={_ => changeFilters("showIllegal", !showIllegal)}>
-							!!!
-						</button>
-						<button
 							title="Display Card Prices"
 							className={`small-button ${showPrice && "selected"}`}
 							onClick={_ => changeFilters("showPrice", !showPrice)}>

@@ -1,53 +1,54 @@
-import React from "react"
+import React, {useEffect, useState} from "react"
 import {Link} from "react-router-dom"
 import {connect} from "react-redux"
 import actions from "../actions"
 import utilities from "../utilities"
 
+import Loading from "./Loading"
 import DeckTile from "./DeckTile"
 import NewDeck from "./NewDeck"
 
-const {HOME_DIR} = utilities
+const {HOME_DIR, getDecks} = utilities
 
-export default connect(({main: {decks}, auth: {isAuthenticated}}) => {
-	return {
+export default connect(({main: {decks, cardData, refresh}, auth: {user: {_id, followed}}}) => {
+	return {decks, cardData, refresh, _id, followed}
+}, actions)(
+	({
+		direct,
 		decks,
-		isAuthenticated,
+		flags,
+		params,
+		you,
+		hasHeader,
+		cardData,
+		children,
+		refresh,
+		_id,
+		followed,
+		newDeck,
+		openModal,
+		refreshData,
+		loadDecks,
+	}) => {
+		const viewDecks = (direct || decks || []).filter(d => {
+			flags = flags || []
+			let included = true
+			if (included && flags.includes("followed")) included = followed.includes(d._id)
+			if (included && flags.includes("published")) included = d.published
+			if (included && flags.includes("helpWanted")) included = d.helpWanted >= 3
+			if (included && flags.includes("others")) included = d.author !== _id
+			return included && (d.privacy !== "Private" || you)
+		})
+
+		return (
+			<div className="browse">
+				{children}
+				<div className="decks big-block center full-width fill wrap">
+					{viewDecks.map(d => (
+						<DeckTile key={"TILE__" + d._id} deck={d} />
+					))}
+				</div>
+			</div>
+		)
 	}
-}, actions)(({user: {_id, slug, name}, you, hasHeader, users, decks, isAuthenticated, newDeck, openModal}) => {
-	const userDecks = decks.filter(d => d.author === _id)
-
-	const newDeckBtn = (
-		<button
-			className="success-button new-deck bar mini-spaced-bar"
-			onClick={_ => openModal({title: "Make a Deck", content: <NewDeck />})}>
-			<div>Make a Deck</div>
-			<span className="icon-list-add" />
-		</button>
-	)
-
-	const header = (
-		<>
-			<h2>Decks by</h2>
-			<Link to={`${HOME_DIR}/user/${slug}`}>
-				<h2 className="inverse-button ">
-					{name} {you ? "(You)" : ""}
-				</h2>
-			</Link>
-		</>
-	)
-
-	return (
-		<div className="browse">
-			<div className="block bar even mini-spaced-bar">
-				{hasHeader ? header : null}
-				{you ? newDeckBtn : null}
-			</div>
-			<div className="big-block decks">
-				{userDecks.map(d => (
-					<DeckTile key={"TILE__" + d._id} deck={d} />
-				))}
-			</div>
-		</div>
-	)
-})
+)

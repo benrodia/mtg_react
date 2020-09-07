@@ -22,9 +22,9 @@ export default ({addable, removable, changeable, text, list, callBack, filters, 
 		}
 	}
 	return (
-		<>
+		<div className="bar even">
 			{!edit ? (
-				children || null
+				<div>{children}</div>
 			) : area ? (
 				<textarea
 					id={uuidv4()}
@@ -51,12 +51,12 @@ export default ({addable, removable, changeable, text, list, callBack, filters, 
 				/>
 			)}
 			{!addable ? null : <button className={`success-button icon-plus ${!canAdd && "disabled"}`} onClick={add} />}
-			{!changeable ? null : <span className="icon-pencil" onClick={change} />}
+			{!changeable ? null : <span className="clicky-icon icon-pencil" onClick={change} />}
 			{!removable ? null : (
 				<span className="icon-cancel" onClick={remove}>
 					X
 				</span>
 			)}
-		</>
+		</div>
 	)
 }
