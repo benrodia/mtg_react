@@ -1,0 +1,62 @@
+.card-container {
+  transition: 0.2s;
+  transform-origin: 50% 100%;
+  animation-duration: 0.3s;
+  animation-timing-function: ease-out;
+  animation-iteration-count: 1;
+  animation-play-state: forwards;
+}
+.card-head {
+  .flex-col();
+  justify-content: flex-start;
+  color: @darkest;
+  margin: 0 @thinner @thinner;
+  border-radius: @thinner;
+  background: rgba(255, 255, 255, 0.7);
+  padding: @thinnest @thinner;
+  text-align: left;
+  h4 {
+    font-size: 1rem;
+    font-family: @header;
+  }
+  &:hover {
+    cursor: pointer;
+    background: @highlight;
+  }
+  .types {
+    font-size: @small;
+    font-family: @para;
+    .ms {
+      &:before {
+        font-size: 0.8rem;
+      }
+      height: 1rem;
+      width: 1rem;
+    }
+  }
+  .prices {
+    padding: @thinner;
+  }
+}
+
+.card-img {
+  transition: 0.2s;
+  object-fit: cover;
+  min-width: @cardW;
+  width: @cardW;
+  min-height: @cardH;
+  height: @cardH;
+  border-radius: @thin;
+}
+.card-img:hover,
+.card-img.selected {
+  cursor: pointer;
+  box-shadow: 0 0 @thin @highlight;
+  transform: scale(1.1);
+}
+
+.grid-view {
+  .prices {
+    color: @lightest;
+  }
+}

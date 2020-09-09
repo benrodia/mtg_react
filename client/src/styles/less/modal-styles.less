@@ -1,0 +1,188 @@
+.modal-cont {
+  .fixed-full-page();
+  .flex-centered();
+  z-index: 300;
+  transition: 0.5s;
+  .exit {
+    .fixed-full-page();
+    position: absolute;
+    z-index: -1;
+    background: rgba(0, 0, 0, 0.75);
+    cursor: pointer;
+    transition: 0.2s;
+    &:hover {
+      background: rgba(0, 0, 0, 0.7);
+      .icon {
+        color: @red;
+      }
+    }
+    .icon {
+      font-size: @bigger;
+      position: absolute;
+      top: 3rem;
+      left: 1rem;
+      z-index: 100;
+      transition: 0.2s;
+    }
+  }
+  .modal-box {
+    .flex-col();
+    justify-content: flex-start;
+    align-items: center;
+    transition: 0.3s ease-out;
+    background: linear-gradient(-45deg, @opaque, @dark);
+    position: fixed;
+    top: 3rem;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    overflow-y: auto;
+
+    .modal-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 30;
+      width: 100%;
+      height: 3rem;
+      padding: @thin;
+      background: @darkest;
+    }
+
+    .modal-content {
+      padding: @thin;
+    }
+
+    .inspect-container {
+      .header {
+        .flex-row();
+        justify-content: space-between;
+        height: 2rem;
+        margin-bottom: 1rem;
+      }
+
+      .info {
+        .flex-centered();
+        margin-right: 20rem;
+        img {
+          object-fit: cover;
+          height: 28rem;
+          width: 20rem;
+          left: 50%;
+          position: fixed;
+          border-radius: @thin;
+          box-shadow: 0 0 1rem rgba(0, 0, 0, 0, 0.6);
+        }
+
+        .text {
+          .flex-col();
+          color: @lightest;
+          padding: 0 2rem 0 0;
+          height: 28rem;
+          width: 20rem;
+          h2 {
+            font-size: 1.3em;
+            padding-bottom: 1rem;
+            white-space: nowrap;
+            display: flex;
+            justify-content: space-between;
+          }
+          p {
+            font-size: 0.9em;
+            line-height: 1.2em;
+            padding-bottom: @thin;
+          }
+
+          .rulings {
+            height: 100%;
+            border-radius: @thin;
+            color: @darkest;
+            background: @lighter;
+            box-shadow: inset 0 0 1rem rgba(0, 0, 0, 0, 0.5);
+            padding: 1rem;
+            margin-top: @thin;
+            // overflow-y: scroll;
+            .ruling {
+              margin-bottom: 2rem;
+              h4 {
+                color: @darker;
+                font-weight: bold;
+                margin-bottom: @thin;
+              }
+            }
+          }
+        }
+      }
+    }
+    .choose-print {
+      min-width: calc(@cardW*2);
+      max-width: 60rem;
+      // height: 24rem;
+      .options {
+        .flex-row();
+        flex-wrap: wrap;
+        padding: 0 @thin;
+        margin-top: 1rem;
+        height: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+        .print-select-card {
+          margin-bottom: 1rem;
+          width: @cardW;
+          margin-right: @thin;
+          h4 {
+            height: 2rem;
+            margin-bottom: @thin;
+          }
+        }
+      }
+    }
+  }
+  .info {
+    color: @lightest;
+    max-width: 60rem;
+
+    .themes {
+      margin: 1rem 0;
+      h4 {
+        margin-bottom: @thin;
+      }
+      .inner {
+        max-width: 100%;
+        padding: @thin;
+        overflow-x: auto;
+        overflow-y: hidden;
+        .flex-row();
+        .sleeves,
+        .playmat {
+          object-fit: cover;
+          margin-right: @thin;
+          height: 10rem;
+          width: 14rem;
+          cursor: pointer;
+          transition: 0.2s ease;
+          &:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 @thin @highlight;
+          }
+        }
+        .sleeves {
+          max-width: 7.14rem;
+        }
+        .selected {
+          box-shadow: 0 0 1rem @highlight;
+        }
+      }
+    }
+  }
+}
+.hide-modal {
+  opacity: 0;
+  pointer-events: none;
+  .modal-box {
+    transform: scale(0);
+    padding: 0;
+  }
+}

@@ -1,0 +1,4 @@
+{
+	"mongoUri": "mongodb+srv://benrodia:MFSuDFIawQeief1I@cluster0.8pajr.mongodb.net/ReactMTG?retryWrites=true&w=majority",
+	"jwtSecret": "rMTG_myJWTsecret"
+}
