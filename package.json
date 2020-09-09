@@ -6,10 +6,11 @@
     "client-install": "npm install && cd client && npm install",
     "start": "node server.js",
     "server": "nodemon server.js",
+    "build": "cd client && npm run build",
     "client": "cd client && npm run start",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "styles": "cd client && lessc src/styles/less/styles.less src/styles/css/styles.css",
-    "heroku-postbuild": "npm install --prefix client && npm run build --prefix client"
+    "heroku-postbuild": "npm run client-install && npm run build"
   },
   "keywords": [],
   "author": "Ben Rodia",
