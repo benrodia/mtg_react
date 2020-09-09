@@ -15,7 +15,7 @@ import User from "./components/_Page_User"
 import Deck from "./components/_Page_Deck"
 import Playtest from "./components/_Page_Playtest"
 
-const {HOME_DIR, DECK_ID, rnd, getDecks, getArt} = utilities
+const {HOME_DIR, DECK_ID, rnd, getArt} = utilities
 export default connect(
   ({main: {modal, cardData, legalCards, tokens, refresh}, deck: {format}, settings: {scale, random_playmat}}) => {
     return {modal, cardData, legalCards, tokens, refresh, format, scale, random_playmat}
@@ -37,16 +37,22 @@ export default connect(
     changeSettings,
     loadUser,
     loadDecks,
+    getCardData,
+    getSetData,
+    getUsers,
   }) => {
     useEffect(
       _ => {
         if (cardData.length) {
           !tokens.length && getTokens(cardData)
           !legalCards.length && getLegalCards(cardData, format)
-          getDecks().then(res => loadDecks(res))
-          const rand = _ => rnd(getArt(cardData, {artist: "John Avon"})).image
-          random_playmat && changeSettings("playmat", rand())
-        } else loadAppData()
+          random_playmat && changeSettings("playmat", rnd(getArt(cardData)).image)
+          loadDecks()
+        } else {
+          getCardData()
+          getSetData()
+          getUsers()
+        }
       },
       [cardData]
     )

@@ -1,9 +1,9 @@
 const express = require("express")
 const router = express.Router()
 const bcrypt = require("bcryptjs")
-const config = require("config")
 const jwt = require("jsonwebtoken")
 const auth = require("../../middleware/auth")
+require("dotenv").config()
 
 const User = require("../../models/User")
 
@@ -16,7 +16,7 @@ router.post("/", (req, res) => {
 		if (!user) return res.status(400).json("User Doesn't Exist.")
 		bcrypt.compare(password, user.password).then(isMatch => {
 			if (!isMatch) return res.status(400).json("Wrong Password.")
-			jwt.sign({id: user.id}, config.get("jwtSecret"), {expiresIn: 7200}, (err, token) => {
+			jwt.sign({id: user.id}, process.env.JWT_SECRET || "jwtSecret", {expiresIn: 7200}, (err, token) => {
 				if (err) throw err
 				res.json({token, user})
 			})
