@@ -11,9 +11,13 @@ export async function getDecks(flags = [], params = {}) {
 	return decks
 }
 
-export const canEdit = author => {
-	const {auth, deck} = store.getState()
-	return auth.isAuthenticated && author ? auth.user._id === author : auth.user._id === deck.author
+export const canEdit = _id => {
+	const {
+		auth: {user, isAuthenticated},
+		deck: {author},
+	} = store.getState()
+
+	return isAuthenticated && _id ? user._id === _id : user._id === author
 }
 
 export const canSuggest = _ => {
@@ -64,9 +68,11 @@ export const createSlug = (name = "", from) => {
 }
 
 export const resetCache = _ => {
-	localStorage.setItem("settings", INIT_SETTINGS_STATE)
-	localStorage.setItem("deck", INIT_DECK_STATE)
+	console.log("resetCache")
+	localStorage.removeItem("settings")
+	localStorage.removeItem("deck")
 	localStorage.removeItem("user")
+	setTimeout(_ => window.location.reload(), 500)
 }
 
 export const testEmail = (email = "") => {
@@ -76,5 +82,18 @@ export const testEmail = (email = "") => {
 	return regex.test(email)
 }
 
-export const testPassword = (password = "") =>
+export const badPassword = (password = "") => {
+	return !RegExp("^(?=.{8,})").test(password)
+		? "Too Short"
+		: !RegExp("^(?=.*[a-z])").test(password)
+		? "Needs a lower case letter"
+		: !RegExp("^(?=.*[A-Z])").test(password)
+		? "Needs a upper case letter"
+		: !RegExp("^(?=.*[0-9])").test(password)
+		? "Needs a number"
+		: !RegExp("^(?=.*[!@#$%^&*-_().,/;:])").test(password)
+		? "Needs a special character"
+		: false
+
 	RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*d)(?=.*[$@$!%*?&])[A-Za-zd$@$!%*?&]{8,}").test(password)
+}

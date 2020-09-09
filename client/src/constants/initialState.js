@@ -6,18 +6,6 @@ import {CARD_SLEEVES, PLAYMATS} from "./data"
 import {loadCache} from "../functions/utility"
 import {prepForPlaytest} from "../functions/receiveCards"
 
-export const INIT_AUTH_STATE = {
-	token: localStorage.getItem("token"),
-	isAuthenticated: !!localStorage.getItem("token"),
-	isLoading: true,
-	user: loadCache("user", {}),
-	errors: {
-		msg: {},
-		status: null,
-		id: null,
-	},
-}
-
 export const INIT_MAIN_STATE = {
 	cardData: [],
 	legalCards: [],
@@ -32,15 +20,26 @@ export const INIT_MAIN_STATE = {
 
 export const INIT_SETTINGS_STATE = {
 	scale: 100,
-	showSubTitle: true,
-	gameLog: true,
-	sleeves: Object.values(CARD_SLEEVES)[0],
-	randomSleeves: true,
+	darken: 40,
+	game_log: true,
 	playmat: Object.values(PLAYMATS)[0],
-	randomPlaymat: true,
-	stacktions: ["Action", "Spell", "Activated Ability", "Triggered Ability"],
-	useStack: [],
-	manaTolerance: 3,
+	random_playmat: true,
+	use_stack: ["Action", "Spell", "Activated Ability", "Triggered Ability"],
+	mana_tolerance: 3,
+}
+
+export const INIT_AUTH_STATE = {
+	token: localStorage.getItem("token"),
+	isAuthenticated: !!localStorage.getItem("token"),
+	isLoading: true,
+	user: loadCache("user", {
+		settings: INIT_SETTINGS_STATE,
+	}),
+	errors: {
+		msg: {},
+		status: null,
+		id: null,
+	},
 }
 
 export const INIT_DECK_STATE = {
@@ -49,6 +48,7 @@ export const INIT_DECK_STATE = {
 	desc: "",
 	list: [],
 	preChanges: [],
+	colors: [0, 0, 0, 0, 0, 1],
 }
 
 export const INIT_FILTERS_STATE = {
@@ -85,6 +85,7 @@ export const INIT_PLAYTEST_STATE = (list, format, num) => {
 		life: SINGLETON(format) ? 40 : 20,
 		eLife: SINGLETON(format) ? 40 : 20,
 		poison: 0,
+		ePoison: 0,
 		turn: 0,
 		mana: COLORS().map(C => 0),
 		phase: "Beginning",
@@ -100,9 +101,9 @@ export const INIT_PLAYTEST_STATE = (list, format, num) => {
 const initialState = {
 	auth: INIT_AUTH_STATE,
 	main: INIT_MAIN_STATE,
-	deck: loadCache(A.DECK, INIT_DECK_STATE),
-	settings: loadCache(A.SETTINGS, INIT_SETTINGS_STATE),
-	filters: loadCache(A.FILTERS, INIT_FILTERS_STATE, true, true),
+	deck: loadCache(A.DECK, INIT_DECK_STATE, true),
+	settings: loadCache(A.SETTINGS, INIT_SETTINGS_STATE, true, true),
+	filters: loadCache(A.FILTERS, INIT_FILTERS_STATE, true),
 	playtest: INIT_PLAYTEST_STATE([], null, 0),
 }
 

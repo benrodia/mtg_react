@@ -139,7 +139,6 @@ export default connect(({playtest: {deck, look, size, hideHand}}) => {
             <BasicSearch
               options={tutorable.cards}
               placeholder="Tutor"
-              labelBy={"name"}
               callBack={c => {
                 if (tutorable.sac) cardClick(card, true, "Graveyard")
                 cardClick(c, false, tutorable.dest)

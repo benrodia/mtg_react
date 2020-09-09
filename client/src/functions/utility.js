@@ -1,18 +1,14 @@
-export const cache = (obj, key, val) => {
-  const stored = JSON.parse(localStorage.getItem(obj)) || {}
+export const cache = (obj, key, val, session) => {
+  let stored = session ? sessionStorage.getItem(obj) : localStorage.getItem(obj)
+  stored = !stored || stored === "undefined" ? {} : JSON.parse(stored)
   const data = key === "all" ? {...stored, ...val} : {...stored, [key]: val}
-  localStorage.setItem(obj, JSON.stringify(data))
+  session ? sessionStorage.setItem(obj, JSON.stringify(data)) : localStorage.setItem(obj, JSON.stringify(data))
 }
 
 export const loadCache = (key, init = {}, session, clear) => {
   let data = session ? sessionStorage.getItem(key) : localStorage.getItem(key)
   data = !data || data === "undefined" ? {} : JSON.parse(data)
   return clear ? init : Object.assign(init, data)
-}
-
-export const session = (obj, key, val) => {
-  const data = key === "all" ? val : {...(JSON.parse(sessionStorage.getItem(obj)) || {}), [key]: val}
-  sessionStorage.setItem(obj, JSON.stringify(data))
 }
 
 export const sum = nums => (!nums || !nums.length ? 0 : nums.reduce((a, b) => Number(a) + Number(b), 0))

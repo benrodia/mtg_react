@@ -24,18 +24,42 @@ const {
   areFriends,
   canSuggest,
   creator,
+  loadCache,
 } = utilities
 
 export const openDeck = slug => (dispatch, getState) => {
   const {decks, cardData} = getState().main
   const deck = decks.filter(d => d.slug === slug)[0]
   if (deck) {
-    deck.list = !deck.list[0] ? [] : deck.list[0].name ? deck.list : expandDeckData(deck.list, cardData)
-    deck.preChanges = deck.list
-    deck.clone = null
-    dispatch({type: A.DECK, val: deck})
+    const recent = sessionStorage.getItem("viewed-recently") || ""
+    if (!recent.includes(deck._id)) {
+      axios.patch(`/api/decks/${deck._id}`, {views: deck.views + 1})
+      sessionStorage.setItem("viewed-recently", recent + "_" + deck._id)
+      deck.views += 1
+    }
+    const list = expandDeckData(deck.list, cardData)
+    dispatch({
+      type: A.DECK,
+      val: {
+        ...deck,
+        list,
+        preChanges: list,
+        suggestions: deck.suggestions.map(s => {
+          return {
+            ...s,
+            changes: s.changes.map(c => {
+              return {
+                ...c,
+                added: expandDeckData([c.added], cardData)[0],
+                removed: expandDeckData([c.removed], cardData)[0],
+              }
+            }),
+          }
+        }),
+        clone: null,
+      },
+    })
     cache(A.DECK, "all", deck)
-    axios.patch(`/api/decks/${deck._id}`, {views: deck.views + 1})
   }
 }
 
@@ -106,24 +130,30 @@ export const addCard = (cards, board, remove, replace) => (dispatch, getState) =
 export const giveLike = _ => (dispatch, getState) => {
   const {
     deck,
-    auth: {
-      user: {_id, liked, isAuthenticated},
-    },
+    auth: {isAuthenticated, user},
   } = getState()
 
-  if (isAuthenticated && deck.author !== _id) {
-    if (!liked.includes(deck._id))
-      axios
-        .patch(`/api/decks/${deck._id}`, {likes: deck.likes + 1})
-        .then(_ => axios.patch(`/api/users/${_id}`, {liked: [...liked, deck._id]}))
-    else
-      axios
-        .patch(`/api/decks/${deck._id}`, {likes: deck.likes - 1})
-        .then(_ => axios.patch(`/api/users/${_id}`, {liked: liked.filter(l => l !== deck._id)}))
+  if (isAuthenticated && deck.author !== user._id) {
+    let likes, liked
+    if (!user.liked.includes(deck._id)) {
+      likes = deck.likes + 1
+      liked = [...user.liked, deck._id]
+      dispatch(newMsg(`Liked ${deck.name}`, "success"))
+    } else {
+      likes = deck.likes - 1
+      liked = user.liked.filter(l => l !== deck._id)
+    }
+    axios
+      .patch(`/api/decks/${deck._id}`, {likes})
+      .then(_ => axios.patch(`/api/users/${user._id}`, {liked}))
+      .then(_ => {
+        dispatch(changeDeck("likes", likes))
+        dispatch({type: A.USER, key: "liked", val: liked})
+      })
   }
 }
 
-export const updateDeckList = confirmed => (dispatch, getState) => {
+export const updateDeckList = _ => (dispatch, getState) => {
   let {
     deck: {_id, format, list, preChanges, published, suggestions, feature},
   } = getState()
@@ -131,19 +161,24 @@ export const updateDeckList = confirmed => (dispatch, getState) => {
   const colors = COLORS("symbol").map(s => sum(list.map(c => c.mana_cost.split("").filter(i => i === s).length)))
 
   if (!canPublish(list, format)) published = false
-  if (canEdit() && confirmed)
+  if (canEdit()) {
+    const updated = new Date()
     axios
       .patch(`/api/decks/${_id}`, {
         published,
         suggestions,
-        feature:
-          feature && feature.length ? feature : (list[0] && list[0].image_uris && list[0].image_uris.art_crop) || "",
+        feature: feature.length ? feature : (list[0] && list[0].image_uris && list[0].image_uris.art_crop) || "",
         colors,
         list: collapseDeckData(list),
-        updated: new Date(),
+        updated,
       })
-      .then(res => dispatch(newMsg("UPDATED DECKLIST", "success")))
+      .then(res => {
+        dispatch(newMsg("UPDATED DECKLIST", "success"))
+        dispatch(changeDeck("updated", updated))
+        dispatch(loadDecks())
+      })
       .catch(err => console.error(err))
+  }
   dispatch(changeDeck("preChanges", list))
 }
 
@@ -209,7 +244,6 @@ export const submitSuggestion = changes => (dispatch, getState) => {
     auth: {user},
   } = getState()
 
-  console.log("SUBMITTING", changes, canSuggest())
   if (canSuggest())
     axios
       .patch(`/api/decks/${_id}`, {
@@ -218,7 +252,13 @@ export const submitSuggestion = changes => (dispatch, getState) => {
           {
             author: user._id,
             date: new Date(),
-            changes,
+            changes: changes.map(c => {
+              return {
+                ...c,
+                added: collapseDeckData([c.added])[0],
+                removed: collapseDeckData([c.removed])[0],
+              }
+            }),
           },
         ],
       })

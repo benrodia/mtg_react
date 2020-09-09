@@ -29,6 +29,8 @@ export const FORMATS = [
 	"casual",
 ]
 
+export const STACKTIONS = ["Action", "Spell", "Activated Ability", "Triggered Ability"]
+
 export const CARD_SLEEVES = importAll(require.context("../../public/images/sleeves", false, /\.(png|jpe?g|svg)$/))
 export const PLAYMATS = importAll(require.context("../../public/images/playmats", false, /\.(png|jpe?g|svg)$/))
 
@@ -103,6 +105,13 @@ export const NUMBER_WORDS = [
 	"nineteen",
 ]
 export const SPECIAL_SYMBOLS = [
+	"artifact",
+	"creature",
+	"enchantment",
+	"instant",
+	"land",
+	"planeswalker",
+	"sorcery",
 	"0",
 	"1",
 	"2",
@@ -180,13 +189,6 @@ export const SPECIAL_SYMBOLS = [
 	"chaos",
 	"1-2",
 	"infinity",
-	"artifact",
-	"creature",
-	"enchantment",
-	"instant",
-	"land",
-	"planeswalker",
-	"sorcery",
 	"multiple",
 	"loyalty-up",
 	"loyalty-down",
@@ -228,6 +230,32 @@ export const SPECIAL_SYMBOLS = [
 	"polis-akros",
 	"polis-meletis",
 ]
+export const GREETINGS = [
+	"Hello",
+	"Hey",
+	"Hi",
+	"Hark",
+	"Howdy",
+	"Hiya",
+	"How's it Goin'",
+	"Salutations",
+	"What's New",
+	"How's Your Day",
+	"Welcome Back",
+	"Long Time No See",
+	"It's About Time",
+]
+
+export const SUB_BANNERS = [
+	"Making Magic™ happen fast!",
+	"After 10,000 Years... It is here",
+	"Not what you hoped for, yet more than you ever dreamed",
+	"We're all happy campers",
+	"The newest phase in Web-Based-MTG-Deck-Building-and-Playtesting evolution",
+	"Effort Incarnate",
+	"Recruiting Everyone",
+	"Better Every Day",
+]
 
 export const EXAMPLE_DECK_NAMES = [
 	"Timmy's BIG Surprise",
@@ -235,7 +263,6 @@ export const EXAMPLE_DECK_NAMES = [
 	"Kaput",
 	"Septa",
 	"Something Clever",
-	"Lord of Shit Mountain",
 	"Johnny Cash Money",
 ]
 

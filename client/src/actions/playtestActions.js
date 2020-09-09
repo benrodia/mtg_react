@@ -279,7 +279,7 @@ export const addStack = ({options, effectType, src, text, cancelable}) => (dispa
     text: text || "",
     src: src || "Game",
   }
-  if (getState().settings.useStack.includes(stacktion.effectType)) dispatch({type: A.ADD_STACK, val: stacktion})
+  if (getState().settings.use_stack.includes(stacktion.effectType)) dispatch({type: A.ADD_STACK, val: stacktion})
   else if (typeof stacktion.options[0].res === "function") stacktion.options[0].res()
 }
 

@@ -1,8 +1,10 @@
 import * as A from "../actions/types"
 import {INIT_AUTH_STATE} from "../constants/initialState"
 
-export default function auth(auth = INIT_AUTH_STATE, {type, val}) {
+export default function auth(auth = INIT_AUTH_STATE, {type, key, val}) {
 	switch (type) {
+		case A.USER:
+			return {...auth, user: {...auth.user, [key]: val}}
 		case A.USER_LOADING:
 			return {...auth, isLoading: true}
 		case A.USER_LOADED:
@@ -24,6 +26,8 @@ export default function auth(auth = INIT_AUTH_STATE, {type, val}) {
 			return {...auth, errors: val}
 		case A.CLEAR_ERRORS:
 			return {...auth, errors: INIT_AUTH_STATE.errors}
+		case A.UPDATE_USER:
+			return {...auth, user: {...auth.user, ...val}}
 		default:
 			return auth
 	}

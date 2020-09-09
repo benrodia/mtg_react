@@ -8,8 +8,10 @@ export default function BasicSelect({
   self,
   className,
   searchBy,
+  string,
   orderBy,
   labelBy,
+  renderAs,
   unique,
   options,
   defImg,
@@ -51,11 +53,10 @@ export default function BasicSelect({
       className={`option`}
       key={`option_${i}_${label(o)}`}
       onClick={_ => {
-        callBack(o)
+        callBack && callBack(o)
         reset()
       }}>
-      <span>{titleCaps(label(o))}</span>
-      {img ? img(o) : null}
+      {renderAs ? renderAs(o, i) : titleCaps(label(o))}
     </div>
   ))
 
@@ -69,15 +70,15 @@ export default function BasicSelect({
       value={search}
       id={`basicsearch${options.map(op => label(op))}`}
       onChange={e => {
-        const sorted = e.target.value.length
-          ? matchSorter(
+        const sorted = !e.target.value.length
+          ? options
+          : matchSorter(
               options.map(o => {
                 return {...o, label: label(o)}
               }),
               e.target.value,
-              {keys: [searchBy || "label"]}
-            )
-          : options
+              {keys: searchBy || ["label"]}
+            ).map(o => (string ? o.label : o))
         setSearch(e.target.value)
         setChoices(sorted)
       }}

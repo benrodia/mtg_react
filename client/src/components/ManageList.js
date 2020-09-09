@@ -11,6 +11,7 @@ import AdvancedSearch from "./AdvancedSearch"
 import DeckStats from "./DeckStats"
 import BoardFilters from "./BoardFilters"
 import BulkEdit from "./BulkEdit"
+import Icon from "./Icon"
 import Board from "./Board"
 import DownloadFile from "./DownloadFile"
 import EditableText from "./EditableText"
@@ -21,11 +22,11 @@ const {HOME_DIR, COLORS, textList, canPublish, sum, listDiffs, canEdit} = utilit
 
 export default connect(
 	({
-		main: {legalCards},
-		deck: {list, preChanges, format, published, suggestions, helpWanted},
+		main: {legalCards, sets},
+		deck: {list, preChanges, format, published, suggestions, allow_suggestions},
 		filters: {board, basic},
 	}) => {
-		return {legalCards, list, preChanges, format, published, suggestions, helpWanted, board, basic}
+		return {legalCards, sets, list, preChanges, format, published, suggestions, allow_suggestions, board, basic}
 	},
 	actions
 )(
@@ -35,9 +36,10 @@ export default connect(
 		format,
 		published,
 		suggestions,
-		helpWanted,
+		allow_suggestions,
 		board,
 		legalCards,
+		sets,
 		basic,
 		newMsg,
 		openModal,
@@ -57,7 +59,7 @@ export default connect(
 		const upToDate = !listDiffs(preChanges, list).changed
 		const publishable = !published && upToDate && canPublish(list, format)
 		const ManageList = (
-			<div className="block bar even spaced-bar">
+			<div className="manage-list block bar even spaced-bar">
 				<div className="search-bar">
 					<div className="bar even mini-spaced-bar">
 						<h4>Search Cards By</h4>
@@ -77,13 +79,24 @@ export default connect(
 					<BasicSearch
 						className="big"
 						searchable
-						searchBy={basic.by}
+						searchBy={[basic.by]}
 						unique
 						orderBy={"name"}
 						limit={10}
 						options={legalCards}
 						callBack={c => addCard(c, board)}
-						placeholder={"Search For Cards"}
+						placeholder={"Search All Cards"}
+						renderAs={o => (
+							<span className="bar even search-cards mini-spaced-bar">
+								<Icon
+									name={o.set_name}
+									className={`${o.rarity === "common" ? "" : o.rarity}`}
+									loader={o.set}
+									src={!sets.length ? null : sets.filter(s => s.name === o.set_name)[0].icon_svg_uri}
+								/>
+								<Card card={o} cardHeadOnly />
+							</span>
+						)}
 					/>
 				</div>
 				<div className="col mini-spaced-col">
@@ -100,9 +113,9 @@ export default connect(
 				</div>
 				<div className="mini-spaced-col">
 					<BasicSearch
-						self={helpTiers[helpWanted || 2]}
+						self={helpTiers[allow_suggestions || 2]}
 						options={helpTiers}
-						callBack={p => changeDeck("helpWanted", helpTiers.indexOf(p))}
+						callBack={p => changeDeck("allow_suggestions", helpTiers.indexOf(p))}
 					/>
 					<button
 						className={`${(suggestions && suggestions.length) || "disabled"}`}

@@ -45,6 +45,7 @@ export default connect(
 				)}
 				<BasicSearch
 					searchable
+					string
 					placeholder="Add Counter"
 					options={COUNTERS}
 					callBack={counter => changeCounters(counter, 1)}

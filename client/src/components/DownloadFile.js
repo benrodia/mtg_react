@@ -36,23 +36,27 @@ export default connect(({deck: {name, format, list}, auth: {user}}) => {
   )
 
   return (
-    <div className="download-box">
-      <h3>
-        File Name: <input type="text" value={fileName} onChange={e => setFileName(e.target.value)} />
-      </h3>
-      <h3>Preview File:</h3>
-      <textarea columns={50} rows={15} value={fileText} onChange={e => setFileText(e.target.value)} />
+    <div className="download-box col">
+      <div className="block">
+        <h4>File Name</h4>
+        <input type="text" value={fileName} onChange={e => setFileName(e.target.value)} />
+      </div>
+      <div className="block">
+        <h4>Extension</h4>
+        <BasicSearch self={fileExt} options={[".dek", ".txt", ".mwDeck"]} callBack={e => setFileExt(e)} />
+      </div>
+      <div className="block">
+        <h4>Preview File:</h4>
+        <textarea columns={50} rows={15} value={fileText} onChange={e => setFileText(e.target.value)} />
+      </div>
 
-      <br />
-      <br />
-      <div className="bar even">
+      <div className="bar even block">
         <a
           onClick={_ => openModal(null)}
           download={`${fileName}${fileExt}`}
           href={URL.createObjectURL(new Blob([...fileText], {type: "text/plain"}))}>
           <button className="success-button">Download</button>
         </a>
-        <BasicSearch self={fileExt} options={[".dek", ".txt", ".mwDeck"]} callBack={e => setFileExt(e)} />
       </div>
     </div>
   )

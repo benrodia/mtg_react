@@ -6,6 +6,7 @@ import {PieChart} from "react-minimal-pie-chart"
 import actions from "../actions"
 import utilities from "../utilities"
 
+import Loading from "./Loading"
 import BasicSearch from "./BasicSearch"
 import AdvancedSearch from "./AdvancedSearch"
 import DeckStats from "./DeckStats"
@@ -34,6 +35,8 @@ export default connect(({main: {decks}, deck}) => {
 		[slug, decks]
 	)
 
+	console.log("openDeck", deck, decks.filter(d => d.slug === slug)[0])
+
 	useEffect(
 		_ => {
 			if (stickyRef.current) setOffset(stickyRef.current.clientHeight)
@@ -41,7 +44,9 @@ export default connect(({main: {decks}, deck}) => {
 		[stickyRef]
 	)
 
-	return (
+	return !deck._id ? (
+		<Loading spinner={" "} message={"No Deck Here"} subMessage={<Link to={HOME_DIR}>Return To Home</Link>} />
+	) : (
 		<div className="builder">
 			<section className="deck-area">
 				<div ref={stickyRef}>
@@ -55,7 +60,7 @@ export default connect(({main: {decks}, deck}) => {
 				<div className="quick-import">
 					<div className="playtest-button">
 						<Link to={`${HOME_DIR}/deck/${slug}/playtest`}>
-							<button className="success-button">Playtest Deck</button>
+							<button className="success-button icon-play">Playtest Deck</button>
 						</Link>
 					</div>
 					<div className="exports col">
@@ -65,9 +70,9 @@ export default connect(({main: {decks}, deck}) => {
 							Download File
 						</button>
 						<button
-							className="small-button icon-docs"
+							className="small-button icon-clipboard"
 							onClick={_ => {
-								navigator.clipboard.writeText(textList(deck.list))
+								navigator.clipboard.writeText(textList(deck.list, true))
 								newMsg("Copied list to clipboard!", "success")
 							}}>
 							Copy to Clipboard
@@ -77,7 +82,7 @@ export default connect(({main: {decks}, deck}) => {
 								<button className="small-button success-button fill">Cloned! Open Deck</button>
 							</Link>
 						) : (
-							<button className="small-button" onClick={_ => cloneDeck()}>
+							<button className="small-button icon-clone" onClick={_ => cloneDeck()}>
 								Clone Deck
 							</button>
 						)}

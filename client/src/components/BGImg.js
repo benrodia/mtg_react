@@ -1,9 +1,9 @@
 import React, {useRef, useEffect, useState} from "react"
 import {connect} from "react-redux"
 
-export default connect(({settings: {playmat, wobble}}) => {
-	return {playmat, wobble}
-})(({playmat, wobble}) => {
+export default connect(({settings: {playmat, wobble, darken}}) => {
+	return {playmat, wobble, darken}
+})(({playmat, wobble, darken}) => {
 	const ref = useRef(null)
 	const mod = -3
 	const [{x, y}, setTranslate] = useState({x: 0, y: 0})
@@ -22,6 +22,7 @@ export default connect(({settings: {playmat, wobble}}) => {
 			<div
 				className="playmat"
 				style={{
+					filter: `brightness(${1 - darken / 100})`,
 					transform: wobble && `scale(${Math.abs(mod / 100) + 1}) translate(${x}%,${y}%)`,
 					backgroundImage: "url('" + playmat + "')",
 					transition: "transform .1s ease-out",

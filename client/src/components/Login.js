@@ -3,12 +3,12 @@ import {connect} from "react-redux"
 import actions from "../actions"
 import utilities from "../utilities"
 
-const {testEmail, testPassword} = utilities
+const {testEmail, badPassword, createSlug} = utilities
 
-export default connect(({auth: {isAuthenticated, errors, user: {name, email, password}}}) => {
+export default connect(({main: {users}, auth: {isAuthenticated, user: {name, email, password}}}) => {
 	return {
 		isAuthenticated,
-		errors,
+		users,
 		name,
 		email,
 		password,
@@ -18,7 +18,7 @@ export default connect(({auth: {isAuthenticated, errors, user: {name, email, pas
 		inModal,
 		activeForm,
 		isAuthenticated,
-		errors,
+		users,
 		name,
 		email,
 		password,
@@ -33,17 +33,23 @@ export default connect(({auth: {isAuthenticated, errors, user: {name, email, pas
 		const [upForm, setUpForm] = useState({})
 		const [showPassword, setShowPassword] = useState(false)
 
-		console.log("activeForm", activeForm)
 		const setForm = (form, e) => {
 			const {name, value} = e.target
 			return form === "in" ? setInForm({...inForm, [name]: value}) : setUpForm({...upForm, [name]: value})
 		}
 
-		const validate = (form = {}, reqName, reqConfirm) => {
+		const nameAvailable = text => !users.filter(u => u.name === text || u.slug === createSlug(text, users)).length
+		const emailAvailable = text => !users.filter(u => u.email === text).length
+
+		const validate = (form = {}, up) => {
 			const {name, email, password, passwordConfirm} = form
-			return testEmail(email) && reqConfirm
-				? testPassword(password)
-				: password && (!reqName || (name && name.length >= 6)) && (!reqConfirm || passwordConfirm === password)
+			return !up
+				? email && password
+				: testEmail(email) &&
+						!badPassword(password) &&
+						nameAvailable(name) &&
+						name.length >= 6 &&
+						passwordConfirm === password
 		}
 
 		const inFormDiv = (
@@ -99,11 +105,15 @@ export default connect(({auth: {isAuthenticated, errors, user: {name, email, pas
 							className={`asterisk icon-${
 								!upForm.name || !upForm.name.length
 									? ""
-									: upForm.name.length >= 6
+									: upForm.name.length >= 6 && nameAvailable(upForm.name)
 									? "ok success"
 									: "attention attention"
 							}`}>
-							{!upForm.name || !upForm.name.length || upForm.name.length >= 6 ? "" : "Should be 6+ characters"}
+							{!upForm.name || !upForm.name.length || upForm.name.length >= 6
+								? nameAvailable(upForm.name)
+									? ""
+									: "Already in use"
+								: "Should be 6+ characters"}
 						</span>
 					</h4>
 					<input type="text" name="name" onChange={e => setForm("up", e)} placeholder={"username"} required />
@@ -115,11 +125,15 @@ export default connect(({auth: {isAuthenticated, errors, user: {name, email, pas
 							className={`asterisk icon-${
 								!upForm.email || !upForm.email.length
 									? ""
-									: testEmail(upForm.email)
+									: testEmail(upForm.email) && emailAvailable(upForm.email)
 									? "ok success"
 									: "attention attention"
 							}`}>
-							{!upForm.email || !upForm.email.length || testEmail(upForm.email) ? "" : "Not a valid email address"}
+							{!upForm.email || !upForm.email.length || testEmail(upForm.email)
+								? emailAvailable(upForm.email)
+									? ""
+									: "Already in use"
+								: "Not a valid email address"}
 						</span>
 					</h4>
 					<input name="email" onChange={e => setForm("up", e)} placeholder={"your@email.com"} required />
@@ -131,11 +145,13 @@ export default connect(({auth: {isAuthenticated, errors, user: {name, email, pas
 							className={`asterisk icon-${
 								!upForm.password || !upForm.password.length
 									? ""
-									: testPassword(upForm.password)
+									: !badPassword(upForm.password)
 									? "ok success"
 									: "attention attention"
 							}`}>
-							{!upForm.password || !upForm.password.length || testPassword(upForm.password) ? "" : "Weak password"}
+							{!upForm.password || !upForm.password.length || !badPassword(upForm.password)
+								? ""
+								: badPassword(upForm.password)}
 						</span>
 					</h4>
 					<input

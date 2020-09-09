@@ -3,110 +3,179 @@ import React from "react"
 import {connect} from "react-redux"
 import actions from "../actions"
 
-import ChooseTheme from "./ChooseTheme"
-
 import utilities from "../utilities"
 
-const {pluralize} = utilities
+import CounterInput from "./CounterInput"
 
-export default connect(
-	({settings}) => settings,
-	actions
-)(
-	({
-		userName,
-		gameLog,
-		scale,
-		wobble,
-		showSubTitle,
-		stacktions,
-		useStack,
-		manaTolerance,
-		gameActions,
-		changeSettings,
-	}) => {
-		const manaT = [
-			"Do not show me mana",
-			"Do not auto spend mana",
-			"Pay costs with floating mana",
-			"If able use extra mana sources",
-		]
+const {INIT_SETTINGS_STATE, STACKTIONS, pluralize, titleCaps, rnd, getArt} = utilities
 
-		const textSize = (
-			<div className="setting-check-box">
-				<p>Text Size</p>
-				<button className={`smaller-button ${scale === 80 && "selected"}`} onClick={_ => changeSettings("scale", 80)}>
-					Small
+export default connect(({main: {cardData}, settings}) => {
+	return {cardData, settings}
+}, actions)(({cardData, settings, updateUser, changeSettings, openModal, newMsg}) => {
+	const {game_log, scale, darken, playmat, random_playmat, sleeves, use_stack, mana_tolerance} = settings
+	const manaT = [
+		"Do not show me mana",
+		"Do not auto spend mana",
+		"Pay costs with floating mana",
+		"If able use extra mana sources",
+	]
+
+	console.log("settings", settings)
+	return (
+		<div className="info settings big-block">
+			<div className="display-settings big-block">
+				<h2>UI Settings</h2>
+				<div className="mini-block">
+					<h4>Text Size (75% - 125%)</h4>
+					<div className="mini-block thin-indent">
+						<span className="bar even mini-spaced-bar">
+							<CounterInput value={scale} callBack={n => changeSettings("scale", n)} upper={125} lower={75}>
+								<span
+									className={`clicky-icon icon-minus ${scale <= 75 && "disabled"}`}
+									onClick={_ => changeSettings("scale", Math.max(75, scale - 5))}></span>
+								<span
+									className={`clicky-icon icon-plus ${scale >= 125 && "disabled"}`}
+									onClick={_ => changeSettings("scale", Math.min(125, scale + 5))}></span>
+							</CounterInput>
+							%
+						</span>
+					</div>
+					<div className="mini-block">
+						<h4>Darken Background (0% - 100%)</h4>
+						<div className="mini-block thin-indent">
+							<span className="bar even mini-spaced-bar">
+								<CounterInput value={darken} callBack={n => changeSettings("darken", n)} upper={100} lower={0}>
+									<span
+										className={`clicky-icon icon-minus ${darken <= 0 && "disabled"}`}
+										onClick={_ => changeSettings("darken", Math.max(0, darken - 5))}></span>
+									<span
+										className={`clicky-icon icon-plus ${darken >= 100 && "disabled"}`}
+										onClick={_ => changeSettings("darken", Math.min(100, darken + 5))}></span>
+								</CounterInput>
+								%
+							</span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div className="game-settings block">
+				<h2>Playtester Settings</h2>
+				<span className="bar even mini-block mini-spaced-bar thin-indent">
+					<span
+						className={`clicky-icon icon-toggle${game_log ? "-on attention " : "-off"}`}
+						onClick={_ => changeSettings("game_log", !game_log)}></span>
+					<span>Display Game Log</span>
+				</span>
+				<h4 className="block ">Effects Allowed On The Stack </h4>
+				<div className="col thin-indent">
+					{STACKTIONS.map((st, i) => (
+						<span className={`bar even mini-spaced-bar ${use_stack.includes(st) && " alert"}`}>
+							<span
+								key={st}
+								className={`clicky-icon icon-toggle${use_stack.includes(st) ? "-on attention alert" : "-off"}`}
+								onClick={_ =>
+									changeSettings(
+										"use_stack",
+										use_stack.includes(st) ? use_stack.filter(s => s !== st) : [...use_stack, st]
+									)
+								}
+							/>
+							<span>{pluralize(st)}</span>
+						</span>
+					))}
+				</div>
+				<h4 className="block">Auto Spend Mana</h4>
+				<div className="col thin-indent">
+					{manaT.map((msg, i) => (
+						<span className="bar even mini-spaced-bar">
+							<span
+								key={manaT[i]}
+								className={`clicky-icon icon${mana_tolerance === i ? "-ok" : "-empty"}`}
+								onClick={_ => changeSettings("mana_tolerance", i)}></span>
+							<span>{msg}</span>
+						</span>
+					))}
+				</div>
+			</div>
+
+			<div className="themes">
+				<div className={` block choose-playmat`}>
+					<div className="bar even mini-spaced-bar">
+						<h4>Playmat</h4>
+						<button
+							title="If unlocked, this image will be shuffled everytime you open the app."
+							className={`small-button icon-lock${random_playmat ? "-open-alt" : " selected"}`}
+							onClick={_ => changeSettings(`random_playmat`, !random_playmat)}>
+							{random_playmat ? "Surprise Me" : "Locked Image"}
+						</button>
+						<button
+							className={`small-button icon-loop`}
+							onClick={_ =>
+								changeSettings("playmat", rnd(getArt(cardData, {type_line: ["instant", "sorcery", "land"]})).image)
+							}>
+							Shuffle
+						</button>
+					</div>
+					<div className="inner">
+						<img className={"playmat"} src={playmat} alt={playmat} />
+					</div>
+				</div>
+			</div>
+
+			<div className="reset">
+				<button
+					className="small-button success-button"
+					onClick={_ => {
+						updateUser({settings})
+						openModal(null)
+						newMsg("Updated Settings!", "success")
+					}}>
+					Save Changes
 				</button>
-				<button className={`smaller-button ${scale === 100 && "selected"}`} onClick={_ => changeSettings("scale", 100)}>
-					Normal
-				</button>
-				<button className={`smaller-button ${scale === 120 && "selected"}`} onClick={_ => changeSettings("scale", 120)}>
-					Large
+				<button
+					className="small-button warning-button"
+					onClick={_ => {
+						changeSettings("clear")
+						updateUser({settings: INIT_SETTINGS_STATE})
+						openModal(null)
+					}}>
+					Reset to Default
 				</button>
 			</div>
-		)
+		</div>
+	)
+})
 
-		return (
-			<section className="info settings">
-				<div className="display-settings block thin-block">
-					<h4 className="field-label">UI Settings</h4>
-					{textSize}
-					<button
-						className={`smaller-button mini-block ${showSubTitle && "selected"}`}
-						onClick={_ => changeSettings("showSubTitle", !showSubTitle)}>
-						Deck Subtitle
-					</button>
-					<button
-						className={`smaller-button mini-block ${wobble && "selected"}`}
-						onClick={_ => changeSettings("wobble", !wobble)}>
-						Wobble Background
-					</button>
-				</div>
-				<div className="game-settings block">
-					<h4 className="field-label">Playtester Settings</h4>
-					<button
-						className={`smaller-button mini-block thin-block ${gameLog && "selected"}`}
-						onClick={_ => changeSettings("gameLog", !gameLog)}>
-						Gamelog
-					</button>
-					<h5 className="block ">Use Stack For</h5>
-					<div className="col thin-block">
-						{stacktions.map((st, i) => (
-							<button
-								key={st}
-								className={`smaller-button mini-block ${useStack.includes(st) && "selected"}`}
-								onClick={_ =>
-									changeSettings("useStack", useStack.includes(st) ? useStack.filter(s => s !== st) : [...useStack, st])
-								}>
-								{pluralize(st)}
-							</button>
-						))}
-					</div>
-					<h5 className="block">Auto Spend Mana</h5>
-					<div className="col thin-block">
-						{manaT.map((msg, i) => (
-							<button
-								key={manaT[i]}
-								className={`smaller-button mini-block ${manaTolerance === i && "selected"}`}
-								onClick={_ => changeSettings("manaTolerance", i)}>
-								{msg}
-							</button>
-						))}
-					</div>
-				</div>
+// <button
+// 	className={`smaller-button mini-block ${showSubTitle && "selected"}`}
+// 	onClick={_ => changeSettings("showSubTitle", !showSubTitle)}>
+// 	Deck Subtitle
+// </button>
 
-				<div className="themes">
-					<ChooseTheme type="sleeves" />
-					<ChooseTheme type="playmat" />
-				</div>
+// <button
+// 	className={`smaller-button mini-block ${wobble && "selected"}`}
+// 	onClick={_ => changeSettings("wobble", !wobble)}>
+// 	Wobble Background
+// </button>
 
-				<div className="reset">
-					<button className="small-button warning-button" onClick={_ => changeSettings("clear")}>
-						Reset to Default
-					</button>
-				</div>
-			</section>
-		)
-	}
-)
+// <div className={` block choose-sleeves`}>
+// 	<div className="bar even mini-spaced-bar">
+// 		<h4>Sleeves</h4>
+// 		<button
+// 			title="If unlocked, this image will be shuffled everytime you open the app."
+// 			className={`small-button icon-lock${randomSleeves ? "-open-alt" : "-on attention selected"}`}
+// 			onClick={_ => changeSettings(`randomSleeves`, !randomSleeves)}>
+// 			{randomSleeves ? "Surprise Me" : "Locked Image"}
+// 		</button>
+// 		<button
+// 			className={`small-button icon-loop`}
+// 			onClick={_ =>
+// 				changeSettings("sleeves", rnd(getArt(cardData, {type_line: ["artifact", "enchantment"]})))
+// 			}>
+// 			Shuffle
+// 		</button>
+// 	</div>
+// 	<div className="inner">
+// 		<img className={"sleeves"} src={sleeves} alt={sleeves} />
+// 	</div>
+// </div>

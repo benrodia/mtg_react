@@ -90,14 +90,16 @@ export const interpretForm = (text = "", cardData = [{}]) => {
   return returned
 }
 
-export const collapseDeckData = list => list.map(c => `${c.commander ? "Commander" : c.board}__ID__${c.id}`)
+export const collapseDeckData = (list = []) =>
+  list.map(c => `${c.commander ? "Commander" : c.board || "NID"}__ID__${c.id}`)
 
 export const expandDeckData = (list = [], cardData = [{}]) =>
   list.map(l => {
+    if (typeof l !== "string") return l
     const card = cardData.filter(d => d.id === l.slice(l.indexOf("ID__") + 4))[0]
     const board = l.slice(0, l.indexOf("__ID"))
     const commander = l.includes("Commander")
-    return {...audit(card), board: commander ? "Main" : board, commander, key: uuidv4()}
+    return {...audit(card), board: commander ? "Main" : board === "NID" ? undefined : board, commander, key: uuidv4()}
   })
 
 export const TCGplayerMassEntryURL = list => {

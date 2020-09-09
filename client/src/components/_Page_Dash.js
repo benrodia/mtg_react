@@ -9,7 +9,7 @@ import DeckFeed from "./DeckFeed"
 import DeckTile from "./DeckTile"
 import NewDeck from "./NewDeck"
 
-const {HOME_DIR} = utilities
+const {HOME_DIR, rnd, SUB_BANNERS, GREETINGS} = utilities
 
 export default connect(({main: {users, decks}, auth: {user: {_id, slug, name, followed}, isAuthenticated}}) => {
 	return {
@@ -24,6 +24,8 @@ export default connect(({main: {users, decks}, auth: {user: {_id, slug, name, fo
 }, actions)(({_id, slug, name, followed, users, decks, setPage, isAuthenticated, newDeck, openModal, loadDecks}) => {
 	const [flags, setFlags] = useState(["others"])
 	const [activeForm, setActiveForm] = useState(null)
+	const [subBanner, setSubBanner] = useState(rnd(SUB_BANNERS))
+	const [greeting, setGreeting] = useState(rnd(GREETINGS))
 
 	useEffect(_ => {
 		loadDecks()
@@ -38,7 +40,7 @@ export default connect(({main: {users, decks}, auth: {user: {_id, slug, name, fo
 			<section className="hero">
 				<div className="banner">
 					<h1>ReactMTG</h1>
-					<p>We make Magic™ happen fast!</p>
+					<p>{subBanner}</p>
 				</div>
 				{isAuthenticated ? null : (
 					<div className="log-in-form">
@@ -53,7 +55,7 @@ export default connect(({main: {users, decks}, auth: {user: {_id, slug, name, fo
 								className={`${activeForm === "up" && "selected"}`}
 								onClick={_ => setActiveForm(activeForm === "up" ? null : "up")}>
 								Sign Up
-								<span className="icon-user-add" />
+								<span className="icon-user-plus" />
 							</button>
 						</div>
 						<Login activeForm={activeForm} />
@@ -64,9 +66,12 @@ export default connect(({main: {users, decks}, auth: {user: {_id, slug, name, fo
 				<DeckFeed direct={decks.filter(d => d.author === _id)}>
 					<div className="block">
 						<div className="bar even spaced-bar">
-							<Link to={`${HOME_DIR}/user/${slug}`}>
-								<h2 className="inverse-button ">{name}'s Decks</h2>
-							</Link>
+							<div className="bar even mini-spaced-bar center">
+								<h2>{greeting},</h2>
+								<Link to={`${HOME_DIR}/user/${slug}`}>
+									<h2 className="inverse-button ">{name}</h2>
+								</Link>
+							</div>
 							<button
 								className="success-button new-deck bar even mini-spaced-bar"
 								onClick={_ => openModal({title: "New Deck", content: <NewDeck />})}>

@@ -53,7 +53,7 @@ export default connect(({main: {legalCards, cardData}, filters: {board, advanced
 					? filtered.filter(c => c.cmc <= cmc)
 					: filtered
 
-			if (rarity !== "any") filtered = Q(filtered, "rarity", rarity, true)
+			if (rarity !== "any") filtered = filtered.filter(f => f.rarity === rarity)
 			if (text.length) filtered = Q(filtered, "oracle_text", text, true)
 			if (types.length) filtered = Q(filtered, "type_line", types, true)
 			if (nameEntry.length) filtered = matchSorter(filtered, nameEntry, {keys: ["name"]})
@@ -113,11 +113,8 @@ export default connect(({main: {legalCards, cardData}, filters: {board, advanced
 		) : null
 	}
 
-	const allTypes = [...CARD_TYPES, ...SUB_TYPES]
-		.filter(T => !types.includes(T))
-		.map(t => {
-			return {t}
-		})
+	const allTypes = [...CARD_TYPES, ...SUB_TYPES].filter(T => !types.includes(T))
+
 	return (
 		<div className="advanced-search spaced-col big-block gap">
 			<button
@@ -159,9 +156,10 @@ export default connect(({main: {legalCards, cardData}, filters: {board, advanced
 					<BasicSearch
 						searchable
 						preview
-						labelBy={t => t.t}
+						string
+						placeholder={`ex. ${rnd(allTypes)}`}
 						options={allTypes}
-						callBack={t => changeAdvanced({types: [...types, t.t]})}
+						callBack={t => changeAdvanced({types: [...types, t]})}
 					/>
 				</div>
 			</div>
@@ -217,7 +215,7 @@ export default connect(({main: {legalCards, cardData}, filters: {board, advanced
 					<BasicSearch
 						self={rarity}
 						labelBy={r => titleCaps(r)}
-						options={["any", "common", "uncommon", "rare", "mythic", "special"]}
+						options={["any", "common", "uncommon", "rare", "mythic"]}
 						callBack={r => changeAdvanced({rarity: r})}
 					/>
 				</div>

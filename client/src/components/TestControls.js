@@ -7,11 +7,11 @@ import {COLORS} from "../constants/definitions"
 import GameLog from "./GameLog"
 import CounterInput from "./CounterInput"
 
-export default connect(({playtest, settings: {gameLog}}) => {
-  return {...playtest, gameLog}
+export default connect(({playtest, settings: {game_log}}) => {
+  return {...playtest, game_log}
 }, actions)(
   ({
-    gameLog,
+    game_log,
     deck,
     turn,
     life,
@@ -42,7 +42,7 @@ export default connect(({playtest, settings: {gameLog}}) => {
           <button className="smaller-button warning-button" onClick={_ => startTest()}>
             Restart
           </button>
-          {!gameLog ? null : <GameLog />}
+          {!game_log ? null : <GameLog />}
         </div>
         <div className="bar">
           <CounterInput value={life} neg addOnClick={life - 1} icon="icon-heart" callBack={e => gameState("life", e)} />

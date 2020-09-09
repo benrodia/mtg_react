@@ -260,6 +260,13 @@
 .thin-block {
 	width: 15rem;
 }
+.indent {
+	margin-left: 1rem;
+}
+
+.thin-indent {
+	margin-left: @thin;
+}
 
 .icon {
 	svg {
@@ -270,7 +277,7 @@
 	}
 	svg.common,
 	svg.common * {
-		fill: #000000;
+		fill: #fff;
 	}
 	svg.uncommon,
 	svg.uncommon * {
@@ -299,6 +306,14 @@
 		fill: @highlight;
 		color: @highlight;
 	}
+}
+
+.icon-empty {
+	width: 1rem;
+	height: 1rem;
+	border: @thinnest solid @lighter;
+	background: transparent;
+	border-radius: @thinner;
 }
 
 .sticky {
@@ -330,9 +345,16 @@
 }
 
 .center {
+	display: flex;
+	flex-wrap: wrap;
 	justify-content: center;
-	text-align: center;
 	align-items: center;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.text-block {
+	max-width: 50rem;
 }
 
 .spread {

@@ -16,7 +16,6 @@ import Card from "./Card"
 const {
 	HOME_DIR,
 	FORMATS,
-	COLORS,
 	ItemTypes,
 	sum,
 	audit,
@@ -30,10 +29,11 @@ const {
 	areFriends,
 } = utilities
 
-export default connect(({auth: {user}, main: {legalCards, users}, deck}) => {
-	return {user, legalCards, users, ...deck}
+export default connect(({auth: {isAuthenticated, user}, main: {legalCards, users}, deck}) => {
+	return {isAuthenticated, user, legalCards, users, ...deck}
 }, actions)(
 	({
+		isAuthenticated,
 		user,
 		_id,
 		name,
@@ -48,7 +48,7 @@ export default connect(({auth: {user}, main: {legalCards, users}, deck}) => {
 		privacy,
 		views,
 		likes,
-		helpWanted,
+		allow_suggestions,
 		suggestions,
 		changes,
 		legalCards,
@@ -57,13 +57,13 @@ export default connect(({auth: {user}, main: {legalCards, users}, deck}) => {
 		changeDeck,
 		giveLike,
 	}) => {
-		const featureImg = feature || (list[0] && list[0].image_uris.art_crop)
-		const canLike = user.isAuthenticated && author !== user._id
+		const featureImg = feature || (list[0] && list[0].image_uris && list[0].image_uris.art_crop)
+		const canLike = isAuthenticated && author !== user._id
 		const pickFeatured = (
 			<div className="block mini-spaced-grid bar wrap">
-				{list.unique("id").map(c => (
+				{list.unique("id").map((c, i) => (
 					<div
-						key={c.id}
+						key={c.id + i}
 						onClick={_ => {
 							openModal(null)
 							changeDeck("feature", c.image_uris.art_crop)
@@ -107,22 +107,10 @@ export default connect(({auth: {user}, main: {legalCards, users}, deck}) => {
 								<h4 className="inverse-button ">{creator().name}</h4>
 							</Link>
 							<p className="asterisk">
-								{formattedDate(new Date(created))} - Updated {ago(new Date(updated))}
+								Created {formattedDate(new Date(created))} - Updated {ago(new Date(updated))}
 							</p>
 						</div>
-						<div className="meta bar even mini-spaced-bar">
-							<div className="even bar">
-								{views}
-								<div className="icon-eye views" />
-							</div>
-							<div className={"likes even bar"} onClick={giveLike}>
-								{likes}
-								<div
-									className={`clicky-icon icon-thumbs-up ${user.liked && user.liked.includes(_id) && "selected"} ${
-										canLike || "disabled"
-									}`}
-								/>
-							</div>
+						<div className="meta bar even spaced-bar">
 							{canEdit() ? (
 								<BasicSearch
 									self={privacy}
@@ -130,8 +118,18 @@ export default connect(({auth: {user}, main: {legalCards, users}, deck}) => {
 									callBack={p => changeDeck("privacy", p)}
 								/>
 							) : (
-								<div className="tag">{privacy}</div>
+								<div className={`icon-${privacy === "Private" ? "lock" : privacy === "Unlisted" ? "link" : "globe"}`}>
+									{privacy}
+								</div>
 							)}
+							<div className="even bar icon-eye views">{views}</div>
+							<button
+								className={`small-button likes even bar icon-thumbs-up ${canLike || "disabled"} ${
+									user.liked && user.liked.includes(_id) && "selected"
+								}`}
+								onClick={giveLike}>
+								{likes}
+							</button>
 						</div>
 					</div>
 				</div>
@@ -166,7 +164,7 @@ export default connect(({auth: {user}, main: {legalCards, users}, deck}) => {
 				<div className="block bar even mini-spaced-bar">
 					{!canSuggest() ? null : (
 						<button onClick={_ => openModal({title: "Leave a Suggestion", content: <NewSuggestion />})}>
-							Leave a Suggestion
+							{allow_suggestions >= 3 ? "Please, " : ""}Leave a Suggestion{allow_suggestions >= 3 ? "!" : ""}
 						</button>
 					)}
 				</div>

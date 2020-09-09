@@ -27,9 +27,7 @@ export default connect(({main: {page}, deck: {list}}) => {
 		_ => {
 			fetch(rulings_uri)
 				.then(response => {
-					if (!response.ok) {
-						throw new Error("HTTP status " + response.status)
-					}
+					if (!response.ok) throw new Error("HTTP status " + response.status)
 					return response.json()
 				})
 				.then(data => setRulings(data.data))
@@ -118,12 +116,11 @@ export default connect(({main: {page}, deck: {list}}) => {
 						<h3>
 							{type_line} {formatManaSymbols(mana_cost)}
 						</h3>
-
-						{formatText(oracle_text)}
+						<div className="mini-block thin-indent">{formatText(oracle_text)}</div>
 					</div>
 					{!rulings.length ? null : (
-						<>
-							<h3 className="field-label">Rulings</h3>
+						<div className="block">
+							<h4>Rulings</h4>
 							<div className="rulings">
 								{rulings.map(r => (
 									<div key={r.comment} className="ruling">
@@ -132,7 +129,7 @@ export default connect(({main: {page}, deck: {list}}) => {
 									</div>
 								))}
 							</div>
-						</>
+						</div>
 					)}
 				</div>
 				<img src={image_uris && image_uris["png" || "large"]} alt={name} />

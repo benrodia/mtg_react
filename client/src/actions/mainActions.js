@@ -26,7 +26,7 @@ export const getCardData = _ => dispatch => {
 export const getSetData = _ => dispatch => {
   axios
     .get(`https://api.scryfall.com/sets`)
-    .then(res => dispatch({type: A.MAIN, key: "sets", val: res.data}))
+    .then(res => dispatch({type: A.MAIN, key: "sets", val: res.data.data}))
     .catch(err => console.log(err))
 }
 

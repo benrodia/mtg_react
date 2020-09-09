@@ -76,7 +76,13 @@ export default connect(({deck: {format, desc, list}, main: {legalCards, sets}}) 
 					<div className="block bar even mini-spaced-bar">
 						<button onClick={addChange}>Add {changes.length ? "Another" : "Suggestion"}</button>
 						{changes.length ? (
-							<button onClick={_ => submitSuggestion(changes)}>Submit {pluralize("Suggestion", changes.length)}</button>
+							<button
+								onClick={_ => {
+									openModal(null)
+									submitSuggestion(changes)
+								}}>
+								Submit {pluralize("Suggestion", changes.length)}
+							</button>
 						) : null}
 					</div>
 				)}

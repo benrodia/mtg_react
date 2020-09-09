@@ -257,6 +257,12 @@
 .thin-block {
   width: 15rem;
 }
+.indent {
+  margin-left: 1rem;
+}
+.thin-indent {
+  margin-left: 0.5rem;
+}
 .icon svg {
   min-height: 1.5rem;
   height: 1.5rem;
@@ -265,7 +271,7 @@
 }
 .icon svg.common,
 .icon svg.common * {
-  fill: #000000;
+  fill: #fff;
 }
 .icon svg.uncommon,
 .icon svg.uncommon * {
@@ -293,6 +299,13 @@
   fill: #fcd303;
   color: #fcd303;
 }
+.icon-empty {
+  width: 1rem;
+  height: 1rem;
+  border: 0.125rem solid #c6cfe4;
+  background: transparent;
+  border-radius: 0.25rem;
+}
 .sticky {
   position: fixed;
   top: 2rem;
@@ -318,9 +331,15 @@
   align-items: center;
 }
 .center {
+  display: flex;
+  flex-wrap: wrap;
   justify-content: center;
-  text-align: center;
   align-items: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+.text-block {
+  max-width: 50rem;
 }
 .spread {
   justify-content: space-between;
@@ -543,8 +562,9 @@ html {
 .wrapper {
   padding-top: 2rem;
   min-height: 100vh;
-  position: relative;
   overflow-x: hidden;
+  position: relative;
+  margin: 0 auto;
 }
 .wrapper > * {
   height: 100%;
@@ -567,7 +587,6 @@ html {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  filter: brightness(30%);
 }
 .bg-img .darken {
   position: fixed;
@@ -593,7 +612,7 @@ html {
   justify-content: space-between;
   background: #020817;
   height: 2rem;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem;
   font-size: 120%;
   font-family: "Beleren";
 }
@@ -608,10 +627,27 @@ html {
 .main-header .title a {
   color: #eff5ff;
   width: auto;
-  padding-right: 0.5rem;
 }
 .main-header .title a:hover {
   opacity: 0.8;
+}
+.main-header .custom-select {
+  background: transparent;
+  height: 1.5rem;
+}
+.main-header .custom-select:hover .select-collapsed {
+  filter: brightness(0.8);
+  cursor: text;
+}
+.main-header .custom-select .select-collapsed {
+  font-size: 0.8rem;
+  color: #8895b3;
+  border-bottom: 1px solid #8895b3;
+  padding: 0.125rem;
+}
+.main-header .custom-select .option a {
+  font-size: 1rem;
+  color: #313f56;
 }
 .main-header .sub-title {
   display: flex;
@@ -626,25 +662,26 @@ html {
   align-items: center;
   justify-content: flex-end;
 }
-.main-header .nav .navItem {
-  color: #eff5ff;
+.main-header .nav .to-profile a {
+  display: flex;
+  flex-flow: row nowrap;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 0.8rem;
+}
+.main-header .nav .to-profile a > * {
   margin-right: 0.5rem;
-  cursor: pointer;
 }
-.main-header .nav .navItem:hover {
-  opacity: 0.8;
+.main-header .nav .to-profile a > *:last-child {
+  margin-right: 0;
 }
-.main-header .nav .cog {
-  transition: 0.2s;
+.main-header .nav .to-profile a .feature {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.25rem;
 }
-.main-header .nav .cog:hover {
-  transform: rotate(45deg) scale(1.2);
-  cursor: pointer;
-  color: #fcd303;
-}
-.main-header .nav .active {
-  text-decoration: underline;
-  color: #fcd303;
+.main-header .nav .to-profile a:hover {
+  filter: brightness(0.8);
 }
 .notifications {
   position: fixed;
@@ -752,7 +789,6 @@ html {
   height: 1.5rem;
   width: 10rem;
   border-radius: 0.125rem;
-  margin: 0 0.125rem;
   background: #eff5ff;
   cursor: pointer;
 }
@@ -797,6 +833,14 @@ html {
 .custom-select .options .option.active {
   background: #fcd303;
 }
+.custom-select .options .search-cards {
+  width: 20rem;
+  display: flex;
+  justify-content: flex-start;
+}
+.custom-select .options .search-cards .card-head {
+  background: transparent !important;
+}
 .custom-select.big {
   display: flex;
   flex-flow: column nowrap;
@@ -806,6 +850,9 @@ html {
 }
 .custom-select.big .options {
   max-height: 25rem;
+}
+.custom-select.big .options input {
+  font-size: 1.2rem;
 }
 .custom-select.big .select-collapsed {
   padding: 1rem;
@@ -979,20 +1026,29 @@ html {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 5rem;
+  border-radius: 0.5rem;
 }
 .feature .change-img {
   position: absolute;
   z-index: 1;
   height: 5rem;
   width: 5rem;
-  border-radius: 5rem;
+  border-radius: 0.5rem;
   background: rgba(0, 0, 0, 0.5);
   opacity: 0;
   cursor: pointer;
 }
 .feature:hover .change-img {
   opacity: 1;
+}
+.user {
+  background: linear-gradient(rgba(0, 0, 0, 0.3), transparent);
+}
+.user .profile {
+  padding: 1rem 0 0.5rem;
+}
+.user .profile .avatar {
+  font-size: 3rem;
 }
 .builder {
   display: flex;
@@ -1004,6 +1060,9 @@ html {
 }
 .builder .info-readme .name h1 {
   margin-right: 1rem;
+}
+.builder .manage-list {
+  padding: 1rem;
 }
 .builder .side-bar {
   width: 18rem;
@@ -1378,7 +1437,7 @@ html {
   box-shadow: 0 0 0.5rem #fcd303;
   transform: scale(1.1);
 }
-.card-img-price {
+.grid-view .prices {
   color: #eff5ff;
 }
 .modal-cont {
@@ -1426,20 +1485,30 @@ html {
   display: flex;
   flex-flow: column nowrap;
   justify-content: flex-start;
-  align-items: flex-start;
+  align-items: center;
   transition: 0.3s ease-out;
-  background: #313f56;
-  padding: 1rem;
-  max-height: calc(100vh - 6rem);
-  min-width: 30rem;
+  background: linear-gradient(-45deg, rgba(0, 0, 0, 0.5), #313f56);
+  position: fixed;
+  top: 3rem;
+  left: 0;
+  right: 0;
+  bottom: 0;
   margin: auto;
-  border-radius: 0.25rem;
-  box-shadow: 0 0 3rem rgba(0, 0, 0, 0.9);
   overflow-y: auto;
 }
-.modal-cont .modal-box > * {
-  position: relative;
+.modal-cont .modal-box .modal-header {
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  width: 100%;
+  height: 3rem;
+  padding: 0.5rem;
+  background: #020817;
+}
+.modal-cont .modal-box .modal-content {
+  padding: 0.5rem;
 }
 .modal-cont .modal-box .inspect-container .header {
   display: flex;
@@ -1453,11 +1522,14 @@ html {
   flex-flow: row nowrap;
   justify-content: center;
   align-items: center;
+  margin-right: 20rem;
 }
 .modal-cont .modal-box .inspect-container .info img {
   object-fit: cover;
   height: 28rem;
   width: 20rem;
+  left: 50%;
+  position: fixed;
   border-radius: 0.5rem;
   box-shadow: 0 0 1rem rgba(0, 0, 0, 0);
 }
@@ -1481,28 +1553,22 @@ html {
   line-height: 1.2em;
   padding-bottom: 0.5rem;
 }
-.modal-cont .modal-box .inspect-container .info .text .field-label {
-  color: #020817;
-}
 .modal-cont .modal-box .inspect-container .info .text .rulings {
   height: 100%;
   border-radius: 0.5rem;
-  background: #1f283b;
+  color: #020817;
+  background: #c6cfe4;
   box-shadow: inset 0 0 1rem rgba(0, 0, 0, 0);
   padding: 1rem;
   margin-top: 0.5rem;
-  overflow-y: scroll;
 }
 .modal-cont .modal-box .inspect-container .info .text .rulings .ruling {
   margin-bottom: 2rem;
 }
 .modal-cont .modal-box .inspect-container .info .text .rulings .ruling h4 {
-  color: #c6cfe4;
+  color: #1f283b;
   font-weight: bold;
   margin-bottom: 0.5rem;
-}
-.modal-cont .modal-box .inspect-container .info .text .rulings .ruling p {
-  color: #eff5ff;
 }
 .modal-cont .modal-box .choose-print {
   min-width: calc(7.14rem*2);

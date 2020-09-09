@@ -11,7 +11,7 @@ const {HOME_DIR, COLORS, sum, canEdit, creator} = utilities
 export default connect(
 	null,
 	actions
-)(({deck: {_id, author, name, list, format, colors, slug, updated, feature}, openDeck, deleteDeck}) => {
+)(({deck: {_id, author, name, list, format, colors, slug, updated, feature, helpWanted}, openDeck, deleteDeck}) => {
 	const colorData =
 		colors &&
 		COLORS().map((color, i) => {
@@ -29,9 +29,9 @@ export default connect(
 						<img src={feature} alt="" />
 					</span>
 				</Link>
-				<div className="info">
+				<div className="info" title={`${helpWanted >= 3 ? "All Suggestions Welcome! Come on in!" : ""}`}>
 					<Link to={`${HOME_DIR}/deck/${slug}`}>
-						<h3 className="deck-title">{name}</h3>
+						<h3 className={`deck-title ${helpWanted >= 3 && "icon-exclamation attention"}`}>{name}</h3>
 						<span className="updated-at">Updated {ago(new Date(updated))}</span>
 					</Link>
 					<div className="bar even mini-spaced-bar">
@@ -44,10 +44,14 @@ export default connect(
 			</div>
 			<div className="links">
 				<Link to={`${HOME_DIR}/deck/${slug}/playtest`}>
-					<button className="small-button">Test</button>
+					<button className="small-button icon-play" title="Playtest Deck" />
 				</Link>
 				{!canEdit(author) ? null : (
-					<button className="warning-button inverse-small-button icon-trash" onClick={_ => deleteDeck(_id)} />
+					<button
+						className="warning-button inverse-small-button icon-trash"
+						onClick={_ => deleteDeck(_id)}
+						title="Trash Deck"
+					/>
 				)}
 			</div>
 		</div>

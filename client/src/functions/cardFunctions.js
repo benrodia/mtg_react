@@ -60,24 +60,19 @@ export function normalizePos(deck) {
 export function isLegal(card = {legalities: {}}, format = "", deckIdentity) {
   let allowed = card.legalities[format] === "legal" ? 4 : card.legalities[format] === "restricted" ? 1 : 0
 
-  if (format === "casual") {
-    allowed = 4
-  }
-  if (Q(card, "type_line", ["Token", "Scheme", "Plane"])) allowed = 0
-  if (SINGLETON(format)) {
-    allowed = 1
-  }
+  if (SINGLETON(format)) allowed = 1
+  if (format === "casual") allowed = 4
+  if (Q(card, "type_line", ["Token", "Scheme", "Plane "])) allowed = 0
   if (NO_QUANT_LIMIT(card)) allowed = 1000000
   if (card.name === "Seven Dwarves") allowed = 7
 
-  if (
-    card.color_identity &&
-    deckIdentity &&
-    deckIdentity.length &&
-    !card.color_identity.every(ci => deckIdentity.includes(ci))
-  ) {
-    allowed = 0
-  }
+  // if (
+  //   card.color_identity &&
+  //   deckIdentity &&
+  //   deckIdentity.length &&
+  //   !card.color_identity.every(ci => deckIdentity.includes(ci))
+  // ) allowed = 0
+
   return allowed
 }
 
@@ -136,9 +131,9 @@ export const canPublish = (list, format) => {
 
 export const listDiffs = (pre, post) => {
   const diffs = (a, b) => {
-    const interp = itemizeDeckList(a).map(acs => {
+    const interp = itemizeDeckList(a, ["id"]).map(acs => {
       const card = acs[0]
-      const quantity = Math.abs(acs.length - b.filter(({name}) => name === card.name).length)
+      const quantity = Math.abs(acs.length - b.filter(({id}) => id === card.id).length)
       return {card, quantity}
     })
     let returned = []
@@ -149,4 +144,16 @@ export const listDiffs = (pre, post) => {
   const added = diffs(post, pre)
   const removed = diffs(pre, post)
   return {added, removed, changed: !!added.length || !!removed.length}
+}
+
+export const getArt = (cards, terms = {}) => {
+  const filters = Object.entries(terms)
+  let selection = cards
+  for (var i = 0; i < filters.length; i++) selection = Q(selection, ...filters[i])
+
+  return selection
+    .filter(s => !!s.highres_image && !!s.image_uris)
+    .map(c => {
+      return {artist: c.artist, image: c.image_uris.art_crop}
+    })
 }

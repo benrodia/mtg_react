@@ -27,7 +27,7 @@ function TheStack({resStack, stack}) {
                       <button
                         key={num}
                         autoFocus={num === 0}
-                        className={`small-button ${op.color}`}
+                        className={`small-button ${op.color}-button`}
                         onClick={_ => {
                           resStack()
                           if (typeof op.res === "function") op.res()

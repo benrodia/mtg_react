@@ -22,7 +22,7 @@ export default connect(({deck: {list}, filters: {sortBy, customFields}}) => {
 		const val = vals[i]
 		const value = filterCardType(filtered, category, val).length
 		const C = base => parseInt((256 / 3 / (1 + vals.length)) * i * base)
-		const color = fill ? fill[i] : `rgb(${C(3)},${C(1)},${C(2)})`
+		const color = fill ? fill[i] : `rgb(${C(3)},${C(2.5)},${C(0)})`
 
 		data = [
 			...data,

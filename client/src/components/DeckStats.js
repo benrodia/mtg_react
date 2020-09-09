@@ -7,9 +7,20 @@ import Sticky from "./Sticky"
 
 const {Q, sum, average, titleCaps, TCGplayerMassEntryURL} = utilities
 
-export default connect(({auth: {isAuthenticated, user: {_id}}, main: {legalCards}, deck: {list, author}}) => {
-	return {isAuthenticated, author, _id, legalCards, list}
-}, actions)(({offset, isAuthenticated, author, _id, list, legalCards, changeFilters, openModal}) => {
+export default connect(
+	({
+		auth: {
+			isAuthenticated,
+			user: {_id},
+		},
+		main: {legalCards},
+		deck: {list, author},
+		filters: {showPrice},
+	}) => {
+		return {isAuthenticated, author, showPrice, _id, legalCards, list}
+	},
+	actions
+)(({offset, isAuthenticated, author, showPrice, _id, list, legalCards, changeFilters, openModal}) => {
 	const [graph, setGraph] = useState("pie")
 
 	return (
@@ -24,7 +35,7 @@ export default connect(({auth: {isAuthenticated, user: {_id}}, main: {legalCards
 				</h2>
 				<span className="bar even">
 					<a target="_blank" href={TCGplayerMassEntryURL(list)}>
-						<button className="icon-tag success-button small-button">Shop TCGplayer</button>
+						<button className="icon-basket success-button small-button">Shop TCGplayer</button>
 					</a>
 					<p className="asterisk">*Unaffiliated Link</p>
 				</span>
@@ -34,7 +45,13 @@ export default connect(({auth: {isAuthenticated, user: {_id}}, main: {legalCards
 			<br />
 			<Sticky offset={offset}>
 				<div className="stats-header bar even mini-spaced-bar">
-					<h2>Statistics </h2>
+					<h3>Statistics </h3>
+					<button
+						title="Display Card Prices"
+						className={`small-button icon-toggle-${showPrice ? "on selected" : "off"}`}
+						onClick={_ => changeFilters("showPrice", !showPrice)}>
+						Card Price
+					</button>
 					<button
 						className={`small-button icon-chart-${graph !== "pie" ? "bar" : "pie"}`}
 						onClick={_ => setGraph(graph === "pie" ? "bar" : "pie")}>

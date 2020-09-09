@@ -1,7 +1,8 @@
 import React, {useRef} from "react"
 
-export default ({value, children, callBack, icon, neg, addOnClick}) => {
+export default ({value, children, callBack, icon, neg, lower, upper, addOnClick}) => {
 	const ref = useRef(null)
+	const validate = val => !isNaN(val) && (neg || val + value >= (lower || 0)) && (!upper || val + value <= upper)
 	return (
 		<p className="counter">
 			<span
@@ -18,8 +19,8 @@ export default ({value, children, callBack, icon, neg, addOnClick}) => {
 				type="number"
 				value={value}
 				onChange={e => {
-					const val = e.target.value === "" ? 0 : parseInt(e.target.value)
-					if (!isNaN(val) && (val + value >= 0 || neg)) callBack(val)
+					const val = e.target.value === "" ? lower || 0 : parseInt(e.target.value)
+					if (validate(val)) callBack(val)
 				}}
 			/>
 		</p>

@@ -60,20 +60,23 @@ export default connect(
 							{changes.map(({id, added, removed, reason}) => {
 								return (
 									<div key={id} className={"change bar even spaced-bar"}>
-										<div className="add bar even">
-											<Card card={added} />
-										</div>
 										<div className="remove bar even">
 											<Card card={removed} />
 										</div>
-										<div className="reason bar even">
-											<p>{reason}</p>
+										<div className="icon-right" />
+										<div className="add bar even">
+											<Card card={added} />
 										</div>
-										<button className="icon-ok success-button" onClick={_ => resolveSuggestion(id, "keep")} />
-										<button className="" onClick={_ => resolveSuggestion(id, "maybe")}>
-											Maybe
-										</button>
-										<button className="icon-trash" onClick={_ => resolveSuggestion(id, "ignore")} />
+										<div className="block">
+											<p>{reason}</p>
+											<div className="bar even">
+												<button className="icon-ok success-button" onClick={_ => resolveSuggestion(id, "keep")} />
+												<button className="" onClick={_ => resolveSuggestion(id, "maybe")}>
+													Maybe
+												</button>
+												<button className="icon-trash" onClick={_ => resolveSuggestion(id, "ignore")} />
+											</div>
+										</div>
 									</div>
 								)
 							})}

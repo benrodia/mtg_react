@@ -158,9 +158,9 @@ export default connect(
 							const setLogo = (
 								<Icon
 									name={card.set_name}
-									className={card.rarity}
+									className={`${card.rarity} ${canEdit() ? "clicky-icon" : ""}`}
 									loader={card.set}
-									src={!sets.length ? null : sets.filter(s => s.name === card.set_name)[0].icon_svg_uri}
+									src={!sets.length ? null : (sets.filter(s => s.name === card.set_name)[0] || {}).icon_svg_uri}
 								/>
 							)
 							const controls = (
@@ -203,7 +203,7 @@ export default connect(
 										pointerEvents: cardInd !== cardsOfSet.length - 1 && view === "grid" && "none",
 										marginBottom: cardsOfSet.length > 1 && !cardInd && view === "grid" && cardsOfSet.length + "rem",
 									}}>
-									{canEdit() ? controls : null}
+									{canEdit() ? controls : view === "list" ? setLogo : null}
 								</CardControls>
 							)
 						})

@@ -4,10 +4,10 @@ import * as A from "./types"
 
 import utilities from "../utilities"
 
-const {session} = utilities
+const {cache} = utilities
 
 export const changeFilters = (key, val) => dispatch => {
-	session(A.FILTERS, key, val)
+	cache(A.FILTERS, key, val, true)
 	dispatch({type: A.FILTERS, key, val})
 }
 
@@ -17,7 +17,6 @@ export const changeAdvanced = assign => dispatch =>
 			...Object.assign(store.getState().filters.advanced, assign),
 		})
 	)
-export const viewUser = user => dispatch => {
-	console.log("openUser", user)
-	dispatch({type: A.FILTERS, key: "viewUser", val: user})
-}
+// export const viewUser = user => dispatch => {
+// 	dispatch({type: A.FILTERS, key: "viewUser", val: user})
+// }

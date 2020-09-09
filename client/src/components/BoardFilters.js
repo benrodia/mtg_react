@@ -23,7 +23,6 @@ export default connect(({auth: {isAuthenticated, user: {_id}}, deck: {list, form
 		sortBy,
 		view,
 		board,
-		showIllegal,
 		showPrice,
 		showTypes,
 		customFields,
@@ -61,12 +60,6 @@ export default connect(({auth: {isAuthenticated, user: {_id}}, deck: {list, form
 						})}
 					</div>
 					<span className="view-options bar even">
-						<button
-							title="Display Card Prices"
-							className={`small-button ${showPrice && "selected"}`}
-							onClick={_ => changeFilters("showPrice", !showPrice)}>
-							$$$
-						</button>
 						<button
 							title={`View as ${view === "list" ? "Bulleted List" : "Image Grid"}`}
 							className={`small-button icon-th${view === "list" ? "-list" : ""}`}

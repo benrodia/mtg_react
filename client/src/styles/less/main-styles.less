@@ -32,6 +32,8 @@ html {
 	min-height: 100vh;
 	position: relative;
 	overflow-x: hidden;
+	position: relative;
+	margin: 0 auto;
 	& > * {
 		height: 100%;
 	}
@@ -50,7 +52,7 @@ html {
 		background-position: center;
 		background-repeat: no-repeat;
 		background-size: cover;
-		filter: brightness(30%);
+		// filter: brightness(30%);
 	}
 	.darken {
 		.fixed-full-page();
@@ -68,7 +70,7 @@ html {
 	justify-content: space-between;
 	background: @darkest;
 	height: @headerH;
-	padding: @thin 1rem;
+	padding: @thin;
 	font-size: 120%;
 	font-family: @header;
 	.title {
@@ -79,10 +81,28 @@ html {
 		a {
 			color: @lightest;
 			width: auto;
-			padding-right: @thin;
+			// padding-right: @thin;
 			&:hover {
 				opacity: 0.8;
 			}
+		}
+	}
+	.custom-select {
+		background: transparent;
+		height: 1.5rem;
+		&:hover .select-collapsed {
+			filter: brightness(0.8);
+			cursor: text;
+		}
+		.select-collapsed {
+			font-size: @small;
+			color: @light;
+			border-bottom: 1px solid @light;
+			padding: @thinnest;
+		}
+		.option a {
+			font-size: 1rem;
+			color: @dark;
 		}
 	}
 	.sub-title {
@@ -91,25 +111,20 @@ html {
 	.nav {
 		.flex-centered();
 		justify-content: flex-end;
-		.navItem {
-			color: @lightest;
-			margin-right: @thin;
-			cursor: pointer;
-			&:hover {
-				opacity: 0.8;
+
+		.to-profile a {
+			.bar();
+			.even();
+			.mini-spaced-bar();
+			font-size: @small;
+			.feature {
+				width: 1.5rem;
+				height: 1.5rem;
+				border-radius: @thinner;
 			}
-		}
-		.cog {
-			transition: 0.2s;
-		}
-		.cog:hover {
-			transform: rotate(45deg) scale(1.2);
-			cursor: pointer;
-			color: @highlight;
-		}
-		.active {
-			text-decoration: underline;
-			color: @highlight;
+			&:hover {
+				filter: brightness(0.8);
+			}
 		}
 	}
 }
@@ -208,7 +223,7 @@ html {
 	height: 1.5rem;
 	width: 10rem;
 	border-radius: @thinnest;
-	margin: 0 @thinnest;
+	// margin: 0 @thinnest;
 	background: @lightest;
 	cursor: pointer;
 
@@ -254,6 +269,14 @@ html {
 		.option.active {
 			background: @highlight;
 		}
+		.search-cards {
+			width: 20rem;
+			display: flex;
+			justify-content: flex-start;
+			.card-head {
+				background: transparent !important;
+			}
+		}
 	}
 }
 
@@ -264,6 +287,9 @@ html {
 	font-size: 1.2rem;
 	.options {
 		max-height: 25rem;
+		input {
+			font-size: 1.2rem;
+		}
 	}
 	.select-collapsed {
 		padding: 1rem;

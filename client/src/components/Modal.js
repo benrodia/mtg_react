@@ -1,6 +1,7 @@
 import React, {useEffect} from "react"
 import {connect} from "react-redux"
 import actions from "../actions"
+import BGImg from "./BGImg"
 
 export default connect(({main: {modal}}) => {
 	return {modal}
@@ -15,13 +16,17 @@ export default connect(({main: {modal}}) => {
 
 	return (
 		<div className={`modal-cont ${!modal && "hide-modal"}`}>
-			<div className="exit" onClick={_ => openModal(null)}></div>
+			<BGImg />
 			<div className="modal-box">
-				<div className="header bar even spread">
-					<h2 className="icon-cancel icon warning-button inverse-button" onClick={_ => openModal(null)} />
-					<h2>{title}</h2>
+				<div className="modal-header">
+					<div className="inner bar even spaced-bar">
+						<h2 className="icon-cancel icon warning-button inverse-button" onClick={_ => openModal(null)}>
+							(esc)
+						</h2>
+						<h2>{title}</h2>
+					</div>
 				</div>
-				<div className="content col even">{content}</div>
+				<div className="modal-content big-block col even">{content}</div>
 			</div>
 		</div>
 	)

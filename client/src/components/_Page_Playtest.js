@@ -49,24 +49,26 @@ export default connect(({main: {tokens, decks, cardData}, playtest: {look}, deck
             valueBy={"id"}
             callBack={spawnToken}
           />
-          <Zone zone="Exile" key="Exile_ZONE" context="list" header cardHeadOnly />
-          <Zone zone="Graveyard" key="Graveyard_ZONE" context="list" header cardHeadOnly />
-          <div className="library-cont">
-            {zone("Library", {context: "single", header: true})}
-            <div className="library-controls">
-              <button className={"smaller-button"} onClick={_ => handleShuffle(false)}>
-                Shuffle
-              </button>
-              <div className="lookBtn">
-                <button
-                  className={"smaller-button warning-button"}
-                  onClick={_ => gameState("look", 0)}
-                  style={{display: !look && "none"}}>
-                  X
+          <div>
+            <Zone zone="Exile" key="Exile_ZONE" context="list" header cardHeadOnly />
+            <Zone zone="Graveyard" key="Graveyard_ZONE" context="list" header cardHeadOnly />
+            <div className="library-cont">
+              {zone("Library", {context: "single", header: true})}
+              <div className="library-controls">
+                <button className={"smaller-button"} onClick={_ => handleShuffle(false)}>
+                  Shuffle
                 </button>
-                <button className={"smaller-button"} onClick={_ => gameState("look", 1, true)}>
-                  Reveal Top {look ? look : ""}
-                </button>
+                <div className="lookBtn">
+                  <button
+                    className={"smaller-button warning-button"}
+                    onClick={_ => gameState("look", 0)}
+                    style={{display: !look && "none"}}>
+                    X
+                  </button>
+                  <button className={"smaller-button"} onClick={_ => gameState("look", 1, true)}>
+                    Reveal Top {look ? look : ""}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

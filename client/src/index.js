@@ -11,7 +11,7 @@ import App from "./App"
 //Styles
 import "./styles/css/styles.css"
 import "./styles/css/mana.css"
-import "./styles/css/icons.css"
+import "./styles/css/fontello.css"
 import utilities from "./utilities"
 const {resetCache} = utilities
 
@@ -21,11 +21,9 @@ function ErrorFallback({error, componentStack, resetErrorBoundary}) {
       <p>Something went wrong:</p>
       <pre>{error.message}</pre>
       <pre>{componentStack}</pre>
-      <a href="">
-        <button onClick={resetCache}>
-          <h3>Refresh Page</h3>
-        </button>
-      </a>
+      <button onClick={resetCache}>
+        <h3>Refresh Page</h3>
+      </button>
     </div>
   )
 }
