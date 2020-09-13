@@ -1,4 +1,4 @@
-export const HOME_DIR = "/reactmtg"
+export const HOME_DIR = "/"
 export const PROXY = ``
 // export const PROXY = `https://localhost:5000/`
 
@@ -26,7 +26,15 @@ export const ARTIFACT = "Artifact"
 export const ENCHANTMENT = "Enchantment"
 export const PLANESWALKER = "Planeswalker"
 export const LAND = "Land"
-export const CARD_TYPES = [CREATURE, INSTANT, SORCERY, ARTIFACT, ENCHANTMENT, PLANESWALKER, LAND]
+export const CARD_TYPES = [
+	CREATURE,
+	INSTANT,
+	SORCERY,
+	ARTIFACT,
+	ENCHANTMENT,
+	PLANESWALKER,
+	LAND,
+]
 
 export const MAIN_BOARD = "Main"
 export const SIDE_BOARD = "Side"
@@ -85,5 +93,7 @@ export const COLORS = key => {
 			fill: "#888899",
 		},
 	]
-	return key !== undefined && colors[0][key] !== undefined ? colors.map(c => c[key]) : colors
+	return key !== undefined && colors[0][key] !== undefined
+		? colors.map(c => c[key])
+		: colors
 }

@@ -2,6 +2,7 @@
   "name": "backend",
   "version": "1.0.0",
   "main": "index.js",
+  "homepage": "/",
   "scripts": {
     "client-install": "npm install && cd client && npm install",
     "start": "node server.js",

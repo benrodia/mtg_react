@@ -11,9 +11,17 @@ import Login from "./Login"
 import utilities from "../utilities"
 const {HOME_DIR, subTitle, COLORS, sum} = utilities
 
-export default connect(({auth: {user, isAuthenticated}, main: {users, decks}, deck, settings: {showSubTitle}}) => {
-  return {user, isAuthenticated, users, decks, deck}
-}, actions)(({user, isAuthenticated, users, decks, deck, openModal}) => {
+export default connect(
+  ({
+    auth: {user, isAuthenticated},
+    main: {users, decks},
+    deck,
+    settings: {showSubTitle},
+  }) => {
+    return {user, isAuthenticated, users, decks, deck}
+  },
+  actions
+)(({user, isAuthenticated, users, decks, deck, openModal}) => {
   const {pathname} = useLocation()
 
   const deckTitle = _ => {
@@ -45,7 +53,7 @@ export default connect(({auth: {user, isAuthenticated}, main: {users, decks}, de
   return (
     <nav className="main-header">
       <div className="title bar even mini-spaced-bar">
-        <Link to={HOME_DIR}>ReactMTG</Link>
+        <Link to={HOME_DIR}>MTG Grip</Link>
         {deckTitle()}
       </div>
       <div className="nav bar even mini-spaced-bar">
@@ -58,7 +66,10 @@ export default connect(({auth: {user, isAuthenticated}, main: {users, decks}, de
           renderAs={({object, name, slug}) => (
             <div className="bar even">
               <Link to={`${HOME_DIR}/${object}/${slug}`}>
-                <span className={`icon-${object === "user" ? "user" : "layers"}`}>{name}</span>
+                <span
+                  className={`icon-${object === "user" ? "user" : "layers"}`}>
+                  {name}
+                </span>
               </Link>
             </div>
           )}
@@ -84,7 +95,12 @@ export default connect(({auth: {user, isAuthenticated}, main: {users, decks}, de
             <div className="bar center mini-spaced-bar">
               <button
                 className={`inverse-button smaller-button`}
-                onClick={_ => openModal({title: "Log In or Sign Up", content: <Login inModal />})}>
+                onClick={_ =>
+                  openModal({
+                    title: "Log In or Sign Up",
+                    content: <Login inModal />,
+                  })
+                }>
                 Log In
               </button>
             </div>
