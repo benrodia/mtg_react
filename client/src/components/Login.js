@@ -5,15 +5,24 @@ import utilities from "../utilities"
 
 const {testEmail, badPassword, createSlug} = utilities
 
-export default connect(({main: {users}, auth: {isAuthenticated, user: {name, email, password}}}) => {
-	return {
-		isAuthenticated,
-		users,
-		name,
-		email,
-		password,
-	}
-}, actions)(
+export default connect(
+	({
+		main: {users},
+		auth: {
+			isAuthenticated,
+			user: {name, email, password},
+		},
+	}) => {
+		return {
+			isAuthenticated,
+			users,
+			name,
+			email,
+			password,
+		}
+	},
+	actions
+)(
 	({
 		inModal,
 		activeForm,
@@ -35,10 +44,14 @@ export default connect(({main: {users}, auth: {isAuthenticated, user: {name, ema
 
 		const setForm = (form, e) => {
 			const {name, value} = e.target
-			return form === "in" ? setInForm({...inForm, [name]: value}) : setUpForm({...upForm, [name]: value})
+			return form === "in"
+				? setInForm({...inForm, [name]: value})
+				: setUpForm({...upForm, [name]: value})
 		}
 
-		const nameAvailable = text => !users.filter(u => u.name === text || u.slug === createSlug(text, users)).length
+		const nameAvailable = text =>
+			!users.filter(u => u.name === text || u.slug === createSlug(text, users))
+				.length
 		const emailAvailable = text => !users.filter(u => u.email === text).length
 
 		const validate = (form = {}, up) => {
@@ -116,7 +129,13 @@ export default connect(({main: {users}, auth: {isAuthenticated, user: {name, ema
 								: "Should be 6+ characters"}
 						</span>
 					</h4>
-					<input type="text" name="name" onChange={e => setForm("up", e)} placeholder={"username"} required />
+					<input
+						type="text"
+						name="name"
+						onChange={e => setForm("up", e)}
+						placeholder={"username"}
+						required
+					/>
 				</div>
 				<div className="block">
 					<h4 className="mini-spaced-bar">
@@ -136,7 +155,12 @@ export default connect(({main: {users}, auth: {isAuthenticated, user: {name, ema
 								: "Not a valid email address"}
 						</span>
 					</h4>
-					<input name="email" onChange={e => setForm("up", e)} placeholder={"your@email.com"} required />
+					<input
+						name="email"
+						onChange={e => setForm("up", e)}
+						placeholder={"your@email.com"}
+						required
+					/>
 				</div>
 				<div className="block">
 					<h4 className="mini-spaced-bar">
@@ -149,7 +173,9 @@ export default connect(({main: {users}, auth: {isAuthenticated, user: {name, ema
 									? "ok success"
 									: "attention attention"
 							}`}>
-							{!upForm.password || !upForm.password.length || !badPassword(upForm.password)
+							{!upForm.password ||
+							!upForm.password.length ||
+							!badPassword(upForm.password)
 								? ""
 								: badPassword(upForm.password)}
 						</span>
@@ -173,7 +199,9 @@ export default connect(({main: {users}, auth: {isAuthenticated, user: {name, ema
 									? "ok success"
 									: "attention attention"
 							}`}>
-							{!upForm.passwordConfirm || !upForm.passwordConfirm.length || upForm.passwordConfirm === upForm.password
+							{!upForm.passwordConfirm ||
+							!upForm.passwordConfirm.length ||
+							upForm.passwordConfirm === upForm.password
 								? ""
 								: "No match"}
 						</span>
@@ -187,7 +215,9 @@ export default connect(({main: {users}, auth: {isAuthenticated, user: {name, ema
 					/>
 				</div>
 				<button
-					className={`block success-button ${validate(upForm, true, true) || "disabled"}`}
+					className={`block success-button ${
+						validate(upForm, true, true) || "disabled"
+					}`}
 					onClick={_ => {
 						openModal(null)
 						register(upForm)
@@ -199,7 +229,7 @@ export default connect(({main: {users}, auth: {isAuthenticated, user: {name, ema
 		)
 
 		return (
-			<div className="bar spaced-bar">
+			<div className="forms">
 				{inFormDiv} {upFormDiv}
 			</div>
 		)
