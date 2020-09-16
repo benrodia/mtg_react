@@ -1,3 +1,4 @@
+import axios from "axios"
 import {v4 as uuidv4} from "uuid"
 import {COLORS, MAIN_BOARD, SIDE_BOARD} from "../constants/definitions"
 import {MANA, NUM_FROM_WORD} from "../constants/greps"
@@ -10,8 +11,12 @@ export function itemizeDeckList(list, filters, headers) {
   let remaining = list
   const filterFor = filters || ["name"]
   while (remaining.length) {
-    const matches = remaining.filter(card => filterFor.every(f => card[f] === remaining[0][f]))
-    remaining = remaining.filter(r => !matches.filter(c => c.key === r.key).length)
+    const matches = remaining.filter(card =>
+      filterFor.every(f => card[f] === remaining[0][f])
+    )
+    remaining = remaining.filter(
+      r => !matches.filter(c => c.key === r.key).length
+    )
     itemized.push(matches)
   }
   return itemized
@@ -35,7 +40,9 @@ export function prepForPlaytest(deck, sleeve, isToken) {
       mana_source: !MANA.source(c)
         ? false
         : MANA.any(c)
-        ? COLORS("symbol").map(co => (co === 5 ? 0 : NUM_FROM_WORD(c.oracle_text)))
+        ? COLORS("symbol").map(co =>
+            co === 5 ? 0 : NUM_FROM_WORD(c.oracle_text)
+          )
         : COLORS("symbol").map(co => MANA.amt(c, co)),
       isToken,
     })
@@ -49,7 +56,9 @@ export const fileMeta = text => {
     : Object.assign(
         ...["NAME", "CREATOR", "FORMAT"].map(l => {
           const prop = metaLines.filter(m => m.includes(l))[0]
-          return {[l.toLowerCase()]: prop && prop.slice(prop.indexOf(":") + 1).trim()}
+          return {
+            [l.toLowerCase()]: prop && prop.slice(prop.indexOf(":") + 1).trim(),
+          }
         })
       )
 }
@@ -65,7 +74,9 @@ export const interpretForm = (text = "", cardData = [{}]) => {
           quantity = parseInt(spaces[i])
           break
         }
-      const setText = item.indexOf("[") ? item.slice(item.indexOf("[") + 1, item.indexOf("]")).toLowerCase() : " "
+      const setText = item.indexOf("[")
+        ? item.slice(item.indexOf("[") + 1, item.indexOf("]")).toLowerCase()
+        : " "
 
       const cards = cardData
         .filter(c => item.toLowerCase().includes(c.name.toLowerCase()))
@@ -78,7 +89,9 @@ export const interpretForm = (text = "", cardData = [{}]) => {
           card: {
             ...card,
             commander: item.includes("CMDR: "),
-            board: items.slice(0, ind).filter(it => it.includes("SB:")).length ? SIDE_BOARD : MAIN_BOARD,
+            board: items.slice(0, ind).filter(it => it.includes("SB:")).length
+              ? SIDE_BOARD
+              : MAIN_BOARD,
           },
         }
       )
@@ -86,7 +99,9 @@ export const interpretForm = (text = "", cardData = [{}]) => {
     .filter(c => !!c)
   let returned = []
   for (var i = 0; i < interp.length; i++)
-    returned = returned.concat([...Array(interp[i].quantity)].map(_ => interp[i].card))
+    returned = returned.concat(
+      [...Array(interp[i].quantity)].map(_ => interp[i].card)
+    )
   return returned
 }
 
@@ -96,11 +111,26 @@ export const collapseDeckData = (list = []) =>
 export const expandDeckData = (list = [], cardData = [{}]) =>
   list.map(l => {
     if (typeof l !== "string") return l
-    const card = cardData.filter(d => d.id === l.slice(l.indexOf("ID__") + 4))[0]
+    const card = cardData.filter(
+      d => d.id === l.slice(l.indexOf("ID__") + 4)
+    )[0]
     const board = l.slice(0, l.indexOf("__ID"))
     const commander = l.includes("Commander")
-    return {...audit(card), board: commander ? "Main" : board === "NID" ? undefined : board, commander, key: uuidv4()}
+    return {
+      ...audit(card),
+      board: commander ? "Main" : board === "NID" ? undefined : board,
+      commander,
+      key: uuidv4(),
+    }
   })
+
+export async function fetchCollection(identifiers) {
+  return await axios.post(
+    `https://api.scryfall.com/cards/collection `,
+    {identifiers},
+    {"Content-Type": "application/json"}
+  )
+}
 
 export const TCGplayerMassEntryURL = list => {
   const urlBase = `https://store.tcgplayer.com/massentry?productline=Magic&c=`
