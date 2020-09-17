@@ -25,10 +25,11 @@ const {
   canSuggest,
   creator,
   loadCache,
+  fetchCollection,
 } = utilities
 
 export const openDeck = slug => (dispatch, getState) => {
-  const {decks, cardData} = getState().main
+  const {decks} = getState().main
   const deck = decks.filter(d => d.slug === slug)[0]
   if (deck) {
     const recent = sessionStorage.getItem("viewed-recently") || ""
@@ -37,29 +38,17 @@ export const openDeck = slug => (dispatch, getState) => {
       sessionStorage.setItem("viewed-recently", recent + "_" + deck._id)
       deck.views += 1
     }
-    const list = expandDeckData(deck.list, cardData)
-    dispatch({
-      type: A.DECK,
-      val: {
+
+    fetchCollection(deck.list).then(list => {
+      const val = {
         ...deck,
         list,
         preChanges: list,
-        suggestions: deck.suggestions.map(s => {
-          return {
-            ...s,
-            changes: s.changes.map(c => {
-              return {
-                ...c,
-                added: expandDeckData([c.added], cardData)[0],
-                removed: expandDeckData([c.removed], cardData)[0],
-              }
-            }),
-          }
-        }),
         clone: null,
-      },
+      }
+      cache(A.DECK, "all", val)
+      dispatch({type: A.DECK, val})
     })
-    cache(A.DECK, "all", deck)
   }
 }
 
@@ -86,7 +75,11 @@ export const changeDeck = (key, val) => (dispatch, getState) => {
       axios.patch(`/api/decks/${deck._id}`, {[key]: val})
       dispatch(getLegalCards(cardData, val))
     }
-  } else if (["name", "desc", "published", "privacy", "helpWanted", "feature"].includes(key))
+  } else if (
+    ["name", "desc", "published", "privacy", "helpWanted", "feature"].includes(
+      key
+    )
+  )
     axios.patch(`/api/decks/${deck._id}`, {[key]: val})
 
   deck[key] = val
@@ -99,11 +92,16 @@ export const changeCard = (card = {}, assign = {}) => (dispatch, getState) =>
   dispatch(
     changeDeck(
       "list",
-      getState().deck.list.map(c => (c.key === card.key ? {...card, ...assign} : c))
+      getState().deck.list.map(c =>
+        c.key === card.key ? {...card, ...assign} : c
+      )
     )
   )
 
-export const addCard = (cards, board, remove, replace) => (dispatch, getState) => {
+export const addCard = (cards, board, remove, replace) => (
+  dispatch,
+  getState
+) => {
   const {list} = getState().deck
   if (cards.constructor !== Array) cards = [cards]
   const newCard = card => {
@@ -158,7 +156,9 @@ export const updateDeckList = _ => (dispatch, getState) => {
     deck: {_id, format, list, preChanges, published, suggestions, feature},
   } = getState()
 
-  const colors = COLORS("symbol").map(s => sum(list.map(c => c.mana_cost.split("").filter(i => i === s).length)))
+  const colors = COLORS("symbol").map(s =>
+    sum(list.map(c => c.mana_cost.split("").filter(i => i === s).length))
+  )
 
   if (!canPublish(list, format)) published = false
   if (canEdit()) {
@@ -167,7 +167,10 @@ export const updateDeckList = _ => (dispatch, getState) => {
       .patch(`/api/decks/${_id}`, {
         published,
         suggestions,
-        feature: feature.length ? feature : (list[0] && list[0].image_uris && list[0].image_uris.art_crop) || "",
+        feature: feature.length
+          ? feature
+          : (list[0] && list[0].image_uris && list[0].image_uris.art_crop) ||
+            "",
         colors,
         list: collapseDeckData(list),
         updated,
@@ -182,7 +185,10 @@ export const updateDeckList = _ => (dispatch, getState) => {
   dispatch(changeDeck("preChanges", list))
 }
 
-export const newDeck = (author, {name, format, list, desc}) => (dispatch, getState) => {
+export const newDeck = (author, {name, format, list, desc}) => (
+  dispatch,
+  getState
+) => {
   if (author) {
     const slug = createSlug(name, getState().main.decks)
     axios
@@ -270,7 +276,9 @@ export const resolveSuggestion = (id, as) => (dispatch, getState) => {
   const {
     deck: {suggestions, list},
   } = getState()
-  const {added, removed} = suggestions.map(({changes}) => changes.filter(c => c.id === id)[0]).filter(s => !!s)[0]
+  const {added, removed} = suggestions
+    .map(({changes}) => changes.filter(c => c.id === id)[0])
+    .filter(s => !!s)[0]
 
   if (as === "keep") {
     dispatch(addCard(removed, null, true))

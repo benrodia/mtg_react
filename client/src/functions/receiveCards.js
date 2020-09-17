@@ -1,5 +1,6 @@
 import axios from "axios"
 import {v4 as uuidv4} from "uuid"
+import {paginate} from "./utility"
 import {COLORS, MAIN_BOARD, SIDE_BOARD} from "../constants/definitions"
 import {MANA, NUM_FROM_WORD} from "../constants/greps"
 import {CONTROL_CARD} from "../constants/data"
@@ -63,73 +64,78 @@ export const fileMeta = text => {
       )
 }
 
-export const interpretForm = (text = "", cardData = [{}]) => {
-  console.log(cardData)
+export async function interpretForm(text = "") {
   const items = text.split("\n")
-  const interp = items
-    .map((item, ind) => {
-      let [quantity, spaces] = [1, item.split(" ")]
-      for (var i = 0; i < spaces.length; i++)
-        if (parseInt(spaces[i]) > 1) {
-          quantity = parseInt(spaces[i])
-          break
-        }
-      const setText = item.indexOf("[")
-        ? item.slice(item.indexOf("[") + 1, item.indexOf("]")).toLowerCase()
-        : " "
+  const cardNames = await axios
+    .get(`https://api.scryfall.com/catalog/card-names`)
+    .then(res => {
+      const names = res.data.data
+      return items
+        .map((item, ind) => {
+          let [quantity, spaces] = [1, item.split(" ")]
+          for (var i = 0; i < spaces.length; i++)
+            if (parseInt(spaces[i]) > 1) {
+              quantity = parseInt(spaces[i])
+              break
+            }
+          const setText = item.indexOf("[")
+            ? item.slice(item.indexOf("[") + 1, item.indexOf("]")).toLowerCase()
+            : " "
+          let name = names
+            .filter(n => item.includes(n))
+            .sort((a, b) => (a.length > b.length ? 1 : -1))[0]
 
-      const cards = cardData
-        .filter(c => item.toLowerCase().includes(c.name.toLowerCase()))
-        .sort((a, b) => (a.name.length < b.name.length ? 1 : -1))
-      const card = cards.filter(c => c.set === setText)[0] || cards[0] || null
-
-      return (
-        card && {
-          quantity,
-          card: {
-            ...card,
-            commander: item.includes("CMDR: "),
-            board: items.slice(0, ind).filter(it => it.includes("SB:")).length
-              ? SIDE_BOARD
-              : MAIN_BOARD,
-          },
-        }
-      )
+          return (
+            !!name && {
+              quantity,
+              card: {
+                name,
+                commander: item.includes("CMDR: "),
+                board: items.slice(0, ind).filter(it => it.includes("SB:"))
+                  .length
+                  ? SIDE_BOARD
+                  : MAIN_BOARD,
+              },
+            }
+          )
+        })
+        .filter(c => !!c)
     })
-    .filter(c => !!c)
   let returned = []
-  for (var i = 0; i < interp.length; i++)
+  for (var i = 0; i < cardNames.length; i++)
     returned = returned.concat(
-      [...Array(interp[i].quantity)].map(_ => interp[i].card)
+      [...Array(cardNames[i].quantity)].map(_ => cardNames[i].card)
     )
   return returned
 }
 
 export const collapseDeckData = (list = []) =>
-  list.map(c => `${c.commander ? "Commander" : c.board || "NID"}__ID__${c.id}`)
-
-export const expandDeckData = (list = [], cardData = [{}]) =>
-  list.map(l => {
-    if (typeof l !== "string") return l
-    const card = cardData.filter(
-      d => d.id === l.slice(l.indexOf("ID__") + 4)
-    )[0]
-    const board = l.slice(0, l.indexOf("__ID"))
-    const commander = l.includes("Commander")
-    return {
-      ...audit(card),
-      board: commander ? "Main" : board === "NID" ? undefined : board,
-      commander,
-      key: uuidv4(),
-    }
+  list.map(({id, board, commander}) => {
+    let c = {id, board}
+    if (commander) c.commander = true
+    return c
   })
 
-export async function fetchCollection(identifiers) {
-  return await axios.post(
-    `https://api.scryfall.com/cards/collection `,
-    {identifiers},
-    {"Content-Type": "application/json"}
-  )
+export async function fetchCollection(list) {
+  if (!list.length) return []
+  const segments = paginate(list.unique("id"), 75)
+  let gotten = []
+  for (var i = 0; i < segments.length; i++) {
+    const get = await axios.post(
+      `https://api.scryfall.com/cards/collection`,
+      {identifiers: segments[i]},
+      {headers: {"Content-Type": "application/json"}}
+    )
+    gotten = [...gotten, ...get.data.data]
+  }
+  const fetched = list
+    .map(({id, board, commander}) => {
+      let m = gotten.filter(g => g.id === id)[0]
+      if (!!m) m = {...m, board, commander, key: uuidv4()}
+      return m
+    })
+    .filter(c => !!c)
+  return fetched
 }
 
 export const TCGplayerMassEntryURL = list => {
