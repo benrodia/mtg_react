@@ -80,7 +80,11 @@ export default connect(({playtest: {deck, look, size, hideHand}}) => {
           zone={zone}
           col={col}
           row={row}
-          accept={zone === "Command" ? ItemTypes.COMMANDER : [ItemTypes.CARD, ItemTypes.COMMANDER]}
+          accept={
+            zone === "Command"
+              ? ItemTypes.COMMANDER
+              : [ItemTypes.CARD, ItemTypes.COMMANDER]
+          }
           callBack={card => moveCard({card, dest: zone, col, row})}>
           {cardStack[0] && cardStack.map((c, i) => renderCard(c, i))}
         </DropSlot>
@@ -90,14 +94,22 @@ export default connect(({playtest: {deck, look, size, hideHand}}) => {
     const Zone = _ => {
       const inner = [...Array(context === "grid" ? 4 : 1)].map((und, row) => (
         <div key={"row" + row} className={`row row-${row}`}>
-          {[...Array(context === "grid" ? size.cols : 1)].map((und, col) => slot(col, row))}
+          {[...Array(context === "grid" ? size.cols : 1)].map((und, col) =>
+            slot(col, row)
+          )}
         </div>
       ))
       return (
-        <div key={zone} className={`zone ${zone.toLowerCase()} ${context}`} ref={zoneDiv}>
+        <div
+          key={zone}
+          className={`zone ${zone.toLowerCase()} ${context}`}
+          ref={zoneDiv}>
           <div className="title bar even" style={{display: !header && "none"}}>
             {zone !== "Hand" ? null : (
-              <h2 className={`clicky-icon icon-eye${hideHand ? "-off" : ""}`} onClick={_ => toggleHand(hideHand)} />
+              <h2
+                className={`clicky-icon icon-eye${hideHand ? "-off" : ""}`}
+                onClick={_ => toggleHand(hideHand)}
+              />
             )}
             <BasicSearch
               isHeader
@@ -126,6 +138,7 @@ export default connect(({playtest: {deck, look, size, hideHand}}) => {
         <CardControls
           key={card.key}
           card={card}
+          context={"playtest"}
           faceDown={zone === "Hand" && hideHand}
           cardHeadOnly={cardHeadOnly}
           itemType={card.commander ? ItemTypes.COMMANDER : ItemTypes.CARD}
@@ -148,10 +161,14 @@ export default connect(({playtest: {deck, look, size, hideHand}}) => {
           )}
           {!(zone === "Library" && look) ? null : (
             <div>
-              <button className="small-button" onClick={_ => moveCard({card, dest: "Library", bottom: true})}>
+              <button
+                className="small-button"
+                onClick={_ => moveCard({card, dest: "Library", bottom: true})}>
                 Bottom
               </button>
-              <button className="small-button" onClick={_ => moveCard({card, dest: "Graveyard"})}>
+              <button
+                className="small-button"
+                onClick={_ => moveCard({card, dest: "Graveyard"})}>
                 Graveyard
               </button>
             </div>
@@ -160,7 +177,9 @@ export default connect(({playtest: {deck, look, size, hideHand}}) => {
             <>
               <Counters card={card} />
               <ManaSource card={card} />
-              {!Q(card, "type_line", "Token") ? null : <button onClick={_ => spawnToken(card)}>Clone</button>}
+              {!Q(card, "type_line", "Token") ? null : (
+                <button onClick={_ => spawnToken(card)}>Clone</button>
+              )}
             </>
           )}
         </CardControls>

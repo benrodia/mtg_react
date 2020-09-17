@@ -35,8 +35,6 @@ export default connect(({main: {decks}, deck}) => {
 		[slug, decks]
 	)
 
-	console.log("openDeck", deck, decks.filter(d => d.slug === slug)[0])
-
 	useEffect(
 		_ => {
 			if (stickyRef.current) setOffset(stickyRef.current.clientHeight)
@@ -45,7 +43,11 @@ export default connect(({main: {decks}, deck}) => {
 	)
 
 	return !deck._id ? (
-		<Loading spinner={" "} message={"No Deck Here"} subMessage={<Link to={HOME_DIR}>Return To Home</Link>} />
+		<Loading
+			spinner={" "}
+			message={"No Deck Here"}
+			subMessage={<Link to={HOME_DIR}>Return To Home</Link>}
+		/>
 	) : (
 		<div className="builder">
 			<section className="deck-area">
@@ -60,13 +62,17 @@ export default connect(({main: {decks}, deck}) => {
 				<div className="quick-import">
 					<div className="playtest-button">
 						<Link to={`${HOME_DIR}/deck/${slug}/playtest`}>
-							<button className="success-button icon-play">Playtest Deck</button>
+							<button className="success-button icon-play">
+								Playtest Deck
+							</button>
 						</Link>
 					</div>
 					<div className="exports col">
 						<button
 							className="small-button icon-download"
-							onClick={_ => openModal({title: "Download File", content: <DownloadFile />})}>
+							onClick={_ =>
+								openModal({title: "Download File", content: <DownloadFile />})
+							}>
 							Download File
 						</button>
 						<button
@@ -79,10 +85,14 @@ export default connect(({main: {decks}, deck}) => {
 						</button>
 						{deck.clone ? (
 							<Link to={`${HOME_DIR}/deck/${deck.clone}`}>
-								<button className="small-button success-button fill">Cloned! Open Deck</button>
+								<button className="small-button success-button fill">
+									Cloned! Open Deck
+								</button>
 							</Link>
 						) : (
-							<button className="small-button icon-clone" onClick={_ => cloneDeck()}>
+							<button
+								className="small-button icon-clone"
+								onClick={_ => cloneDeck()}>
 								Clone Deck
 							</button>
 						)}

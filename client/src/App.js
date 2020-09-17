@@ -62,7 +62,6 @@ export default connect(
     }, [])
     const {pathname} = useLocation()
 
-    console.log("playmat", playmat)
     const routes = (
       <Switch>
         <Route exact path={HOME_DIR}>

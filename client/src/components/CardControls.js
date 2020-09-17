@@ -9,16 +9,15 @@ import actions from "../actions"
 import Inspect from "./Inspect"
 import Card from "./Card"
 
-let timer
-export default connect(({main: {page}}) => {
-	return {page}
+export default connect(({}) => {
+	return {}
 }, actions)(
 	({
-		page,
 		card,
 		inArea,
 		options,
 		itemType,
+		context,
 		style,
 		faceDown,
 		cardHeadOnly,
@@ -29,34 +28,36 @@ export default connect(({main: {page}}) => {
 		classes,
 	}) => {
 		const [clicked, clickState] = useState(false)
+		const [timer, setTimer] = useState(null)
 		const [{isDragging}, drag] = useDrag({
 			item: {...card, type: itemType || ItemTypes.CARD},
 			collect: monitor => ({isDragging: !!monitor.isDragging()}),
 		})
 		const inspect = _ =>
-			openModal({title: card.name, content: <Inspect card={card} inArea={inArea} options={options} />})
+			openModal({
+				title: card.name,
+				content: <Inspect card={card} inArea={inArea} options={options} />,
+			})
 
 		if (isDragging) clearTimeout(timer)
-		const inPlaytest = useLocation().pathname.includes("playtest")
 
 		const click = _ => {
-			if (inPlaytest) {
+			if (context === "playtest") {
 				cardClick(card, clicked)
 				clickState(true)
 				setTimeout(_ => clickState(false), 300)
-			} else inspect()
+			}
+			if (context === "builder") inspect()
 		}
 
-		const clickHold = _ => {
-			if (!isDragging)
-				timer = setTimeout(_ => {
-					timer = null
-					inspect()
-				}, 300)
-		}
+		const clickHold = _ => !isDragging && setTimer(setTimeout(inspect, 300))
 
 		return (
-			<div key={(card.key || card.id) + "container"} ref={drag} style={style} className={`card-container ${classes}`}>
+			<div
+				key={(card.key || card.id) + "container"}
+				ref={drag}
+				style={style}
+				className={`card-container ${classes}`}>
 				<div className="card-controls">{children}</div>
 				<span
 					className="click-events"

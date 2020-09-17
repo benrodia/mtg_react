@@ -28,11 +28,21 @@ export const FORMATS = [
 	"vintage",
 	"casual",
 ]
+export const helpTiers = ["Off", "From Friends", "Allowed", "Wanted"]
 
-export const STACKTIONS = ["Action", "Spell", "Activated Ability", "Triggered Ability"]
+export const STACKTIONS = [
+	"Action",
+	"Spell",
+	"Activated Ability",
+	"Triggered Ability",
+]
 
-export const CARD_SLEEVES = importAll(require.context("../../public/images/sleeves", false, /\.(png|jpe?g|svg)$/))
-export const PLAYMATS = importAll(require.context("../../public/images/playmats", false, /\.(png|jpe?g|svg)$/))
+export const CARD_SLEEVES = importAll(
+	require.context("../../public/images/sleeves", false, /\.(png|jpe?g|svg)$/)
+)
+export const PLAYMATS = importAll(
+	require.context("../../public/images/playmats", false, /\.(png|jpe?g|svg)$/)
+)
 
 export const CONTROL_CARD = {
 	object: "card",

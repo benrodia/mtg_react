@@ -8,11 +8,30 @@ import DropSlot from "./DropSlot"
 import BasicSearch from "./BasicSearch"
 import EditableText from "./EditableText"
 
-const {SINGLETON, FILTER_TERMS, ItemTypes, COLORS, BOARDS, MAIN_BOARD, rem, titleCaps} = utilities
+const {
+	SINGLETON,
+	FILTER_TERMS,
+	ItemTypes,
+	COLORS,
+	BOARDS,
+	MAIN_BOARD,
+	rem,
+	titleCaps,
+} = utilities
 
-export default connect(({auth: {isAuthenticated, user: {_id}}, deck: {list, format, author}, filters}) => {
-	return {list, format, author, ...filters, isAuthenticated, _id}
-}, actions)(
+export default connect(
+	({
+		auth: {
+			isAuthenticated,
+			user: {_id},
+		},
+		deck: {list, format, author},
+		filters,
+	}) => {
+		return {list, format, author, ...filters, isAuthenticated, _id}
+	},
+	actions
+)(
 	({
 		offset,
 		list,
@@ -28,6 +47,7 @@ export default connect(({auth: {isAuthenticated, user: {_id}}, deck: {list, form
 		customFields,
 		changeFilters,
 		changeCard,
+		addCard,
 	}) => {
 		const canEdit = _id === author && isAuthenticated
 		return (
@@ -38,7 +58,8 @@ export default connect(({auth: {isAuthenticated, user: {_id}}, deck: {list, form
 							const cards = list.filter(c => c.board === B)
 							const legalAmt =
 								B !== MAIN_BOARD ||
-								(cards.length >= (SINGLETON(format) ? 100 : 60) && cards.length <= (SINGLETON(format) ? 100 : 600))
+								(cards.length >= (SINGLETON(format) ? 100 : 60) &&
+									cards.length <= (SINGLETON(format) ? 100 : 600))
 							return (
 								<h2
 									key={B}
@@ -48,11 +69,17 @@ export default connect(({auth: {isAuthenticated, user: {_id}}, deck: {list, form
 										key={"board_header_" + B}
 										field={B}
 										accept={canEdit ? ItemTypes.CARD : "NULL"}
-										callBack={c => changeCard(c, {board: B})}>
-										{B}board{" "}
+										callBack={c =>
+											c.key ? changeCard(c, {board: B}) : addCard(c, B)
+										}>
+										{B}board
 										<span>
 											{" "}
-											(<span style={{color: !legalAmt && "#f46"}}>{cards.length}</span>)
+											(
+											<span style={{color: !legalAmt && "#f46"}}>
+												{cards.length}
+											</span>
+											)
 										</span>
 									</DropSlot>
 								</h2>
@@ -61,9 +88,15 @@ export default connect(({auth: {isAuthenticated, user: {_id}}, deck: {list, form
 					</div>
 					<span className="view-options bar even">
 						<button
-							title={`View as ${view === "list" ? "Bulleted List" : "Image Grid"}`}
-							className={`small-button icon-th${view === "list" ? "-list" : ""}`}
-							onClick={_ => changeFilters("view", view === "list" ? "grid" : "list")}>
+							title={`View as ${
+								view === "list" ? "Bulleted List" : "Image Grid"
+							}`}
+							className={`small-button icon-th${
+								view === "list" ? "-list" : ""
+							}`}
+							onClick={_ =>
+								changeFilters("view", view === "list" ? "grid" : "list")
+							}>
 							{titleCaps(view)}
 						</button>
 						<BasicSearch

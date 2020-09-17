@@ -9,6 +9,9 @@
 .hide {
   opacity: 0;
   pointer-events: none;
+  height: 0;
+  width: 0;
+  margin: 0;
 }
 .flex-row {
   display: flex;
@@ -311,11 +314,13 @@
   top: 2rem;
   z-index: 1;
 }
+.fill .max,
 .max {
-  flex-grow: 1 !important;
+  flex: 1 0;
 }
+.fill .min,
 .min {
-  flex-shrink: 1 !important;
+  flex: 0 1;
 }
 .bar {
   display: flex;
@@ -937,8 +942,11 @@ html {
 }
 .dash .hero .log-in-form .in-form.hide,
 .dash .hero .log-in-form .up-form.hide {
+  margin: 0;
+  padding: 0;
   height: 0;
-  transform: scaleY(0);
+  width: 0;
+  transform: scale(0);
 }
 .browse {
   display: flex;
@@ -1381,6 +1389,28 @@ html {
 .advanced-search .advanced-search-results .card-container:hover .card-controls {
   opacity: 1;
 }
+.basic-search .search-bar {
+  flex-flow: row-reverse;
+}
+.basic-search .search-bar input {
+  width: 100%;
+  font-size: 1.2rem;
+  padding: 1.5rem 1rem;
+}
+.basic-search .search-bar .exit {
+  position: absolute;
+  z-index: 2;
+}
+.basic-search .results {
+  transition: 0.4s;
+  position: absolute;
+  z-index: 1;
+  max-height: 25rem;
+  overflow-y: auto;
+  background: #c6cfe4;
+  width: auto;
+  padding: 0.25rem 0.5rem;
+}
 .card-container {
   transition: 0.2s;
   transform-origin: 50% 100%;
@@ -1674,6 +1704,9 @@ html {
 .tester .zone .row .card-container .card-controls > * {
   opacity: 0;
   pointer-events: none;
+  height: 0;
+  width: 0;
+  margin: 0;
   position: absolute;
   top: 0;
   z-index: 20;

@@ -323,3 +323,28 @@
 		}
 	}
 }
+
+.basic-search {
+	.search-bar {
+		flex-flow: row-reverse;
+		input {
+			width: 100%;
+			font-size: 1.2rem;
+			padding: 1.5rem 1rem;
+		}
+		.exit {
+			position: absolute;
+			z-index: 2;
+		}
+	}
+	.results {
+		transition: 0.4s;
+		position: absolute;
+		z-index: 1;
+		max-height: 25rem;
+		overflow-y: auto;
+		background: @lighter;
+		width: auto;
+		padding: @thinner @thin;
+	}
+}

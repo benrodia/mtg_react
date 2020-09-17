@@ -5,6 +5,7 @@ import utilities from "../utilities"
 
 import Loading from "./Loading"
 import DropSlot from "./DropSlot"
+import BasicSearch1 from "./BasicSearch1"
 import BasicSearch from "./BasicSearch"
 import CardControls from "./CardControls"
 import PrintSelector from "./PrintSelector"
@@ -40,7 +41,16 @@ export default connect(
 		main: {sets, legalCards},
 		deck: {list, format, author},
 	}) => {
-		return {sets, legalCards, ...filters, list, format, _id, isAuthenticated, author}
+		return {
+			sets,
+			legalCards,
+			...filters,
+			list,
+			format,
+			_id,
+			isAuthenticated,
+			author,
+		}
 	},
 	actions
 )(
@@ -75,16 +85,25 @@ export default connect(
 					sortBy === "Custom"
 						? customFields.map(f => f.key)
 						: Filter_By.vals || inBoard.map(c => c[Filter_By.key]).sort(),
-				valNames: sortBy === "Custom" ? customFields.map(f => f.name) : Filter_By.valNames,
+				valNames:
+					sortBy === "Custom"
+						? customFields.map(f => f.name)
+						: Filter_By.valNames,
 				other: Filter_By.other || `Missing ${Filter_By.name}`,
 			}
 
 			const sorted = (val = "", ind = null) => {
-				const filteredCards = ind === null ? inBoard : filterCardType(inBoard, category, val)
-				inBoard = inBoard.filter(b => !filteredCards.filter(c => c.key === b.key).length)
+				const filteredCards =
+					ind === null ? inBoard : filterCardType(inBoard, category, val)
+				inBoard = inBoard.filter(
+					b => !filteredCards.filter(c => c.key === b.key).length
+				)
 
-				const cardStacks = itemizeDeckList(filteredCards, ["name"]).orderBy("name")
-				const valName = (category.valNames && category.valNames[ind]) || val.toString()
+				const cardStacks = itemizeDeckList(filteredCards, ["name"]).orderBy(
+					"name"
+				)
+				const valName =
+					(category.valNames && category.valNames[ind]) || val.toString()
 
 				if (category.name === "Custom") {
 					return (
@@ -92,8 +111,12 @@ export default connect(
 							key={"custom" + valName}
 							field={val}
 							accept={[ItemTypes.CARD, ItemTypes.COMMANDER]}
-							callBack={c => changeCard(c, {customField: val})}>
-							<div key={board + "_" + category.key + "_" + valName} className={`${valName}-list list ${view}-view`}>
+							callBack={c =>
+								c.key ? changeCard(c, {customField: val}) : addCard(c, board)
+							}>
+							<div
+								key={board + "_" + category.key + "_" + valName}
+								className={`${valName}-list list ${view}-view`}>
 								<h3>
 									<EditableText
 										changeable
@@ -104,37 +127,41 @@ export default connect(
 									/>{" "}
 									({filteredCards.length})
 								</h3>
-								<div className={`${view}-inner`}>{cardStacks.map(c => renderCardStack(c, valName))}</div>
+								<div className={`${view}-inner`}>
+									{cardStacks.map(c => renderCardStack(c, valName))}
+								</div>
 							</div>
 						</DropSlot>
 					)
 				} else
 					return !cardStacks.length ? null : (
-						<div key={board + "_" + category.key + "_" + valName} className={`${valName}-list list ${view}-view`}>
+						<div
+							key={board + "_" + category.key + "_" + valName}
+							className={`${valName}-list list ${view}-view`}>
 							<h3>
-								<div className={`icon ms ms-${category.icon && val.toString().toLowerCase()}`} /> {titleCaps(valName)} (
-								{filteredCards.length})
+								<div
+									className={`icon ms ms-${
+										category.icon && val.toString().toLowerCase()
+									}`}
+								/>{" "}
+								{titleCaps(valName)} ({filteredCards.length})
 							</h3>
-							<div className={`${view}-inner`}>{cardStacks.map(c => renderCardStack(c, valName))}</div>
+							<div className={`${view}-inner`}>
+								{cardStacks.map(c => renderCardStack(c, valName))}
+							</div>
 						</div>
 					)
 			}
 			const commandHeader = (
 				<div className={`Commander-list list grid-view`}>
 					<h3>
-						<div className={`icon`} /> {pluralize("Commander", commanders.length)}
+						<div className={`icon`} />{" "}
+						{pluralize("Commander", commanders.length)}
 					</h3>
-					{canEdit() ? (
-						<BasicSearch
-							searchable
-							limit={20}
-							options={legalCommanders(format, legalCards)}
-							label={"name"}
-							callBack={c => changeDeck("list", chooseCommander(c, list, legalCards, true))}
-							placeholder="Choose a Commander"
-						/>
-					) : null}
-					<div className={`grid-inner`}>{renderCardStack(commanders, "Commander")}</div>
+					{canEdit() ? <BasicSearch1 commander /> : null}
+					<div className={`grid-inner`}>
+						{renderCardStack(commanders, "Commander")}
+					</div>
 				</div>
 			)
 
@@ -160,20 +187,39 @@ export default connect(
 									name={card.set_name}
 									className={`${card.rarity} ${canEdit() ? "clicky-icon" : ""}`}
 									loader={card.set}
-									src={!sets.length ? null : (sets.filter(s => s.name === card.set_name)[0] || {}).icon_svg_uri}
+									src={
+										!sets.length
+											? null
+											: (sets.filter(s => s.name === card.set_name)[0] || {})
+													.icon_svg_uri
+									}
 								/>
 							)
 							const controls = (
 								<>
-									<div className={`quantity ${view === "list" && cardInd !== 0 ? "hide" : ""}`}>
+									<div
+										className={`quantity ${
+											view === "list" && cardInd !== 0 ? "hide" : ""
+										}`}>
 										<span
-											className={`icon-plus ${cards.length >= legal ? "disabled" : ""}`}
+											className={`icon-plus ${
+												cards.length >= legal ? "disabled" : ""
+											}`}
 											onClick={_ => addCard(card, board)}
 										/>
-										/<span className="icon-minus" onClick={_ => addCard(card, board, true)} />
+										/
+										<span
+											className="icon-minus"
+											onClick={_ => addCard(card, board, true)}
+										/>
 									</div>
 									<span
-										onClick={_ => openModal({title: "Change Printing", content: <PrintSelector change card={card} />})}>
+										onClick={_ =>
+											openModal({
+												title: "Change Printing",
+												content: <PrintSelector change card={card} />,
+											})
+										}>
 										{view === "list" || card.commander ? (
 											setLogo
 										) : (
@@ -190,7 +236,9 @@ export default connect(
 									inArea={inBoard}
 									key={card.key}
 									card={card}
-									itemType={card.commander ? ItemTypes.COMMANDER : ItemTypes.CARD}
+									itemType={
+										card.commander ? ItemTypes.COMMANDER : ItemTypes.CARD
+									}
 									imgSize="small"
 									classes={`
 										${cards.length > legal && cardInd >= legal && "illegal "} 
@@ -199,9 +247,19 @@ export default connect(
 									cardHeadOnly={view === "list" && !card.commander}
 									style={{
 										position: cardInd > 0 && view === "grid" && "absolute",
-										marginTop: cardInd > 0 && view === "grid" && cardInd - cardsOfSet.length - 10 + "rem",
-										pointerEvents: cardInd !== cardsOfSet.length - 1 && view === "grid" && "none",
-										marginBottom: cardsOfSet.length > 1 && !cardInd && view === "grid" && cardsOfSet.length + "rem",
+										marginTop:
+											cardInd > 0 &&
+											view === "grid" &&
+											cardInd - cardsOfSet.length - 10 + "rem",
+										pointerEvents:
+											cardInd !== cardsOfSet.length - 1 &&
+											view === "grid" &&
+											"none",
+										marginBottom:
+											cardsOfSet.length > 1 &&
+											!cardInd &&
+											view === "grid" &&
+											cardsOfSet.length + "rem",
 									}}>
 									{canEdit() ? controls : view === "list" ? setLogo : null}
 								</CardControls>
@@ -217,9 +275,24 @@ export default connect(
 				{inBoard.length || commanders.length ? (
 					boardInner()
 				) : (
-					<Loading spinner={" "} anim="none" message={`No Cards in ${board}board`} />
+					<Loading
+						spinner={" "}
+						anim="none"
+						message={`No Cards in ${board}board`}
+					/>
 				)}
 			</div>
 		)
 	}
 )
+
+// <BasicSearch
+// 	searchable
+// 	limit={20}
+// 	options={legalCommanders(format, legalCards)}
+// 	label={"name"}
+// 	callBack={c =>
+// 		changeDeck("list", chooseCommander(c, list, legalCards, true))
+// 	}
+// 	placeholder="Choose a Commander"
+// />
