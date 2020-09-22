@@ -8,7 +8,6 @@ import utilities from "../utilities"
 
 import BasicSearch1 from "./BasicSearch1"
 import BasicSearch from "./BasicSearch"
-import AdvancedSearch from "./AdvancedSearch"
 import DeckStats from "./DeckStats"
 import BoardFilters from "./BoardFilters"
 import BulkEdit from "./BulkEdit"
@@ -67,7 +66,7 @@ export default connect(
 		const publishable = !published && upToDate && canPublish(list, format)
 		const ManageList = (
 			<div className="manage-list block bar even spaced-bar">
-				<BasicSearch1 />
+				<BasicSearch1 callBack={(c, b, r) => addCard(c, b || board, r)} />
 				<div className="mini-spaced-col">
 					<div className="mini-spaced-bar bar full-width">
 						<button
@@ -86,19 +85,6 @@ export default connect(
 							onClick={_ => updateDeckList(false)}
 						/>
 					</div>
-					<button
-						className={`small-button full-width fill success-button ${
-							publishable || " disabled"
-						}`}
-						onClick={_ => publishable && changeDeck("published", true)}>
-						{published
-							? "Published"
-							: !upToDate
-							? "Save Changes First"
-							: canPublish(list, format)
-							? "Publish!"
-							: "Can't Publish"}
-					</button>
 				</div>
 			</div>
 		)

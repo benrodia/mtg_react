@@ -13,6 +13,7 @@ import Footer from "./components/Footer"
 import Dash from "./components/_Page_Dash"
 import User from "./components/_Page_User"
 import Deck from "./components/_Page_Deck"
+import Build from "./components/_Page_Build"
 import Playtest from "./components/_Page_Playtest"
 
 const {HOME_DIR, DECK_ID, rnd, getArt} = utilities
@@ -64,18 +65,15 @@ export default connect(
 
     const routes = (
       <Switch>
-        <Route exact path={HOME_DIR}>
-          <Dash />
-        </Route>
-        <Route exact path={`${HOME_DIR}/deck/:slug`}>
-          <Deck />
-        </Route>
-        <Route exact path={`${HOME_DIR}/deck/:slug/playtest`}>
-          <Playtest />
-        </Route>
-        <Route exact path={`${HOME_DIR}/user/:slug`}>
-          <User />
-        </Route>
+        <Route exact path={HOME_DIR} component={Dash} />
+        <Route exact path={`${HOME_DIR}/build`} component={Build} />
+        <Route exact path={`${HOME_DIR}/deck/:slug`} component={Deck} />
+        <Route
+          exact
+          path={`${HOME_DIR}/deck/:slug/playtest`}
+          component={Playtest}
+        />
+        <Route exact path={`${HOME_DIR}/user/:slug`} component={User} />
         <Route>
           <Redirect to={HOME_DIR} />
         </Route>

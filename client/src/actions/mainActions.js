@@ -10,16 +10,16 @@ const {Q, isLegal, expandDeckData, getDecks} = utilities
 //   dispatch({type: A.MAIN, key: "modal", val: null})
 // }
 
-// export const getCardData = _ => dispatch => {
-//   axios
-//     .get(`https://api.scryfall.com/bulk-data/oracle_cards`)
-//     .then(res =>
-//       axios
-//         .get(res.data.download_uri)
-//         .then(res => dispatch({type: A.MAIN, key: "cardData", val: res.data}))
-//     )
-//     .catch(err => console.log(err))
-// }
+export const getCardData = _ => dispatch => {
+  axios
+    .get(`https://api.scryfall.com/bulk-data/oracle_cards`)
+    .then(res =>
+      axios
+        .get(res.data.download_uri)
+        .then(res => dispatch({type: A.MAIN, key: "cardData", val: res.data}))
+    )
+    .catch(err => console.log(err))
+}
 
 export const getSetData = _ => dispatch => {
   axios

@@ -42,6 +42,9 @@ export default connect(
               </span>
             </p>
           </Link>
+          <Link to={`${HOME_DIR}/build`}>
+            <button className="icon-cog small-button">Build</button>
+          </Link>
           <Link to={`${HOME_DIR}/deck/${deck.slug}/playtest`}>
             <button className="icon-play small-button">Playtest</button>
           </Link>
@@ -75,12 +78,16 @@ export default connect(
           )}
         />
         {isAuthenticated ? (
-          <button
-            className="success-button smaller-button new-deck bar even"
-            onClick={_ => openModal({title: "New Deck", content: <NewDeck />})}>
-            <span className="icon-plus" />
-            <div>New Deck</div>
-          </button>
+          <Link to={`${HOME_DIR}/build`}>
+            <button
+              className="success-button smaller-button new-deck bar even"
+              onClick={_ =>
+                openModal({title: "New Deck", content: <NewDeck />})
+              }>
+              <span className="icon-plus" />
+              <div>New Deck</div>
+            </button>
+          </Link>
         ) : null}
 
         {isAuthenticated ? (

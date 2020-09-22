@@ -25,7 +25,7 @@ export const rem = (num = 1) =>
       .fontSize || 16
   )
 
-export const rnd = (arr, num) => {
+export const rnd = (arr = [], num = 0) => {
   if (typeof arr === "number") return Math.floor(Math.random() * arr)
   const rand = _ => arr[Math.floor(Math.random() * arr.length)]
   if (!num) return rand()
@@ -94,9 +94,11 @@ Array.prototype.shuffle = function () {
   return cards
 }
 
-Array.prototype.orderBy = function (key) {
+Array.prototype.orderBy = function (key, asc) {
+  if (!this || !this.length) return []
   return this.sort((a, b) => (a[key] > b[key] ? 1 : -1))
 }
+// (asc ? -1 : 1)
 
 Array.prototype.unique = function (key) {
   let b = []

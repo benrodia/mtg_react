@@ -77,7 +77,11 @@ export const resetCache = _ => {
 	// localStorage.removeItem("user")
 	// localStorage.removeItem("token")
 	localStorage.removeItem("settings")
+	sessionStorage.removeItem("settings")
+	localStorage.removeItem("filters")
+	sessionStorage.removeItem("filters")
 	localStorage.removeItem("deck")
+	sessionStorage.removeItem("deck")
 	setTimeout(_ => window.location.reload(), 500)
 }
 

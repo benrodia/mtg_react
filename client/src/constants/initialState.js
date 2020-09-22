@@ -15,7 +15,6 @@ export const INIT_MAIN_STATE = {
 	users: [],
 	noteLog: [],
 	modal: null,
-	refresh: false,
 }
 
 export const INIT_SETTINGS_STATE = {
@@ -60,18 +59,12 @@ export const INIT_FILTERS_STATE = {
 	showPrice: false,
 	basic: {
 		by: "name",
+		asc: false,
 	},
 	advanced: {
-		legalOnly: true,
-		colors: COLORS("symbol").map(s => s !== "C"),
-		all: false,
-		only: false,
-		cmc: 0,
-		cmcOp: "any",
-		rarity: "any",
-		types: [],
-		text: [],
-		keywords: [],
+		terms: [],
+		by: "name",
+		asc: false,
 	},
 	deckFilters: [],
 	deckParams: [],
@@ -101,9 +94,9 @@ export const INIT_PLAYTEST_STATE = (list, format, num) => {
 const initialState = {
 	auth: INIT_AUTH_STATE,
 	main: INIT_MAIN_STATE,
-	deck: loadCache(A.DECK, INIT_DECK_STATE, true),
-	settings: loadCache(A.SETTINGS, INIT_SETTINGS_STATE, true, true),
-	filters: loadCache(A.FILTERS, INIT_FILTERS_STATE, true),
+	deck: loadCache(A.DECK, INIT_DECK_STATE),
+	settings: loadCache(A.SETTINGS, INIT_SETTINGS_STATE),
+	filters: loadCache(A.FILTERS, INIT_FILTERS_STATE),
 	playtest: INIT_PLAYTEST_STATE([], null, 0),
 }
 

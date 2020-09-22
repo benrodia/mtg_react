@@ -4,12 +4,6 @@ import {connect} from "react-redux"
 import ago from "s-ago"
 import actions from "../actions"
 import utilities from "../utilities"
-import MdEditor from "react-markdown-editor-lite"
-import Markdown from "markdown-to-jsx"
-import "react-markdown-editor-lite/lib/index.css"
-
-import ResolveSuggestions from "./ResolveSuggestions"
-import NewSuggestion from "./NewSuggestion"
 import BasicSearch from "./BasicSearch"
 import EditableText from "./EditableText"
 import Card from "./Card"
@@ -26,9 +20,7 @@ const {
 	canPublish,
 	canEdit,
 	creator,
-	canSuggest,
-	areFriends,
-	helpTiers,
+	listDiffs,
 } = utilities
 
 export default connect(
@@ -45,6 +37,7 @@ export default connect(
 		format,
 		desc,
 		list,
+		preChanges,
 		author,
 		created,
 		updated,
@@ -79,182 +72,101 @@ export default connect(
 				))}
 			</div>
 		)
+		const upToDate = !listDiffs(preChanges, list).changed
+		const publishable = !published && upToDate && canPublish(list, format)
 
 		return (
-			<div className="info-readme">
-				<div className="bar spaced-bar">
-					<span
-						className="feature icon"
-						onClick={_ =>
-							canEdit() &&
-							openModal({title: "Featured Card", content: pickFeatured})
-						}>
+			<div className="info-readme bar even spaced-bar max">
+				<span
+					className="feature icon"
+					onClick={_ =>
+						canEdit() &&
+						openModal({title: "Featured Card", content: pickFeatured})
+					}>
+					{canEdit() ? (
+						<div className="change-img flex-centered">
+							<span>Change</span>
+						</div>
+					) : null}
+					<img src={featureImg} alt="" />
+				</span>
+				<div className="col">
+					<div className="name bar even spaced-bar">
+						<EditableText
+							changeable={canEdit()}
+							text={name}
+							callBack={({text, method}) =>
+								method === "change" && changeDeck("name", text)
+							}>
+							<h1>{name}</h1>
+						</EditableText>
 						{canEdit() ? (
-							<div className="change-img flex-centered">
-								<span>Change</span>
-							</div>
-						) : null}
-						<img src={featureImg} alt="" />
-					</span>
-					<div className="col">
-						<div className="name bar even spaced-bar">
-							<EditableText
-								changeable={canEdit()}
-								text={name}
-								callBack={({text, method}) =>
-									method === "change" && changeDeck("name", text)
-								}>
-								<h1>{name}</h1>
-							</EditableText>
-							{canEdit() ? (
-								<BasicSearch
-									options={FORMATS}
-									self={format}
-									callBack={f => changeDeck("format", f)}
-								/>
-							) : (
-								<h3 className="tag">{titleCaps(format)}</h3>
-							)}
-						</div>
-						<div className="mini-block bar even mini-spaced-bar">
-							<h4>{published ? "Published" : "Draft"} by</h4>
-							<Link to={`${HOME_DIR}/user/${creator().slug}`}>
-								<h4 className="inverse-button ">{creator().name}</h4>
-							</Link>
-							<p className="asterisk">
-								Created {formattedDate(new Date(created))} - Updated{" "}
-								{ago(new Date(updated))}
-							</p>
-						</div>
-						<div className="meta bar even spaced-bar">
-							{canEdit() ? (
-								<BasicSearch
-									self={privacy}
-									options={["Public", "Unlisted", "Private"]}
-									callBack={p => changeDeck("privacy", p)}
-								/>
-							) : (
-								<div
-									className={`icon-${
-										privacy === "Private"
-											? "lock"
-											: privacy === "Unlisted"
-											? "link"
-											: "globe"
-									}`}>
-									{privacy}
-								</div>
-							)}
-							<div className="even bar icon-eye views">{views}</div>
-							<button
-								className={`small-button likes even bar icon-thumbs-up ${
-									canLike || "disabled"
-								} ${user.liked && user.liked.includes(_id) && "selected"}`}
-								onClick={giveLike}>
-								{likes}
-							</button>
-						</div>
+							<BasicSearch
+								options={FORMATS}
+								self={format}
+								callBack={f => changeDeck("format", f)}
+							/>
+						) : (
+							<h3 className="tag">{titleCaps(format)}</h3>
+						)}
 					</div>
-				</div>
-				<div className="big-block bar spaced-bar fill spread">
-					<div className="desc ">
-						<div className="bar even">
-							<h4>Description</h4>
-							{canEdit() ? (
-								<div
-									className="clicky-icon icon-pencil"
-									onClick={_ =>
-										openModal({
-											title: "Change Description",
-											content: (
-												<EditMarkDown
-													name={"Description"}
-													text={desc}
-													callBack={t => {
-														changeDeck("desc", t)
-														openModal(null)
-													}}
-												/>
-											),
-										})
-									}
-								/>
-							) : null}
-						</div>
-						<div className="mini-block">
-							<Markdown>{desc}</Markdown>
-						</div>
+					<div className="mini-block bar even mini-spaced-bar">
+						<Link to={`${HOME_DIR}/user/${creator().slug}`}>
+							<h4 className="inverse-button ">{creator().name}</h4>
+						</Link>
+						<p className="asterisk">
+							Created {formattedDate(new Date(created))} - Updated{" "}
+							{ago(new Date(updated))}
+						</p>
 					</div>
-					<div className="min">
-						<h4 className="bar even mini-spaced-bar">
-							<span>Suggestions: </span>
-							{canEdit() ? (
-								<BasicSearch
-									self={helpTiers[allow_suggestions || 0]}
-									options={helpTiers}
-									callBack={p =>
-										changeDeck("allow_suggestions", helpTiers.indexOf(p))
-									}
-								/>
-							) : (
-								<span>helpTiers[allow_suggestions]</span>
-							)}
-						</h4>
+					<div className="meta bar even mini-spaced-bar">
 						{canEdit() ? (
 							<button
-								className={`block ${
-									(suggestions && suggestions.length) || "disabled"
+								className={`small-button success-button ${
+									publishable || " disabled"
 								}`}
-								onClick={_ =>
-									openModal({
-										title: "Resolve Suggestions",
-										content: <ResolveSuggestions />,
-									})
-								}>
-								Pending ({suggestions ? suggestions.length : 0})
+								onClick={_ => publishable && changeDeck("published", true)}>
+								{published
+									? "Published"
+									: !upToDate
+									? "Save Changes First"
+									: canPublish(list, format)
+									? "Publish!"
+									: "Can't Publish"}
 							</button>
 						) : (
-							<div>
-								<button
-									className={canSuggest() || "disabled"}
-									onClick={_ =>
-										openModal({
-											title: "Leave a Suggestion",
-											content: <NewSuggestion />,
-										})
-									}>
-									{allow_suggestions >= 3 ? "Please, " : ""}Leave a Suggestion
-									{allow_suggestions >= 3 ? "!" : ""}
-								</button>
-								{!canSuggest() && !canEdit() && allow_suggestions > 1 ? (
-									<p className="asterisk">*Log in to make suggestions</p>
-								) : null}
+							<h4>{published ? "Published" : "Draft"}</h4>
+						)}
+
+						{canEdit() ? (
+							<BasicSearch
+								self={privacy}
+								options={["Public", "Unlisted", "Private"]}
+								callBack={p => changeDeck("privacy", p)}
+							/>
+						) : (
+							<div
+								className={`icon-${
+									privacy === "Private"
+										? "lock"
+										: privacy === "Unlisted"
+										? "link"
+										: "globe"
+								}`}>
+								{privacy}
 							</div>
 						)}
+						<div className="even bar icon-eye views">{views}</div>
+						<button
+							className={`small-button likes even bar icon-thumbs-up ${
+								canLike || "disabled"
+							} ${user.liked && user.liked.includes(_id) && "selected"}`}
+							onClick={giveLike}>
+							{likes}
+						</button>
 					</div>
 				</div>
 			</div>
 		)
 	}
 )
-
-const EditMarkDown = ({name, text, callBack}) => {
-	const [t, setT] = useState(text)
-
-	return (
-		<div className="col block">
-			<MdEditor
-				value={t}
-				style={{height: "20rem"}}
-				onChange={md => setT(md.text)}
-				renderHTML={md => <Markdown>{md}</Markdown>}
-			/>
-
-			<button
-				className={`mini-block success-button ${t === text && "disabled"}`}
-				onClick={_ => callBack(t)}>
-				Update {name}
-			</button>
-		</div>
-	)
-}

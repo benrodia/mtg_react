@@ -24,7 +24,10 @@ export default function BasicSelect({
 }) {
   const {titleCaps} = utilities
 
-  const label = item => (typeof labelBy === "function" ? labelBy(item) : item["name"]) || item.toString()
+  const label = item =>
+    (typeof labelBy === "function" && labelBy(item)) ||
+    item["name"] ||
+    item + ""
 
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
@@ -36,7 +39,7 @@ export default function BasicSelect({
   }
   useEffect(
     _ => {
-      setChoices(orderBy ? options.orderBy(orderBy) : options)
+      reset()
       return reset()
     },
     [options]
@@ -56,7 +59,7 @@ export default function BasicSelect({
         callBack && callBack(o)
         reset()
       }}>
-      {renderAs ? renderAs(o, i) : titleCaps(label(o))}
+      {renderAs ? renderAs(o, i) : label(o)}
     </div>
   ))
 
@@ -74,11 +77,13 @@ export default function BasicSelect({
           ? options
           : matchSorter(
               options.map(o => {
-                return {...o, label: label(o)}
+                return typeof o === "string"
+                  ? {label: label(o)}
+                  : {...o, label: label(o)}
               }),
               e.target.value,
               {keys: searchBy || ["label"]}
-            ).map(o => (string ? o.label : o))
+            ).map(o => (typeof options[0] === "string" ? o.label : o))
         setSearch(e.target.value)
         setChoices(sorted)
       }}
@@ -96,6 +101,7 @@ export default function BasicSelect({
       ${open ? "open" : ""} 
       ${className || ""}
       ${img ? "icon" : ""}
+       ${searchable && "searchable"}
     `}>
       {open ? (
         <div className="options">
@@ -103,9 +109,9 @@ export default function BasicSelect({
           {optionDivs}
         </div>
       ) : (
-        <div onClick={_ => setOpen(true)} className="select-collapsed">
+        <div onClick={_ => setOpen(true)} className={`select-collapsed`}>
           {defImg ? defImg : null}
-          {placeholder ? placeholder : titleCaps(self !== undefined ? label(self) : "")}
+          {placeholder ? placeholder : self !== undefined ? label(self) : ""}
         </div>
       )}
     </div>

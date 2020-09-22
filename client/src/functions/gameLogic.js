@@ -5,7 +5,10 @@ import {TUTOR, MANA, SAC_AS_COST} from "../constants/greps"
 import {audit} from "../functions/receiveCards"
 
 export function playLand(deck) {
-  return deck.filter(c => c.zone === "Hand" && c.type_line.includes("Land"))[0] || false
+  return (
+    deck.filter(c => c.zone === "Hand" && c.type_line.includes("Land"))[0] ||
+    false
+  )
 }
 
 export function getColorIdentity(list, key) {
@@ -20,7 +23,7 @@ export function getColorIdentity(list, key) {
   return colors
 }
 
-export const chooseCommander = (card, list, legalCards) => {
+export const chooseCommander = (card, list) => {
   const commanders = list.filter(c => c.commander)
   const partners =
     commanders.length &&
@@ -31,20 +34,28 @@ export const chooseCommander = (card, list, legalCards) => {
   const add = card => {
     list = [
       ...list,
-      {...audit(card), commander: true, board: MAIN_BOARD, key: "CardID__" + uuidv4(), customField: "unsorted"},
+      {
+        ...audit(card),
+        commander: true,
+        board: MAIN_BOARD,
+        key: "CardID__" + uuidv4(),
+        customField: "unsorted",
+      },
     ]
   }
 
-  if (Q(card, "oracle_text", "Partner with")) {
-    const partnerName = card.oracle_text.substr(12, card.oracle_text.indexOf("(") - 12).trim()
-    if (list.filter(c => c.name === partnerName).length)
-      list = list.map(c => (c.name === partnerName ? {...c, commander: true} : c))
-    else {
-      list = list.filter(c => !c.commander)
-      add(legalCards.filter(c => c.name === partnerName)[0])
-    }
-  } else if (!partners) list = list.filter(c => !c.commander)
-  else if (commanders.length > 1) list = list.filter(c => c.key !== commanders[0].key)
+  // if (Q(card, "oracle_text", "Partner with")) {
+  //   const partnerName = card.oracle_text.substr(12, card.oracle_text.indexOf("(") - 12).trim()
+  //   if (list.filter(c => c.name === partnerName).length)
+  //     list = list.map(c => (c.name === partnerName ? {...c, commander: true} : c))
+  //   else {
+  //     list = list.filter(c => !c.commander)
+  //     add(legalCards.filter(c => c.name === partnerName)[0])
+  //   }
+  // }
+  if (!partners) list = list.filter(c => !c.commander)
+  else if (commanders.length > 1)
+    list = list.filter(c => c.key !== commanders[0].key)
   add(card)
   return list
 }
@@ -52,13 +63,19 @@ export const chooseCommander = (card, list, legalCards) => {
 export function legalCommanders(format, legalCards) {
   let legalCommanders = []
   if (format === "commander" && legalCards.length) {
-    legalCommanders = Q(legalCards, "type_line", ["Legendary", "Creature"], true).concat(
-      Q(legalCards, "oracle_text", "can be your commander")
-    )
+    legalCommanders = Q(
+      legalCards,
+      "type_line",
+      ["Legendary", "Creature"],
+      true
+    ).concat(Q(legalCards, "oracle_text", "can be your commander"))
   } else if (format === "brawl" && legalCards.length) {
-    legalCommanders = Q(legalCards, "type_line", ["Legendary", "Creature"], true).concat(
-      Q(legalCards, "type_line", "Planeswalker")
-    )
+    legalCommanders = Q(
+      legalCards,
+      "type_line",
+      ["Legendary", "Creature"],
+      true
+    ).concat(Q(legalCards, "type_line", "Planeswalker"))
   }
   return legalCommanders
 }
@@ -78,7 +95,10 @@ export function tutorableCards(card, deck) {
       )
     dest = ZONES.filter(z => searchText.includes(z.toLowerCase()))[0]
 
-    const searchForType = [...COLORS("basic"), ...CARD_TYPES.map(C => (C === "Land" ? "Basic" : C))]
+    const searchForType = [
+      ...COLORS("basic"),
+      ...CARD_TYPES.map(C => (C === "Land" ? "Basic" : C)),
+    ]
 
     if (Q(card, ...SAC_AS_COST(card.name))) sac = true
 

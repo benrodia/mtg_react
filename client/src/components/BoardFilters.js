@@ -17,6 +17,7 @@ const {
 	MAIN_BOARD,
 	rem,
 	titleCaps,
+	canEdit,
 } = utilities
 
 export default connect(
@@ -33,6 +34,7 @@ export default connect(
 	actions
 )(
 	({
+		minified,
 		offset,
 		list,
 		format,
@@ -49,7 +51,6 @@ export default connect(
 		changeCard,
 		addCard,
 	}) => {
-		const canEdit = _id === author && isAuthenticated
 		return (
 			<Sticky offset={offset}>
 				<div className="list-head">
@@ -68,53 +69,54 @@ export default connect(
 									<DropSlot
 										key={"board_header_" + B}
 										field={B}
-										accept={canEdit ? ItemTypes.CARD : "NULL"}
+										accept={canEdit() ? ItemTypes.CARD : "NULL"}
 										callBack={c =>
 											c.key ? changeCard(c, {board: B}) : addCard(c, B)
 										}>
-										{B}board
-										<span>
-											{" "}
-											(
-											<span style={{color: !legalAmt && "#f46"}}>
-												{cards.length}
-											</span>
-											)
+										{B}
+										{minified ? "" : "board"}:{" "}
+										<span style={{color: !legalAmt && "#f46"}}>
+											{cards.length}
 										</span>
 									</DropSlot>
 								</h2>
 							)
 						})}
 					</div>
-					<span className="view-options bar even">
-						<button
-							title={`View as ${
-								view === "list" ? "Bulleted List" : "Image Grid"
-							}`}
-							className={`small-button icon-th${
-								view === "list" ? "-list" : ""
-							}`}
-							onClick={_ =>
-								changeFilters("view", view === "list" ? "grid" : "list")
-							}>
-							{titleCaps(view)}
-						</button>
-						<BasicSearch
-							self={FILTER_TERMS.filter(f => f.name === sortBy)[0]}
-							defImg={<span className="icon-sort-alt-down" />}
-							options={FILTER_TERMS}
-							labelBy={"name"}
-							callBack={s => changeFilters("sortBy", s.name)}
-						/>
-						{sortBy !== "Custom" ? null : (
-							<EditableText
-								addable
-								value={{name: "New Field", key: "custom" + customFields.length}}
-								list={customFields}
-								callBack={n => changeFilters("customFields", n)}
+					{minified ? null : (
+						<span className="view-options bar even">
+							<button
+								title={`View as ${
+									view === "list" ? "Bulleted List" : "Image Grid"
+								}`}
+								className={`small-button icon-th${
+									view === "list" ? "-list" : ""
+								}`}
+								onClick={_ =>
+									changeFilters("view", view === "list" ? "grid" : "list")
+								}>
+								{titleCaps(view)}
+							</button>
+							<BasicSearch
+								self={FILTER_TERMS.filter(f => f.name === sortBy)[0]}
+								defImg={<span className="icon-sort-alt-down" />}
+								options={FILTER_TERMS}
+								labelBy={"name"}
+								callBack={s => changeFilters("sortBy", s.name)}
 							/>
-						)}
-					</span>
+							{sortBy !== "Custom" ? null : (
+								<EditableText
+									addable
+									value={{
+										name: "New Field",
+										key: "custom" + customFields.length,
+									}}
+									list={customFields}
+									callBack={n => changeFilters("customFields", n)}
+								/>
+							)}
+						</span>
+					)}
 				</div>
 			</Sticky>
 		)

@@ -32,23 +32,13 @@ const {
 } = utilities
 
 export default connect(
-	({
-		auth: {
-			user: {_id},
-			isAuthenticated,
-		},
-		filters,
-		main: {sets, legalCards},
-		deck: {list, format, author},
-	}) => {
+	({filters, main: {sets, legalCards}, deck: {list, format, author}}) => {
 		return {
 			sets,
 			legalCards,
 			...filters,
 			list,
 			format,
-			_id,
-			isAuthenticated,
 			author,
 		}
 	},
@@ -62,8 +52,6 @@ export default connect(
 		list,
 		format,
 		author,
-		_id,
-		isAuthenticated,
 		view,
 		sortBy,
 		focus,
@@ -158,7 +146,9 @@ export default connect(
 						<div className={`icon`} />{" "}
 						{pluralize("Commander", commanders.length)}
 					</h3>
-					{canEdit() ? <BasicSearch1 commander /> : null}
+					{canEdit() ? (
+						<BasicSearch1 commander callBack={c => chooseCommander(c, list)} />
+					) : null}
 					<div className={`grid-inner`}>
 						{renderCardStack(commanders, "Commander")}
 					</div>

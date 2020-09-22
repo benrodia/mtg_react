@@ -1,7 +1,12 @@
 import axios from "axios"
 import {v4 as uuidv4} from "uuid"
 import {paginate} from "./utility"
-import {COLORS, MAIN_BOARD, SIDE_BOARD} from "../constants/definitions"
+import {
+  CARD_TYPES,
+  COLORS,
+  MAIN_BOARD,
+  SIDE_BOARD,
+} from "../constants/definitions"
 import {MANA, NUM_FROM_WORD} from "../constants/greps"
 import {CONTROL_CARD} from "../constants/data"
 
@@ -144,4 +149,25 @@ export const TCGplayerMassEntryURL = list => {
     .map(l => `${l.length} ${l[0].name}`.replaceAll("/ /gi", "%20"))
     .join("||")
   return urlBase + listUrl
+}
+
+export async function getAllCardTypes() {
+  const supertypes = ["Basic", "Legendary", "Snow"]
+  const types = [
+    "creature",
+    "land",
+    "planeswalker",
+    "artifact",
+    "enchantment",
+    "spell",
+  ]
+  const all = Promise.all(
+    types.map(type =>
+      axios
+        .get(`https://api.scryfall.com/catalog/${type}-types`)
+        .then(res => res.data.data)
+    )
+  ).then(res => CARD_TYPES.concat(supertypes, ...res))
+
+  return all
 }
