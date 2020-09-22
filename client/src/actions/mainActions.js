@@ -5,21 +5,19 @@ import utilities from "../utilities"
 
 const {Q, isLegal, expandDeckData, getDecks} = utilities
 
-export const setPage = page => dispatch => {
-  dispatch({type: A.MAIN, key: "page", val: page})
-  dispatch({type: A.MAIN, key: "modal", val: null})
-}
-
-export const loadAppData = _ => dispatch => {
-  dispatch(getCardData())
-  dispatch(getSetData())
-  dispatch(getUsers())
-}
+// export const setPage = page => dispatch => {
+//   dispatch({type: A.MAIN, key: "page", val: page})
+//   dispatch({type: A.MAIN, key: "modal", val: null})
+// }
 
 export const getCardData = _ => dispatch => {
   axios
     .get(`https://api.scryfall.com/bulk-data/oracle_cards`)
-    .then(res => axios.get(res.data.download_uri).then(res => dispatch({type: A.MAIN, key: "cardData", val: res.data})))
+    .then(res =>
+      axios
+        .get(res.data.download_uri)
+        .then(res => dispatch({type: A.MAIN, key: "cardData", val: res.data}))
+    )
     .catch(err => console.log(err))
 }
 
@@ -31,16 +29,16 @@ export const getSetData = _ => dispatch => {
 }
 
 export const getLegalCards = (cards, format) => dispatch => {
-  const legal = cards.filter(c => isLegal(c, format, null) > 0)
-  dispatch({type: A.MAIN, key: "legalCards", val: legal})
+  // const legal = cards.filter(c => isLegal(c, format, null) > 0)
+  // dispatch({type: A.MAIN, key: "legalCards", val: legal})
 }
 
-export const getTokens = cards => dispatch =>
-  dispatch({
-    type: A.MAIN,
-    key: "tokens",
-    val: cards.filter(c => Q(c, "type_line", "Token")),
-  })
+// export const getTokens = cards => dispatch =>
+//   dispatch({
+//     type: A.MAIN,
+//     key: "tokens",
+//     val: cards.filter(c => Q(c, "type_line", "Token")),
+//   })
 
 export const getUsers = _ => dispatch => {
   axios
@@ -50,11 +48,15 @@ export const getUsers = _ => dispatch => {
 }
 
 export const loadDecks = val => (dispatch, getState) => {
-  axios.get("/api/decks").then(res => dispatch({type: A.MAIN, key: "decks", val: res.data}))
+  axios
+    .get("/api/decks")
+    .then(res => dispatch({type: A.MAIN, key: "decks", val: res.data}))
 }
 
-export const openModal = modal => dispatch => dispatch({type: A.MAIN, key: "modal", val: modal})
-export const newMsg = (message, type) => dispatch => dispatch({type: A.NEW_MSG, val: {key: uuidv4(), message, type}})
+export const openModal = modal => dispatch =>
+  dispatch({type: A.MAIN, key: "modal", val: modal})
+export const newMsg = (message, type) => dispatch =>
+  dispatch({type: A.NEW_MSG, val: {key: uuidv4(), message, type}})
 export const refreshData = _ => dispatch => {
   getDecks().then(res => dispatch(loadDecks(res)))
 }

@@ -45,6 +45,9 @@
 .hide {
 	opacity: 0;
 	pointer-events: none;
+	height: 0;
+	width: 0;
+	margin: 0;
 }
 
 .flex-row {
@@ -322,12 +325,14 @@
 	z-index: 1;
 }
 
+.fill .max,
 .max {
-	flex-grow: 1 !important;
+	flex: 1 0;
 }
 
+.fill .min,
 .min {
-	flex-shrink: 1 !important;
+	flex: 0 1;
 }
 
 .bar {

@@ -5,7 +5,7 @@
 // STYLES
 
 html {
-	font-size: 100%;
+	font-size: 90%;
 	color: @lightest;
 	background: @darker;
 	font-family: @para;
@@ -89,16 +89,14 @@ html {
 	}
 	.custom-select {
 		background: transparent;
-		height: 1.5rem;
 		&:hover .select-collapsed {
 			filter: brightness(0.8);
 			cursor: text;
 		}
 		.select-collapsed {
-			font-size: @small;
 			color: @light;
-			border-bottom: 1px solid @light;
-			padding: @thinnest;
+			padding: @thin;
+			font-size: 1rem;
 		}
 		.option a {
 			font-size: 1rem;
@@ -192,7 +190,6 @@ html {
 		}
 	}
 	.sub-msg {
-		padding-top: 1rem;
 		font-size: 1.5rem;
 	}
 }
@@ -220,62 +217,74 @@ html {
 }
 
 .custom-select {
-	height: 1.5rem;
 	width: 10rem;
+	min-height: 2rem;
 	border-radius: @thinnest;
-	// margin: 0 @thinnest;
 	background: @lightest;
 	cursor: pointer;
-
-	* {
-		box-shadow: none;
-	}
 
 	.set-symbol {
 		width: 1.5rem;
 		height: 1.5rem;
 		object-fit: contain;
 	}
+}
+.select-collapsed {
+	padding: @thin;
+	white-space: nowrap;
+	overflow: hidden;
+	color: @darkest;
+}
 
-	.select-collapsed {
-		padding: @thinner;
-		white-space: nowrap;
-		overflow: hidden;
-		color: @darkest;
+.options {
+	position: absolute;
+	z-index: 30;
+	width: auto;
+	max-height: 10rem;
+	overflow-y: auto;
+	overflow-x: hidden;
+	color: @darkest;
+	background: @lightest;
+	input {
+		box-shadow: inset 0 0 @thinner rgba(0, 0, 0, 0.3);
+		margin: 0;
+		font-size: 1rem;
+		padding: @thin;
+		border-radius: 0;
 	}
-	.options {
-		position: absolute;
-		z-index: 30;
-		width: auto;
-		max-height: 10rem;
-		overflow-y: auto;
-		overflow-x: hidden;
-		color: @darkest;
+	.option {
+		.flex-row();
+		justify-content: space-between;
+		width: 100%;
+		padding: @thinner;
 		background: @lightest;
-		.option {
-			.flex-row();
-			justify-content: space-between;
-			width: 100%;
-			padding: @thinner;
-			background: @lightest;
-			border-left: @thinner solid @highlight;
-			cursor: pointer;
-			transition: 0.2s;
+		border-left: @thinnest solid @highlight;
+		cursor: pointer;
+		transition: 0.2s;
 
-			&:hover {
-				background: @highlight;
-			}
-		}
-		.option.active {
+		&:hover {
 			background: @highlight;
 		}
-		.search-cards {
-			width: 20rem;
-			display: flex;
-			justify-content: flex-start;
-			.card-head {
-				background: transparent !important;
-			}
+	}
+	.option.active {
+		background: @highlight;
+	}
+	.search-cards {
+		width: 20rem;
+		display: flex;
+		justify-content: flex-start;
+		.card-head {
+			background: transparent !important;
+		}
+	}
+}
+
+.custom-select.searchable {
+	.select-collapsed {
+		box-shadow: inset 0 0 @thinner rgba(0, 0, 0, 0.3);
+		&:hover {
+			cursor: text;
+			color: @dark;
 		}
 	}
 }
@@ -294,6 +303,17 @@ html {
 	.select-collapsed {
 		padding: 1rem;
 		color: #888;
+	}
+}
+
+.custom-select.small {
+	width: 3rem;
+	min-height: 1.5rem;
+	.select-collapsed {
+		padding: @thinnest;
+	}
+	.options input {
+		padding: @thinnest;
 	}
 }
 

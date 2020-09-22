@@ -25,7 +25,10 @@ export const canSuggest = _ => {
 		deck: {author, helpWanted},
 		auth: {user, isAuthenticated},
 	} = store.getState()
-	return (isAuthenticated && user._id !== author && helpWanted > 1) || (helpWanted === 1 && areFriends(author))
+	return (
+		(isAuthenticated && user._id !== author && helpWanted > 1) ||
+		(helpWanted === 1 && areFriends(author))
+	)
 }
 export const areFriends = _id => {
 	const {
@@ -41,7 +44,9 @@ export const creator = _id => {
 		main: {users},
 	} = store.getState()
 
-	return _id ? users.filter(u => u._id === _id)[0] : users.filter(u => u._id === author)[0] || {}
+	return _id
+		? users.filter(u => u._id === _id)[0]
+		: users.filter(u => u._id === author)[0] || {}
 }
 
 export const config = getState => {
@@ -69,9 +74,14 @@ export const createSlug = (name = "", from) => {
 
 export const resetCache = _ => {
 	console.log("resetCache")
+	// localStorage.removeItem("user")
+	// localStorage.removeItem("token")
 	localStorage.removeItem("settings")
+	sessionStorage.removeItem("settings")
+	localStorage.removeItem("filters")
+	sessionStorage.removeItem("filters")
 	localStorage.removeItem("deck")
-	localStorage.removeItem("user")
+	sessionStorage.removeItem("deck")
 	setTimeout(_ => window.location.reload(), 500)
 }
 
@@ -95,5 +105,7 @@ export const badPassword = (password = "") => {
 		? "Needs a special character"
 		: false
 
-	RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*d)(?=.*[$@$!%*?&])[A-Za-zd$@$!%*?&]{8,}").test(password)
+	RegExp(
+		"^(?=.*[a-z])(?=.*[A-Z])(?=.*d)(?=.*[$@$!%*?&])[A-Za-zd$@$!%*?&]{8,}"
+	).test(password)
 }

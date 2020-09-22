@@ -2,7 +2,9 @@ export const cache = (obj, key, val, session) => {
   let stored = session ? sessionStorage.getItem(obj) : localStorage.getItem(obj)
   stored = !stored || stored === "undefined" ? {} : JSON.parse(stored)
   const data = key === "all" ? {...stored, ...val} : {...stored, [key]: val}
-  session ? sessionStorage.setItem(obj, JSON.stringify(data)) : localStorage.setItem(obj, JSON.stringify(data))
+  session
+    ? sessionStorage.setItem(obj, JSON.stringify(data))
+    : localStorage.setItem(obj, JSON.stringify(data))
 }
 
 export const loadCache = (key, init = {}, session, clear) => {
@@ -11,14 +13,19 @@ export const loadCache = (key, init = {}, session, clear) => {
   return clear ? init : Object.assign(init, data)
 }
 
-export const sum = nums => (!nums || !nums.length ? 0 : nums.reduce((a, b) => Number(a) + Number(b), 0))
+export const sum = nums =>
+  !nums || !nums.length ? 0 : nums.reduce((a, b) => Number(a) + Number(b), 0)
 
 export const average = nums => nums.reduce((a, b) => a + b, 0) / nums.length
 
 export const rem = (num = 1) =>
-  num * parseFloat(window.getComputedStyle(document.getElementsByTagName("html")[0]).fontSize || 16)
+  num *
+  parseFloat(
+    window.getComputedStyle(document.getElementsByTagName("html")[0])
+      .fontSize || 16
+  )
 
-export const rnd = (arr, num) => {
+export const rnd = (arr = [], num = 0) => {
   if (typeof arr === "number") return Math.floor(Math.random() * arr)
   const rand = _ => arr[Math.floor(Math.random() * arr.length)]
   if (!num) return rand()
@@ -26,7 +33,9 @@ export const rnd = (arr, num) => {
 }
 
 export const paginate = (arr = [], per = 1) =>
-  [...Array(Math.ceil(arr.length / per) || 1)].map((_, i) => arr.slice(per * i, per * i + per))
+  [...Array(Math.ceil(arr.length / per) || 1)].map((_, i) =>
+    arr.slice(per * i, per * i + per)
+  )
 
 export const timestamp = _ => {
   const today = new Date()
@@ -85,9 +94,11 @@ Array.prototype.shuffle = function () {
   return cards
 }
 
-Array.prototype.orderBy = function (key) {
+Array.prototype.orderBy = function (key, asc) {
+  if (!this || !this.length) return []
   return this.sort((a, b) => (a[key] > b[key] ? 1 : -1))
 }
+// (asc ? -1 : 1)
 
 Array.prototype.unique = function (key) {
   let b = []

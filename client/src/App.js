@@ -13,22 +13,36 @@ import Footer from "./components/Footer"
 import Dash from "./components/_Page_Dash"
 import User from "./components/_Page_User"
 import Deck from "./components/_Page_Deck"
+import Build from "./components/_Page_Build"
 import Playtest from "./components/_Page_Playtest"
 
 const {HOME_DIR, DECK_ID, rnd, getArt} = utilities
 export default connect(
-  ({main: {modal, cardData, legalCards, tokens, refresh}, deck: {format}, settings: {scale, random_playmat}}) => {
-    return {modal, cardData, legalCards, tokens, refresh, format, scale, random_playmat}
+  ({
+    main: {modal, legalCards, tokens, refresh},
+    deck: {format},
+    settings: {scale, random_playmat, playmat},
+  }) => {
+    return {
+      modal,
+      legalCards,
+      tokens,
+      refresh,
+      format,
+      scale,
+      random_playmat,
+      playmat,
+    }
   },
   actions
 )(
   ({
     modal,
-    cardData,
     legalCards,
     refresh,
     scale,
     random_playmat,
+    playmat,
     format,
     tokens,
     loadAppData,
@@ -41,37 +55,25 @@ export default connect(
     getSetData,
     getUsers,
   }) => {
-    useEffect(
-      _ => {
-        if (cardData.length) {
-          !tokens.length && getTokens(cardData)
-          !legalCards.length && getLegalCards(cardData, format)
-          random_playmat && changeSettings("playmat", rnd(getArt(cardData)).image)
-          loadDecks()
-        } else {
-          getCardData()
-          getSetData()
-          getUsers()
-        }
-      },
-      [cardData]
-    )
+    useEffect(_ => {
+      random_playmat && getArt().then(art => changeSettings("playmat", art))
+      loadDecks()
+      getUsers()
+      getSetData()
+    }, [])
     const {pathname} = useLocation()
 
     const routes = (
       <Switch>
-        <Route exact path={HOME_DIR}>
-          <Dash />
-        </Route>
-        <Route exact path={`${HOME_DIR}/deck/:slug`}>
-          <Deck />
-        </Route>
-        <Route exact path={`${HOME_DIR}/deck/:slug/playtest`}>
-          <Playtest />
-        </Route>
-        <Route exact path={`${HOME_DIR}/user/:slug`}>
-          <User />
-        </Route>
+        <Route exact path={HOME_DIR} component={Dash} />
+        <Route exact path={`${HOME_DIR}/build`} component={Build} />
+        <Route exact path={`${HOME_DIR}/deck/:slug`} component={Deck} />
+        <Route
+          exact
+          path={`${HOME_DIR}/deck/:slug/playtest`}
+          component={Playtest}
+        />
+        <Route exact path={`${HOME_DIR}/user/:slug`} component={User} />
         <Route>
           <Redirect to={HOME_DIR} />
         </Route>
@@ -80,12 +82,14 @@ export default connect(
 
     return (
       <>
-        <div className="wrapper" style={{fontSize: scale + "%", overflowY: modal && "hidden"}}>
+        <div
+          className="wrapper"
+          style={{fontSize: scale + "%", overflowY: modal && "hidden"}}>
           <Nav />
           <BGImg />
           <Notifications />
           <Modal />
-          {cardData.length ? routes : <Loading full message="Loading card data..." />}
+          {routes}
         </div>
         {pathname.includes("playtest") ? null : <Footer />}
       </>

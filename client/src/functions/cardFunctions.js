@@ -1,5 +1,12 @@
+import axios from "axios"
 import {CARD_TYPES, MAIN_BOARD, ZONES, COLORS} from "../constants/definitions"
-import {SINGLETON, NO_QUANT_LIMIT, MANA, NUM_FROM_WORD} from "../constants/greps"
+import {advancedFields, illegalLayouts} from "../constants/data"
+import {
+  SINGLETON,
+  NO_QUANT_LIMIT,
+  MANA,
+  NUM_FROM_WORD,
+} from "../constants/greps"
 import {matchStr} from "../functions/utility"
 import {audit, itemizeDeckList} from "../functions/receiveCards"
 
@@ -58,40 +65,83 @@ export function normalizePos(deck) {
 }
 
 export function isLegal(card = {legalities: {}}, format = "", deckIdentity) {
-  let allowed = card.legalities[format] === "legal" ? 4 : card.legalities[format] === "restricted" ? 1 : 0
+  let allowed =
+    card.legalities[format] === "legal" ||
+    !card.legalities[format] ||
+    format === "casual"
+      ? 4
+      : card.legalities[format] === "restricted" || SINGLETON(format)
+      ? 1
+      : 0
 
-  if (SINGLETON(format)) allowed = 1
-  if (format === "casual") allowed = 4
-  if (Q(card, "type_line", ["Token", "Scheme", "Plane "])) allowed = 0
-  if (NO_QUANT_LIMIT(card)) allowed = 1000000
-  if (card.name === "Seven Dwarves") allowed = 7
-
-  // if (
-  //   card.color_identity &&
-  //   deckIdentity &&
-  //   deckIdentity.length &&
-  //   !card.color_identity.every(ci => deckIdentity.includes(ci))
-  // ) allowed = 0
-
+  if (
+    Q(card, "layout", illegalLayouts) ||
+    Q(card, "border_color", ["Silver", "Gold"]) ||
+    card.set_type === "funny"
+  )
+    allowed = 0
+  else if (NO_QUANT_LIMIT(card)) allowed = 1000
+  else if (card.name === "Seven Dwarves") allowed = 7
   return allowed
 }
 
-export function filterColors(options, colorFilter, all, only) {
-  const colorsF = COLORS("symbol").filter((co, i) => colorFilter[i])
+export function filterColors(options, {terms}) {
+  const clr = o =>
+    terms.filter(f => f.trait === "color" && f.op === o).map(cl => cl.val)
   const filtered = options.filter(c => {
-    const colorsC = (c.colors || []).length ? c.colors : ["C"]
+    const test = (c, clr) =>
+      c.colors.includes(clr) || (clr === "C" && !c.colors.length)
+
     return (
-      (all ? colorsF.every(co => colorsC.includes(co)) : colorsF.some(co => colorsC.includes(co))) &&
-      (!only ||
-        !colorsC.some(C =>
-          COLORS("symbol")
-            .filter(co => !colorsF.includes(co))
-            .includes(C)
-        ))
+      !clr("AND").length ||
+      (clr("AND").every(cl => test(cl)) &&
+        (!clr("OR").length || clr("OR").some(cl => test(cl))) &&
+        (!clr("NOT").length || !clr("NOT").every(cl => test(cl))))
     )
   })
+  return filtered
+}
 
-  console.log("filterSearch", options, filtered, "\ncolorFilter", colorFilter, "all", all, "only", only)
+export const filterNumeric = (card, key, op, val) => {
+  const cur = parseInt(card[key])
+  return op === ">"
+    ? cur > val
+    : op === "<"
+    ? cur < val
+    : op === "="
+    ? cur == val
+    : op === ">="
+    ? cur >= val
+    : op === "<="
+    ? cur <= val
+    : true
+}
+
+export const filterAdvanced = (cards, advanced) => {
+  if (!advanced) return cards
+  const {terms} = advanced
+  const fields = advancedFields.map(n => terms.filter(t => t.name === n.name))
+  const filtered = filterColors(cards, advanced).filter((c, ci) => {
+    const fmt = o => terms.filter(f => f.trait === "format" && f.op === o)
+
+    return (
+      isLegal(c) &&
+      (!fmt("AND").length || fmt("AND").every(f => isLegal(c, f.val))) &&
+      (!fmt("OR").length || fmt("OR").some(f => isLegal(c, f.val))) &&
+      (!fmt("NOT").length || !fmt("NOT").every(f => isLegal(c, f.val))) &&
+      fields.every((inField, i) => {
+        const ofOP = op => inField.filter(f => f.op === op).map(f => f.val)
+        const cur = advancedFields[i]
+        return cur.numeric
+          ? inField.every(({trait, op, val}) =>
+              filterNumeric(c, trait, op, val)
+            )
+          : (!ofOP("AND").length || Q(c, cur.trait, ofOP("AND"), true)) &&
+              (!ofOP("OR").length || Q(c, cur.trait, ofOP("OR"))) &&
+              (!ofOP("NOT").length || Q(c, cur.trait, ofOP("NOT"), false))
+      })
+    )
+  })
   return filtered
 }
 
@@ -110,7 +160,9 @@ export const optimizePrices = _ => {
 
 export const filterCardType = (list, category, val) =>
   list.filter(c => {
-    const cVal = category.subKey ? c[category.key][category.subKey] : c[category.key]
+    const cVal = category.subKey
+      ? c[category.key][category.subKey]
+      : c[category.key]
     return cVal === undefined
       ? false
       : !isNaN(parseFloat(cVal))
@@ -125,7 +177,9 @@ export const filterCardType = (list, category, val) =>
 export const canPublish = (list, format) => {
   const main = list.filter(c => c.board === MAIN_BOARD)
   const atLimit = !SINGLETON(format) ? main.length >= 60 : main.length === 100
-  const allLegal = !itemizeDeckList(main).filter(cards => cards.length > isLegal(cards[0], format)).length
+  const allLegal = !itemizeDeckList(main).filter(
+    cards => cards.length > isLegal(cards[0], format)
+  ).length
   return atLimit && allLegal
 }
 
@@ -133,12 +187,17 @@ export const listDiffs = (pre, post) => {
   const diffs = (a, b) => {
     const interp = itemizeDeckList(a, ["id"]).map(acs => {
       const card = acs[0]
-      const quantity = Math.abs(acs.length - b.filter(({id}) => id === card.id).length)
+      const quantity = Math.abs(
+        acs.length - b.filter(({id}) => id === card.id).length
+      )
       return {card, quantity}
     })
     let returned = []
     for (var i = 0; i < interp.length; i++)
-      returned = [...returned, ...[...Array(interp[i].quantity)].map(_ => interp[i].card)]
+      returned = [
+        ...returned,
+        ...[...Array(interp[i].quantity)].map(_ => interp[i].card),
+      ]
     return returned
   }
   const added = diffs(post, pre)
@@ -146,14 +205,9 @@ export const listDiffs = (pre, post) => {
   return {added, removed, changed: !!added.length || !!removed.length}
 }
 
-export const getArt = (cards, terms = {}) => {
-  const filters = Object.entries(terms)
-  let selection = cards
-  for (var i = 0; i < filters.length; i++) selection = Q(selection, ...filters[i])
-
-  return selection
-    .filter(s => !!s.highres_image && !!s.image_uris)
-    .map(c => {
-      return {artist: c.artist, image: c.image_uris.art_crop}
-    })
+export async function getArt(terms = {}) {
+  const art = await axios
+    .get(`https://api.scryfall.com/cards/random?q=is:highres+t:land`)
+    .then(res => res.data.image_uris.art_crop)
+  return art
 }

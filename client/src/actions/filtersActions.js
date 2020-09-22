@@ -11,12 +11,11 @@ export const changeFilters = (key, val) => dispatch => {
 	dispatch({type: A.FILTERS, key, val})
 }
 
-export const changeAdvanced = assign => dispatch =>
-	dispatch(
-		changeFilters("advanced", {
-			...Object.assign(store.getState().filters.advanced, assign),
-		})
-	)
+export const changeAdvanced = assign => dispatch => {
+	const {advanced} = store.getState().filters
+	assign.terms = assign.terms.unique("id")
+	dispatch(changeFilters("advanced", {...advanced, ...assign}))
+}
 // export const viewUser = user => dispatch => {
 // 	dispatch({type: A.FILTERS, key: "viewUser", val: user})
 // }

@@ -59,6 +59,27 @@ export default connect(
 			)
 		}
 
+		const welcome = (
+			<div className="block col center mini-spaced-col">
+				<div className="bar even mini-spaced-bar center">
+					<h2>{greeting},</h2>
+					{isAuthenticated ? (
+						<Link to={`${HOME_DIR}/user/${slug}`}>
+							<h2 className="inverse-button ">{name}</h2>
+						</Link>
+					) : (
+						<h2>Stranger</h2>
+					)}
+				</div>
+				<button
+					className="success-button new-deck bar even mini-spaced-bar"
+					onClick={_ => openModal({title: "New Deck", content: <NewDeck />})}>
+					<span className="icon-plus" />
+					<div>New Deck</div>
+				</button>
+			</div>
+		)
+
 		return (
 			<div className="dash">
 				<section className="hero">
@@ -90,26 +111,11 @@ export default connect(
 						</div>
 					)}
 				</section>
-				{!isAuthenticated ? null : (
+				{!isAuthenticated ? (
+					welcome
+				) : (
 					<DeckFeed direct={decks.filter(d => d.author === _id)}>
-						<div className="block">
-							<div className="bar even spaced-bar">
-								<div className="bar even mini-spaced-bar center">
-									<h2>{greeting},</h2>
-									<Link to={`${HOME_DIR}/user/${slug}`}>
-										<h2 className="inverse-button ">{name}</h2>
-									</Link>
-								</div>
-								<button
-									className="success-button new-deck bar even mini-spaced-bar"
-									onClick={_ =>
-										openModal({title: "New Deck", content: <NewDeck />})
-									}>
-									<span className="icon-plus" />
-									<div>New Deck</div>
-								</button>
-							</div>
-						</div>
+						{welcome}
 					</DeckFeed>
 				)}
 				<DeckFeed flags={flags}>

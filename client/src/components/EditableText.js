@@ -1,7 +1,17 @@
 import React, {useState, useEffect} from "react"
 import {v4 as uuidv4} from "uuid"
 
-export default ({addable, removable, changeable, text, list, callBack, filters, children, area}) => {
+export default ({
+	addable,
+	removable,
+	changeable,
+	text,
+	list,
+	callBack,
+	filters,
+	children,
+	area,
+}) => {
 	const [input, setInput] = useState(addable ? "" : text || "")
 	const [edit, isEditing] = useState(addable)
 
@@ -24,7 +34,7 @@ export default ({addable, removable, changeable, text, list, callBack, filters, 
 	return (
 		<div className="bar even">
 			{!edit ? (
-				<div>{children}</div>
+				<div onClick={changeable && change}>{children}</div>
 			) : area ? (
 				<textarea
 					id={uuidv4()}
@@ -50,8 +60,15 @@ export default ({addable, removable, changeable, text, list, callBack, filters, 
 					onChange={e => setInput(e.target.value)}
 				/>
 			)}
-			{!addable ? null : <button className={`success-button icon-plus ${!canAdd && "disabled"}`} onClick={add} />}
-			{!changeable ? null : <span className="clicky-icon icon-pencil" onClick={change} />}
+			{!addable ? null : (
+				<button
+					className={`success-button icon-plus ${!canAdd && "disabled"}`}
+					onClick={add}
+				/>
+			)}
+			{!changeable ? null : (
+				<span className="clicky-icon icon-pencil" onClick={change} />
+			)}
 			{!removable ? null : (
 				<span className="icon-cancel" onClick={remove}>
 					X
