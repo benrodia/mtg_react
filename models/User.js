@@ -54,6 +54,10 @@ module.exports = User = mongoose.model(
 			type: Array,
 			default: [],
 		},
+		folders: {
+			type: Array,
+			default: [],
+		},
 		goodies: {
 			type: Object,
 			default: {
@@ -66,13 +70,24 @@ module.exports = User = mongoose.model(
 		settings: {
 			type: Object,
 			default: {
-				scale: 100,
-				darken: 70,
-				game_log: true,
-				playmat: "",
-				random_playmat: true,
-				use_stack: ["Action", "Spell", "Activated Ability", "Triggered Ability"],
-				mana_tolerance: 3,
+				scale: {
+					type: Number,
+					default: 100,
+				},
+				darken: {type: Number, default: 70},
+				game_log: {type: Boolean, default: true},
+				playmat: {type: String, default: ""},
+				random_playmat: {type: Boolean, default: true},
+				use_stack: {
+					type: Array,
+					default: [
+						"Action",
+						"Spell",
+						"Activated Ability",
+						"Triggered Ability",
+					],
+				},
+				mana_tolerance: {type: Number, default: 3},
 			},
 		},
 	})

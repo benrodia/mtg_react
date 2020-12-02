@@ -42,9 +42,12 @@
 
 // // MIXINS
 
-.hide {
+.invisible {
 	opacity: 0;
 	pointer-events: none;
+}
+.hide {
+	.invisible();
 	height: 0;
 	width: 0;
 	margin: 0;

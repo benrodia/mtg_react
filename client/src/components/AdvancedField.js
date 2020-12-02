@@ -8,28 +8,23 @@ import utilities from "../utilities"
 
 import BasicSearch from "./BasicSearch"
 const {
-	BOARDS,
 	COLORS,
-	INIT_ADVANCED_STATE,
-	FORMATS,
-	ADVANCED_GREPS,
 	OPs,
-	formatText,
 	formatManaSymbols,
-	filterColors,
-	audit,
-	Q,
 	rnd,
-	sum,
-	titleCaps,
-	paginate,
 	advancedFields,
-	filterAdvanced,
 	getAllCardTypes,
 } = utilities
 export default connect(
-	({main: {cardData}, filters: {board, advanced}, deck: {list, format}}) => {
-		return {cardData, board, advanced, list, format}
+	({
+		main: {cardData},
+		filters: {
+			board,
+			advanced: {terms},
+		},
+		deck: {list, format},
+	}) => {
+		return {cardData, board, terms, list, format}
 	},
 	actions
 )(
@@ -38,15 +33,14 @@ export default connect(
 		list,
 		format,
 		cardData,
-		advanced,
+		terms,
 		changeAdvanced,
 		openModal,
 		newMsg,
 	}) => {
-		const {terms} = advanced
-
 		const {name, trait, options, numeric, colored} = advancedFields[index] || {}
 
+		const [ex, setEx] = useState(numeric ? "" : `Filter Card ${name}`)
 		const [op, setOp] = useState(OPs(numeric)[0])
 		const [focused, setFocused] = useState(false)
 		const [input, setInput] = useState(numeric ? 0 : colored ? [] : "")
@@ -83,8 +77,9 @@ export default connect(
 
 		useEffect(
 			_ => {
-				const keyEvent = e => e.code === "En1r" && focused && submit()
+				const keyEvent = e => e.code === "Enter" && focused && submit()
 
+				window.removeEventListener("keydown", keyEvent)
 				window.addEventListener("keydown", keyEvent)
 				return _ => window.removeEventListener("keydown", keyEvent)
 			},
@@ -99,7 +94,7 @@ export default connect(
 					type={numeric ? "number" : "text"}
 					value={input}
 					onChange={e => setInput(e.target.value)}
-					placeholder={numeric ? "" : `Filter Card ${name}`}
+					placeholder={ex}
 				/>
 				<button
 					className={`icon-plus success-button ${

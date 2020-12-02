@@ -28,7 +28,7 @@ html {
 }
 
 .wrapper {
-	padding-top: @headerH;
+	// padding-top: @headerH;
 	min-height: 100vh;
 	position: relative;
 	overflow-x: hidden;
@@ -41,8 +41,8 @@ html {
 
 .bg-img {
 	.fixed-full-page();
-	height: calc(100vh - @headerH);
-	top: @headerH;
+	// height: calc(100vh - @headerH);
+	// top: @headerH;
 	z-index: -1;
 
 	.playmat {
@@ -63,9 +63,9 @@ html {
 }
 
 .main-header {
-	.fixed-full-page();
-	height: @headerH;
-	z-index: 150;
+	// .fixed-full-page();
+	// height: @headerH;
+	// z-index: 150;
 	.flex-centered();
 	justify-content: space-between;
 	background: @darkest;
@@ -75,7 +75,8 @@ html {
 	font-family: @header;
 	.title {
 		.flex-centered();
-		justify-content: flex-start;
+		width: 100%;
+		justify-content: space-between;
 		font-family: @header;
 
 		a {
@@ -330,5 +331,32 @@ html {
 	.inverse-button {
 		font-weight: normal;
 		margin-bottom: @thin;
+	}
+}
+
+.hamburger-cont {
+	.toggle {
+		cursor: pointer;
+		&:hover {
+			filter: brightness(0.7);
+		}
+	}
+	.inner {
+		.flex-col();
+		min-width: 12rem;
+		transition: 0.2s;
+		padding: @thinner;
+		position: absolute;
+		background: @dark;
+		opacity: 1;
+		transform: scale(1);
+		& > * {
+			width: 100%;
+		}
+	}
+	.inner:not(.open) {
+		opacity: 0;
+		transform: scale(0);
+		padding: 0;
 	}
 }

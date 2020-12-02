@@ -6,6 +6,7 @@ import utilities from "../utilities"
 export default function BasicSelect({
   img,
   self,
+  autoCompleteCards,
   className,
   searchBy,
   string,
@@ -40,7 +41,7 @@ export default function BasicSelect({
   useEffect(
     _ => {
       reset()
-      return reset()
+      return _ => reset()
     },
     [options]
   )

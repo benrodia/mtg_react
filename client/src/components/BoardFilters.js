@@ -89,14 +89,11 @@ export default connect(
 								title={`View as ${
 									view === "list" ? "Bulleted List" : "Image Grid"
 								}`}
-								className={`small-button icon-th${
-									view === "list" ? "-list" : ""
-								}`}
+								className={`icon-view-mode ${view === "list" ? "-list" : ""}`}
 								onClick={_ =>
 									changeFilters("view", view === "list" ? "grid" : "list")
-								}>
-								{titleCaps(view)}
-							</button>
+								}
+							/>
 							<BasicSearch
 								self={FILTER_TERMS.filter(f => f.name === sortBy)[0]}
 								defImg={<span className="icon-sort-alt-down" />}

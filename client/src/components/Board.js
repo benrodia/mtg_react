@@ -32,7 +32,11 @@ const {
 } = utilities
 
 export default connect(
-	({filters, main: {sets, legalCards}, deck: {list, format, author}}) => {
+	({
+		filters,
+		main: {sets, legalCards},
+		deck: {list, format, author, editing, unsaved},
+	}) => {
 		return {
 			sets,
 			legalCards,
@@ -40,6 +44,8 @@ export default connect(
 			list,
 			format,
 			author,
+			editing,
+			unsaved,
 		}
 	},
 	actions
@@ -52,6 +58,8 @@ export default connect(
 		list,
 		format,
 		author,
+		editing,
+		unsaved,
 		view,
 		sortBy,
 		focus,
@@ -87,9 +95,7 @@ export default connect(
 					b => !filteredCards.filter(c => c.key === b.key).length
 				)
 
-				const cardStacks = itemizeDeckList(filteredCards, ["name"]).orderBy(
-					"name"
-				)
+				const cardStacks = itemizeDeckList(filteredCards).orderBy("name")
 				const valName =
 					(category.valNames && category.valNames[ind]) || val.toString()
 
@@ -142,16 +148,26 @@ export default connect(
 			}
 			const commandHeader = (
 				<div className={`Commander-list list grid-view`}>
-					<h3>
-						<div className={`icon`} />{" "}
-						{pluralize("Commander", commanders.length)}
-					</h3>
-					{canEdit() ? (
-						<BasicSearch1 commander callBack={c => chooseCommander(c, list)} />
-					) : null}
-					<div className={`grid-inner`}>
-						{renderCardStack(commanders, "Commander")}
-					</div>
+					<DropSlot
+						field={"Command"}
+						accept={ItemTypes.CARD}
+						callBack={c => chooseCommander(c, list)}>
+						<h3>
+							<div className={`icon`} />
+							Commander {commanders.length > 1 ? "s" : ""}
+						</h3>
+						<div className={`grid-inner`}>
+							{commanders.length ? (
+								renderCardStack(commanders, "Commander")
+							) : (
+								<Loading
+									anim={"none"}
+									spinner={" "}
+									subMessage={"No Commander Chosen"}
+								/>
+							)}
+						</div>
+					</DropSlot>
 				</div>
 			)
 
@@ -168,94 +184,104 @@ export default connect(
 			if (!cards[0]) return null
 			const legal = isLegal(cards[0], format)
 			const numOfSets = itemizeDeckList(cards, ["set_name"])
-			return (
-				<div key={board + cards[0].key} className={`of-name`}>
-					{numOfSets.map(cardsOfSet =>
-						cardsOfSet.map((card, cardInd) => {
-							const setLogo = (
-								<Icon
-									name={card.set_name}
-									className={`${card.rarity} ${canEdit() ? "clicky-icon" : ""}`}
-									loader={card.set}
-									src={
-										!sets.length
-											? null
-											: (sets.filter(s => s.name === card.set_name)[0] || {})
-													.icon_svg_uri
-									}
-								/>
-							)
-							const controls = (
-								<>
-									<div
-										className={`quantity ${
-											view === "list" && cardInd !== 0 ? "hide" : ""
-										}`}>
-										<span
-											className={`icon-plus ${
-												cards.length >= legal ? "disabled" : ""
-											}`}
-											onClick={_ => addCard(card, board)}
-										/>
-										/
-										<span
-											className="icon-minus"
-											onClick={_ => addCard(card, board, true)}
-										/>
-									</div>
-									<span
-										onClick={_ =>
-											openModal({
-												title: "Change Printing",
-												content: <PrintSelector change card={card} />,
-											})
-										}>
-										{view === "list" || card.commander ? (
-											setLogo
-										) : (
-											<button>
-												{setLogo} {card.set_name}
-											</button>
-										)}
-									</span>
-								</>
-							)
-							return (
-								<CardControls
-									options={"Move"}
-									inArea={inBoard}
-									key={card.key}
-									card={card}
-									itemType={
-										card.commander ? ItemTypes.COMMANDER : ItemTypes.CARD
-									}
-									imgSize="small"
-									classes={`
+
+			const renderedCard = ({card, cardInd, cardsOfSet}) => {
+				const setLogo = (
+					<Icon
+						name={card.set_name}
+						className={`${card.rarity} ${editing ? "clicky-icon" : ""}`}
+						loader={card.set}
+						src={
+							!sets.length
+								? null
+								: (sets.filter(s => s.name === card.set_name)[0] || {})
+										.icon_svg_uri
+						}
+					/>
+				)
+				const controls = (
+					<>
+						<div className={`quantity `}>
+							<span
+								className={`icon-plus ${
+									cards.length >= legal ? "disabled" : ""
+								} ${!cardInd || "invisible"}`}
+								onClick={_ => addCard(card, board)}
+							/>
+							<span
+								className="icon-minus"
+								onClick={_ => addCard(card, board, true)}
+							/>
+						</div>
+						<span
+							onClick={_ =>
+								openModal({
+									title: "Change Printing",
+									content: <PrintSelector change card={card} />,
+								})
+							}>
+							{view === "list" || card.commander ? (
+								setLogo
+							) : (
+								<button>
+									{setLogo} {card.set_name}
+								</button>
+							)}
+						</span>
+					</>
+				)
+				const quant = <h3 className="quant">{cards.length}x</h3>
+				const style = {
+					position: cardInd > 0 && view === "grid" && "absolute",
+					marginTop:
+						cardInd > 0 &&
+						view === "grid" &&
+						cardInd - cardsOfSet.length - 10 + "rem",
+					pointerEvents:
+						cardInd !== cardsOfSet.length - 1 && view === "grid" && "none",
+					marginBottom:
+						cardsOfSet.length > 1 &&
+						!cardInd &&
+						view === "grid" &&
+						cardsOfSet.length + "rem",
+				}
+				return (
+					<CardControls
+						options={"Move"}
+						key={card.key}
+						card={card}
+						itemType={
+							!editing
+								? "NA"
+								: card.commander
+								? ItemTypes.COMMANDER
+								: ItemTypes.CARD
+						}
+						imgSize="small"
+						classes={`
 										${cards.length > legal && cardInd >= legal && "illegal "} 
 										${Q(card, focus.key, focus.val) && "highlighted"}
 									`}
-									cardHeadOnly={view === "list" && !card.commander}
-									style={{
-										position: cardInd > 0 && view === "grid" && "absolute",
-										marginTop:
-											cardInd > 0 &&
-											view === "grid" &&
-											cardInd - cardsOfSet.length - 10 + "rem",
-										pointerEvents:
-											cardInd !== cardsOfSet.length - 1 &&
-											view === "grid" &&
-											"none",
-										marginBottom:
-											cardsOfSet.length > 1 &&
-											!cardInd &&
-											view === "grid" &&
-											cardsOfSet.length + "rem",
-									}}>
-									{canEdit() ? controls : view === "list" ? setLogo : null}
-								</CardControls>
-							)
-						})
-					)}
+						cardHeadOnly={view === "list" && !card.commander}
+						style={style}>
+						{editing ? controls : quant}
+					</CardControls>
+				)
+			}
+
+			return (
+				<div key={board + cards[0].key} className={`of-name`}>
+					{!(view === "grid" || editing)
+						? renderedCard({
+								card: cards[0],
+								cardInd: 0,
+								cardsOfSet: cards.length,
+						  })
+						: numOfSets.map(cardsOfSet =>
+								cardsOfSet.map((card, cardInd) =>
+									renderedCard({card, cardInd, cardsOfSet})
+								)
+						  )}
 				</div>
 			)
 		}

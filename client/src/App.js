@@ -1,20 +1,22 @@
-import React, {useEffect} from "react"
+import React, {useEffect, useRef} from "react"
 import {Route, Redirect, Switch, useLocation} from "react-router-dom"
 import {connect} from "react-redux"
 import actions from "./actions"
 import utilities from "./utilities"
 
-import Nav from "./components/Nav"
 import BGImg from "./components/BGImg"
 import Notifications from "./components/Notifications"
 import Modal from "./components/Modal"
 import Loading from "./components/Loading"
 import Footer from "./components/Footer"
+import Nav from "./components/Nav"
+
+import DeckNav from "./components/DeckNav"
 import Dash from "./components/_Page_Dash"
 import User from "./components/_Page_User"
-import Deck from "./components/_Page_Deck"
-import Build from "./components/_Page_Build"
-import Playtest from "./components/_Page_Playtest"
+import View from "./components/_Page_Deck_View"
+import Build from "./components/_Page_Deck_Build"
+import Playtest from "./components/_Page_Deck_Playtest"
 
 const {HOME_DIR, DECK_ID, rnd, getArt} = utilities
 export default connect(
@@ -54,25 +56,40 @@ export default connect(
     getCardData,
     getSetData,
     getUsers,
+    screenSize,
   }) => {
+    const wrapper = useRef(0)
+
+    useEffect(
+      _ => {
+        if (wrapper.current) {
+          console.log(wrapper.current)
+          screenSize(wrapper.current.clientWidth)
+        }
+      },
+      [wrapper.current]
+    )
+
     useEffect(_ => {
       random_playmat && getArt().then(art => changeSettings("playmat", art))
       loadDecks()
       getUsers()
       getSetData()
     }, [])
-    const {pathname} = useLocation()
 
     const routes = (
       <Switch>
         <Route exact path={HOME_DIR} component={Dash} />
-        <Route exact path={`${HOME_DIR}/build`} component={Build} />
-        <Route exact path={`${HOME_DIR}/deck/:slug`} component={Deck} />
-        <Route
-          exact
-          path={`${HOME_DIR}/deck/:slug/playtest`}
-          component={Playtest}
-        />
+        <Route exact path={`${HOME_DIR}/advanced`} component={Build} />
+        <Route path={`${HOME_DIR}/deck`}>
+          <Route exact path={`${HOME_DIR}/deck/:slug`} component={View} />
+          <Route
+            exact
+            path={`${HOME_DIR}/deck/:slug/playtest`}
+            component={Playtest}
+          />
+        </Route>
+
         <Route exact path={`${HOME_DIR}/user/:slug`} component={User} />
         <Route>
           <Redirect to={HOME_DIR} />
@@ -83,6 +100,7 @@ export default connect(
     return (
       <>
         <div
+          ref={wrapper}
           className="wrapper"
           style={{fontSize: scale + "%", overflowY: modal && "hidden"}}>
           <Nav />
@@ -91,7 +109,7 @@ export default connect(
           <Modal />
           {routes}
         </div>
-        {pathname.includes("playtest") ? null : <Footer />}
+        {useLocation().pathname.includes("playtest") ? null : <Footer />}
       </>
     )
   }

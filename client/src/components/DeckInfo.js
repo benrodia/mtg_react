@@ -2,8 +2,12 @@ import React, {useState} from "react"
 import {Link} from "react-router-dom"
 import {connect} from "react-redux"
 import ago from "s-ago"
+import Markdown from "markdown-to-jsx"
+import "react-markdown-editor-lite/lib/index.css"
 import actions from "../actions"
 import utilities from "../utilities"
+
+import NewSuggestion from "./NewSuggestion"
 import BasicSearch from "./BasicSearch"
 import EditableText from "./EditableText"
 import Card from "./Card"
@@ -19,7 +23,9 @@ const {
 	formattedDate,
 	canPublish,
 	canEdit,
+	canSuggest,
 	creator,
+	helpTiers,
 	listDiffs,
 } = utilities
 
@@ -55,96 +61,29 @@ export default connect(
 		changeDeck,
 		giveLike,
 	}) => {
-		const featureImg =
-			feature || (list[0] && list[0].image_uris && list[0].image_uris.art_crop)
 		const canLike = isAuthenticated && author !== user._id
-		const pickFeatured = (
-			<div className="block mini-spaced-grid bar wrap">
-				{list.unique("id").map((c, i) => (
-					<div
-						key={c.id + i}
-						onClick={_ => {
-							openModal(null)
-							changeDeck("feature", c.image_uris.art_crop)
-						}}>
-						<Card card={c} />
-					</div>
-				))}
-			</div>
-		)
-		const upToDate = !listDiffs(preChanges, list).changed
-		const publishable = !published && upToDate && canPublish(list, format)
-
 		return (
-			<div className="info-readme bar even spaced-bar max">
-				<span
-					className="feature icon"
-					onClick={_ =>
-						canEdit() &&
-						openModal({title: "Featured Card", content: pickFeatured})
-					}>
-					{canEdit() ? (
-						<div className="change-img flex-centered">
-							<span>Change</span>
-						</div>
-					) : null}
-					<img src={featureImg} alt="" />
-				</span>
-				<div className="col">
-					<div className="name bar even spaced-bar">
-						<EditableText
-							changeable={canEdit()}
-							text={name}
-							callBack={({text, method}) =>
-								method === "change" && changeDeck("name", text)
-							}>
-							<h1>{name}</h1>
-						</EditableText>
-						{canEdit() ? (
-							<BasicSearch
-								options={FORMATS}
-								self={format}
-								callBack={f => changeDeck("format", f)}
-							/>
-						) : (
+			<div className="info-readme">
+				<div className="bar even spaced-bar max">
+					<span className="feature icon">
+						<img src={feature} alt="" />
+					</span>
+					<div className="col">
+						<div className="name bar even spaced-bar">
 							<h3 className="tag">{titleCaps(format)}</h3>
-						)}
-					</div>
-					<div className="mini-block bar even mini-spaced-bar">
-						<Link to={`${HOME_DIR}/user/${creator().slug}`}>
-							<h4 className="inverse-button ">{creator().name}</h4>
-						</Link>
-						<p className="asterisk">
-							Created {formattedDate(new Date(created))} - Updated{" "}
-							{ago(new Date(updated))}
-						</p>
-					</div>
-					<div className="meta bar even mini-spaced-bar">
-						{canEdit() ? (
-							<button
-								className={`small-button success-button ${
-									publishable || " disabled"
-								}`}
-								onClick={_ => publishable && changeDeck("published", true)}>
-								{published
-									? "Published"
-									: !upToDate
-									? "Save Changes First"
-									: canPublish(list, format)
-									? "Publish!"
-									: "Can't Publish"}
-							</button>
-						) : (
+						</div>
+						<div className="mini-block bar even mini-spaced-bar">
+							<Link to={`${HOME_DIR}/user/${creator().slug}`}>
+								<h4 className="inverse-button ">{creator().name}</h4>
+							</Link>
+							<p className="asterisk">
+								Created {formattedDate(new Date(created))} - Updated{" "}
+								{ago(new Date(updated))}
+							</p>
+						</div>
+						<div className="meta bar even mini-spaced-bar">
 							<h4>{published ? "Published" : "Draft"}</h4>
-						)}
 
-						{canEdit() ? (
-							<BasicSearch
-								self={privacy}
-								options={["Public", "Unlisted", "Private"]}
-								callBack={p => changeDeck("privacy", p)}
-							/>
-						) : (
 							<div
 								className={`icon-${
 									privacy === "Private"
@@ -155,15 +94,43 @@ export default connect(
 								}`}>
 								{privacy}
 							</div>
+							<div className="even bar icon-eye views">{views}</div>
+						</div>
+					</div>
+				</div>
+				<div className="block">
+					<div className="desc block">
+						<div className="block">
+							<Markdown>{desc}</Markdown>
+						</div>
+						{canEdit() ? null : (
+							<div className="bar even">
+								<button
+									className={`likes even bar icon-thumbs-up ${
+										canLike || "disabled"
+									} ${user.liked && user.liked.includes(_id) && "selected"}`}
+									onClick={giveLike}>
+									{likes}
+								</button>
+
+								<button
+									className={canSuggest() || "disabled"}
+									onClick={_ =>
+										openModal({
+											title: "Leave a Suggestion",
+											content: <NewSuggestion />,
+										})
+									}>
+									{allow_suggestions >= 3 ? "Please, " : ""}Leave a Suggestion
+									{allow_suggestions >= 3 ? "!" : ""}
+								</button>
+								{!canSuggest() && !canEdit() ? (
+									<p className="asterisk">
+										*Log in to like and suggest changes
+									</p>
+								) : null}
+							</div>
 						)}
-						<div className="even bar icon-eye views">{views}</div>
-						<button
-							className={`small-button likes even bar icon-thumbs-up ${
-								canLike || "disabled"
-							} ${user.liked && user.liked.includes(_id) && "selected"}`}
-							onClick={giveLike}>
-							{likes}
-						</button>
 					</div>
 				</div>
 			</div>

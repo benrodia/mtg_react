@@ -1,5 +1,9 @@
 export const cache = (obj, key, val, session) => {
-  let stored = session ? sessionStorage.getItem(obj) : localStorage.getItem(obj)
+  let stored = session
+    ? sessionStorage.getItem(obj)
+    : session === false
+    ? null
+    : localStorage.getItem(obj)
   stored = !stored || stored === "undefined" ? {} : JSON.parse(stored)
   const data = key === "all" ? {...stored, ...val} : {...stored, [key]: val}
   session
@@ -10,7 +14,7 @@ export const cache = (obj, key, val, session) => {
 export const loadCache = (key, init = {}, session, clear) => {
   let data = session ? sessionStorage.getItem(key) : localStorage.getItem(key)
   data = !data || data === "undefined" ? {} : JSON.parse(data)
-  return clear ? init : Object.assign(init, data)
+  return clear ? init : {...init, ...data}
 }
 
 export const sum = nums =>
@@ -61,8 +65,9 @@ export const formattedDate = date => {
   return month + "/" + day + "/" + year
 }
 
-export const matchStr = (text = "", searchWords = [], every = null) => {
-  text = text.toString()
+export const matchStr = (t = "", searchWords = [], every = null) => {
+  const rep = /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/
+  const text = ("" + t).replace(rep, "\\$&")
   return every === true
     ? searchWords.every(el => text.match(new RegExp(el, "i")))
     : every === false
@@ -96,9 +101,8 @@ Array.prototype.shuffle = function () {
 
 Array.prototype.orderBy = function (key, asc) {
   if (!this || !this.length) return []
-  return this.sort((a, b) => (a[key] > b[key] ? 1 : -1))
+  return this.sort((a, b) => (a[key] > b[key] ? (asc ? -1 : 1) : -1))
 }
-// (asc ? -1 : 1)
 
 Array.prototype.unique = function (key) {
   let b = []

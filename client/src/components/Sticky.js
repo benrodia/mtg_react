@@ -12,5 +12,7 @@ export default ({children, offset}) => {
 		[offset]
 	)
 
-	return React.cloneElement(children, {className: `${children.props.className} ${isSticky && "sticky"}`})
+	return React.cloneElement(children, {
+		className: `${children.props.className} ${isSticky && "sticky"}`,
+	})
 }

@@ -13,6 +13,7 @@ export default connect(
 	actions
 )(
 	({
+		context,
 		deck: {
 			_id,
 			author,
@@ -34,10 +35,12 @@ export default connect(
 				return {label: "", value: colors[i], color: color.fill}
 			})
 
-		return (
+		const deckLink = `${HOME_DIR}/deck/${slug}`
+
+		const full = (
 			<div key={_id} className={"deck-tile bar"}>
 				<div className="bar mini-spaced-bar">
-					<Link to={`${HOME_DIR}/deck/${slug}`}>
+					<Link to={deckLink}>
 						<span className="feature icon">
 							<div className="pie">
 								<PieChart data={colorData} startAngle={270} />
@@ -50,7 +53,7 @@ export default connect(
 						title={`${
 							helpWanted >= 3 ? "All Suggestions Welcome! Come on in!" : ""
 						}`}>
-						<Link to={`${HOME_DIR}/deck/${slug}`}>
+						<Link to={deckLink}>
 							<h3
 								className={`deck-title ${
 									helpWanted >= 3 && "icon-exclamation attention"
@@ -78,15 +81,10 @@ export default connect(
 					<Link to={`${HOME_DIR}/deck/${slug}/playtest`}>
 						<button className="small-button icon-play" title="Playtest Deck" />
 					</Link>
-					{!canEdit(author) ? null : (
-						<button
-							className="warning-button inverse-small-button icon-trash"
-							onClick={_ => deleteDeck(_id)}
-							title="Trash Deck"
-						/>
-					)}
 				</div>
 			</div>
 		)
+
+		return full
 	}
 )

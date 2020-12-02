@@ -1,12 +1,12 @@
-import React, {useState, useEffect} from "react"
+import React, { useState, useEffect } from "react"
 import utilities from "../utilities"
-import {connect} from "react-redux"
+import { connect } from "react-redux"
 import actions from "../actions"
 
-const {BOARDS, ZONES, formatText, formatManaSymbols, audit} = utilities
+const { BOARDS, ZONES, formatText, formatManaSymbols, audit } = utilities
 
-export default connect(({main: {page}, deck: {list}}) => {
-	return {page, list}
+export default connect(({ main: { page }, deck: { list } }) => {
+	return { page, list }
 }, actions)(
 	({
 		back,
@@ -25,10 +25,15 @@ export default connect(({main: {page}, deck: {list}}) => {
 		const [cooledDown, coolDown] = useState(true)
 		const [flipped, flip] = useState(false)
 
-		const {id, card_faces, rulings_uri, ind} = target
-		const {name, oracle_text, mana_cost, image_uris, type_line} = card_faces
-			? card_faces[flipped ? 1 : 0]
-			: target
+		const { id, card_faces, rulings_uri, ind } = target
+		const {
+			name,
+			oracle_text,
+			flavor_text,
+			mana_cost,
+			image_uris,
+			type_line,
+		} = card_faces ? card_faces[flipped ? 1 : 0] : target
 		console.log("inspect", card)
 		const shiftList = by => {
 			if (inArea && ind) {
@@ -99,7 +104,7 @@ export default connect(({main: {page}, deck: {list}}) => {
 								<button
 									key={B}
 									className="small-button"
-									onClick={_ => changeCard(card, {board: B})}>
+									onClick={_ => changeCard(card, { board: B })}>
 									{B} ({cards.length})
 								</button>
 							)
@@ -112,7 +117,7 @@ export default connect(({main: {page}, deck: {list}}) => {
 							<button
 								key={Z}
 								className="small-button"
-								onClick={_ => changeCard(card, {zone: Z})}>
+								onClick={_ => changeCard(card, { zone: Z })}>
 								{Z} (
 								{list.filter(l => l.name === card.name && l.zone === Z).length})
 							</button>
@@ -129,12 +134,12 @@ export default connect(({main: {page}, deck: {list}}) => {
 						onClick={_ => openModal(back || null)}
 					/>
 					<button
-						style={{display: !list && "none"}}
+						style={{ display: !list && "none" }}
 						onClick={_ => shiftList(-1)}>
 						{"<"}
 					</button>
 					<button
-						style={{display: !list && "none"}}
+						style={{ display: !list && "none" }}
 						onClick={_ => shiftList(1)}>
 						{">"}
 					</button>
@@ -149,11 +154,12 @@ export default connect(({main: {page}, deck: {list}}) => {
 				<div className="info">
 					<div className="text">
 						<div className="oracle-text">
-							<h3>
-								{type_line} {formatManaSymbols(mana_cost)}
-							</h3>
+							<h1>{formatText(name)}</h1>
+							{formatManaSymbols(mana_cost)}
+							<h3>{type_line}</h3>
 							<div className="mini-block thin-indent">
 								{formatText(oracle_text)}
+								<div className="asterisk">{formatText(flavor_text)}</div>
 							</div>
 						</div>
 						{!rulings.length ? null : (

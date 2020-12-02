@@ -64,6 +64,17 @@ export function normalizePos(deck) {
   return deck.filter(c => !(c.isToken && c.zone !== "Battlefield"))
 }
 
+export const validCardObjects = cards =>
+  cards.filter(
+    card =>
+      !(
+        Q(card, "layout", illegalLayouts) ||
+        Q(card, "border_color", ["Silver", "Gold"]) ||
+        card.set_type === "funny" ||
+        !Object.values(card.legalities).filter(le => le === "legal").length
+      )
+  )
+
 export function isLegal(card = {legalities: {}}, format = "", deckIdentity) {
   let allowed =
     card.legalities[format] === "legal" ||
@@ -74,32 +85,23 @@ export function isLegal(card = {legalities: {}}, format = "", deckIdentity) {
       ? 1
       : 0
 
-  if (
-    Q(card, "layout", illegalLayouts) ||
-    Q(card, "border_color", ["Silver", "Gold"]) ||
-    card.set_type === "funny"
-  )
-    allowed = 0
-  else if (NO_QUANT_LIMIT(card)) allowed = 1000
+  if (NO_QUANT_LIMIT(card)) allowed = 1000
   else if (card.name === "Seven Dwarves") allowed = 7
   return allowed
 }
 
-export function filterColors(options, {terms}) {
-  const clr = o =>
-    terms.filter(f => f.trait === "color" && f.op === o).map(cl => cl.val)
-  const filtered = options.filter(c => {
-    const test = (c, clr) =>
-      c.colors.includes(clr) || (clr === "C" && !c.colors.length)
-
-    return (
-      !clr("AND").length ||
-      (clr("AND").every(cl => test(cl)) &&
-        (!clr("OR").length || clr("OR").some(cl => test(cl))) &&
-        (!clr("NOT").length || !clr("NOT").every(cl => test(cl))))
+export function filterColors(c, terms) {
+  const ofOP = o => terms.filter(f => f.op === o).map(cl => cl.val)
+  const test = clr =>
+    ["colors", "color_identity"].every(
+      co => c[co] && (c[co].length ? c[co].includes(clr) : clr === "C")
     )
-  })
-  return filtered
+
+  return (
+    (!ofOP("AND").length || ofOP("AND").every(cl => test(cl))) &&
+    (!ofOP("OR").length || ofOP("OR").some(cl => test(cl))) &&
+    (!ofOP("NOT").length || !ofOP("NOT").some(cl => test(cl)))
+  )
 }
 
 export const filterNumeric = (card, key, op, val) => {
@@ -121,24 +123,36 @@ export const filterAdvanced = (cards, advanced) => {
   if (!advanced) return cards
   const {terms} = advanced
   const fields = advancedFields.map(n => terms.filter(t => t.name === n.name))
-  const filtered = filterColors(cards, advanced).filter((c, ci) => {
+  const filtered = cards.filter((c, ci) => {
     const fmt = o => terms.filter(f => f.trait === "format" && f.op === o)
 
     return (
       isLegal(c) &&
       (!fmt("AND").length || fmt("AND").every(f => isLegal(c, f.val))) &&
       (!fmt("OR").length || fmt("OR").some(f => isLegal(c, f.val))) &&
-      (!fmt("NOT").length || !fmt("NOT").every(f => isLegal(c, f.val))) &&
+      (!fmt("NOT").length || !fmt("NOT").some(f => isLegal(c, f.val))) &&
       fields.every((inField, i) => {
-        const ofOP = op => inField.filter(f => f.op === op).map(f => f.val)
+        const ofOP = op =>
+          inField
+            .filter(f => f.op === op)
+            .map(f => {
+              const val =
+                f.name === "Text" && f.val.includes("[CARDNAME]")
+                  ? c.name
+                  : f.val
+              return val
+            })
         const cur = advancedFields[i]
+
         return cur.numeric
           ? inField.every(({trait, op, val}) =>
               filterNumeric(c, trait, op, val)
             )
+          : cur.colored
+          ? filterColors(c, inField)
           : (!ofOP("AND").length || Q(c, cur.trait, ofOP("AND"), true)) &&
-              (!ofOP("OR").length || Q(c, cur.trait, ofOP("OR"))) &&
-              (!ofOP("NOT").length || Q(c, cur.trait, ofOP("NOT"), false))
+            (!ofOP("OR").length || Q(c, cur.trait, ofOP("OR"))) &&
+            (!ofOP("NOT").length || Q(c, cur.trait, ofOP("NOT"), false))
       })
     )
   })
@@ -208,6 +222,9 @@ export const listDiffs = (pre, post) => {
 export async function getArt(terms = {}) {
   const art = await axios
     .get(`https://api.scryfall.com/cards/random?q=is:highres+t:land`)
-    .then(res => res.data.image_uris.art_crop)
+    .then(({data}) => {
+      const {image_uris} = data.card_faces ? data.card_faces[0] : data
+      return image_uris.art_crop
+    })
   return art
 }

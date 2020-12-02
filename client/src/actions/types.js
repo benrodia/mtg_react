@@ -22,6 +22,7 @@ export const REFRESH = "REFRESH"
 export const DECK = "DECK"
 export const OPEN_DECK = "OPEN_DECK"
 export const SAVE_DECK = "SAVE_DECK"
+export const CHANGE_DECK = "CHANGE_DECK"
 
 // SETTINGS
 export const SETTINGS = "SETTINGS"

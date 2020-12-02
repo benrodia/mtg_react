@@ -115,8 +115,9 @@ export async function interpretForm(text = "") {
 }
 
 export const collapseDeckData = (list = []) =>
-  list.map(({id, board, commander}) => {
-    let c = {id, board}
+  list.map(({id, set, name, board, commander}) => {
+    let c = {id, set, name}
+    if (board !== MAIN_BOARD) c.board = board
     if (commander) c.commander = true
     return c
   })
@@ -136,7 +137,7 @@ export async function fetchCollection(list) {
   const fetched = list
     .map(({id, board, commander}) => {
       let m = gotten.filter(g => g.id === id)[0]
-      if (!!m) m = {...m, board, commander, key: uuidv4()}
+      if (!!m) m = {...m, board: board || MAIN_BOARD, commander, key: uuidv4()}
       return m
     })
     .filter(c => !!c)

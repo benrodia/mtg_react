@@ -36,9 +36,10 @@ export const illegalLayouts = [
 	"planar",
 	"emblem",
 	"vanguard",
+	"art_series",
 ]
 
-export const helpTiers = ["Off", "From Friends", "Allowed", "Wanted"]
+export const helpTiers = ["No", "From Friends", "Yes", "Wanted"]
 
 export const STACKTIONS = [
 	"Action",
@@ -51,20 +52,20 @@ export const OPs = numeric =>
 	numeric ? ["=", ">", "<", ">=", "<="] : ["AND", "OR", "NOT"]
 
 export const advancedFields = [
+	// {
+	// 	name: "Format",
+	// 	trait: "format",
+	// 	options: FORMATS,
+	// },
 	{
-		name: "Format",
-		trait: "format",
-		options: FORMATS,
+		name: "Name",
+		trait: "name",
 	},
 	{
 		name: "Colors",
 		trait: "colors",
 		colored: true,
 		options: COLORS("symbol"),
-	},
-	{
-		name: "Name",
-		trait: "name",
 	},
 	{
 		name: "Text",
@@ -325,8 +326,6 @@ export const SUB_BANNERS = [
 	"After 10,000 Years... It is here",
 	"Not what you hoped for, yet more than you ever dreamed",
 	"We're all happy campers",
-	"The newest phase in Web-Based-MTG-Deck-Building-and-Playtesting evolution",
-	"Effort Incarnate",
 	"Recruiting Everyone",
 	"Better Every Day",
 ]
@@ -351,14 +350,14 @@ export const EXAMPLE_DECK_DESCS = [
 
 const priceThresholds = [
 	{val: 2, label: "bulk"},
-	{val: 5, label: "$"},
-	{val: 15, label: "$$"},
-	{val: 25, label: "$$$"},
-	{val: 50, label: "$$$$"},
-	{val: 100, label: "$$$$$"},
-	{val: 300, label: "$$$$$$"},
-	{val: 600, label: "$$$$$$$"},
-	{val: 1000, label: "TOO MUCH"},
+	{val: 5, label: "< $2"},
+	{val: 15, label: "< $5"},
+	{val: 25, label: "< $15"},
+	{val: 50, label: "< $25"},
+	{val: 100, label: "< $50"},
+	{val: 300, label: "< $100"},
+	{val: 600, label: "< $300"},
+	{val: 1000, label: "BLOOD MONEY"},
 ]
 
 export const FILTER_TERMS = [

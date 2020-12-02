@@ -1,11 +1,22 @@
 import React, {useState} from "react"
+import {Link} from "react-router-dom"
 import {connect} from "react-redux"
 import actions from "../actions"
 import utilities from "../utilities"
 import Graph from "./Graph"
 import Sticky from "./Sticky"
+import DownloadFile from "./DownloadFile"
 
-const {Q, sum, average, titleCaps, TCGplayerMassEntryURL} = utilities
+const {
+	HOME_DIR,
+	Q,
+	sum,
+	average,
+	titleCaps,
+	TCGplayerMassEntryURL,
+	textList,
+	canEdit,
+} = utilities
 
 export default connect(
 	({
@@ -14,10 +25,10 @@ export default connect(
 			user: {_id},
 		},
 		main: {legalCards},
-		deck: {list, author},
+		deck: {list, author, clone},
 		filters: {showPrice},
 	}) => {
-		return {isAuthenticated, author, showPrice, _id, legalCards, list}
+		return {isAuthenticated, author, clone, showPrice, _id, legalCards, list}
 	},
 	actions
 )(
@@ -25,15 +36,18 @@ export default connect(
 		offset,
 		isAuthenticated,
 		author,
+		clone,
+
 		showPrice,
 		_id,
 		list,
 		legalCards,
 		changeFilters,
 		openModal,
+		newMsg,
+		cloneDeck,
 	}) => {
 		const [graph, setGraph] = useState("pie")
-
 		return (
 			<div className="stats">
 				<div className="price-stats">

@@ -14,7 +14,7 @@ export default connect(({}) => {
 }, actions)(
 	({
 		card,
-		inArea,
+		desc,
 		options,
 		itemType,
 		context,
@@ -36,7 +36,7 @@ export default connect(({}) => {
 		const inspect = _ =>
 			openModal({
 				title: card.name,
-				content: <Inspect card={card} inArea={inArea} options={options} />,
+				content: <Inspect card={card} options={options} />,
 			})
 
 		if (isDragging) clearTimeout(timer)
@@ -65,7 +65,12 @@ export default connect(({}) => {
 					onMouseDown={clickHold}
 					onMouseUp={_ => clearTimeout(timer)}
 					onMouseOut={_ => clearTimeout(timer)}>
-					<Card faceDown={faceDown} card={card} cardHeadOnly={cardHeadOnly} />
+					<Card
+						faceDown={faceDown}
+						card={card}
+						cardHeadOnly={cardHeadOnly}
+						desc={desc}
+					/>
 				</span>
 			</div>
 		)

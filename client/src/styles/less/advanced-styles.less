@@ -1,11 +1,9 @@
 .advanced {
-	max-width: 70rem;
-	margin: 2rem auto;
-	.inner {
+	margin: 1rem auto;
+	& > .inner {
 		.flex-row();
 		width: 100%;
 		.advanced-search {
-			flex: 1 0 20%;
 			section {
 				margin-bottom: 1rem;
 				max-height: initial;
@@ -34,6 +32,13 @@
 			}
 			p {
 				max-width: 25rem;
+			}
+		}
+		.interested {
+			& > .inner {
+				.flex-col();
+				max-height: 50vh;
+				overflow-y: auto;
 			}
 		}
 	}

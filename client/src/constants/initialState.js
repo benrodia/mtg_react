@@ -42,13 +42,16 @@ export const INIT_AUTH_STATE = {
 }
 
 export const INIT_DECK_STATE = {
-	name: "New Deck",
+	name: "Untitled",
 	format: "casual",
 	desc: "",
 	list: [],
 	preChanges: [],
 	colors: [0, 0, 0, 0, 0, 1],
+	editing: false,
 }
+
+// console.log("INIT_DECK_STATE", INIT_DECK_STATE)
 
 export const INIT_FILTERS_STATE = {
 	board: MAIN_BOARD,
@@ -62,9 +65,11 @@ export const INIT_FILTERS_STATE = {
 		asc: false,
 	},
 	advanced: {
+		interested: [],
 		terms: [],
 		by: "name",
 		asc: false,
+		nameEntry: "",
 	},
 	deckFilters: [],
 	deckParams: [],

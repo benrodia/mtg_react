@@ -28,6 +28,23 @@ const {
   fetchCollection,
 } = utilities
 
+export const newDeck = (author, {name, format, list, desc}) => (
+  dispatch,
+  getState
+) => {
+  if (author) {
+    const slug = createSlug(name, getState().main.decks)
+    axios
+      .post(`/api/decks`, {author, name, format, list, slug})
+      .then(res => {
+        dispatch(newMsg("CREATED DECK", "success"))
+        dispatch(loadDecks())
+        dispatch(openDeck(res.data))
+      })
+      .catch(err => console.error("COULD NOT CREATE DECK", err))
+  }
+}
+
 export const openDeck = slug => (dispatch, getState) => {
   const {decks} = getState().main
   const deck = decks.filter(d => d.slug === slug)[0]
@@ -49,112 +66,60 @@ export const openDeck = slug => (dispatch, getState) => {
       cache(A.DECK, "all", val)
       dispatch({type: A.DECK, val})
     })
+  } else {
+    cache(A.DECK, "all", INIT_DECK_STATE, false)
+    dispatch({type: A.DECK, clear: true})
   }
 }
 
 export const changeDeck = (key, val) => (dispatch, getState) => {
-  let {
-    deck,
-    main: {cardData},
-  } = getState()
-
-  if (key === "format" && val !== deck.format) {
-    if (deck.published && !canPublish(deck.list, key)) {
-      if (
-        !window.confirm(
-          `Heads up! Your deck has cards/quantities not legal in "${titleCaps(
-            val
-          )}". It will be un-published if you change formats.`
-        )
-      )
-        return
-      axios.patch(`/api/decks/${deck._id}`, {format: val, published: false})
-      dispatch(getLegalCards(cardData, val))
-      deck.published = false
-    } else {
-      axios.patch(`/api/decks/${deck._id}`, {[key]: val})
-      dispatch(getLegalCards(cardData, val))
-    }
-  } else if (
-    ["name", "desc", "published", "privacy", "helpWanted", "feature"].includes(
-      key
-    )
-  )
-    axios.patch(`/api/decks/${deck._id}`, {[key]: val})
-
+  const deck = {...getState().deck}
   deck[key] = val
-
   cache(A.DECK, "all", deck)
+  if (
+    [
+      "name",
+      "format",
+      "desc",
+      "list",
+      "privacy",
+      "allow_suggestions",
+      "published",
+    ].includes(key)
+  )
+    deck.unsaved = true
   dispatch({type: A.DECK, val: deck})
 }
 
-export const changeCard = (card = {}, assign = {}) => (dispatch, getState) =>
-  dispatch(
-    changeDeck(
-      "list",
-      getState().deck.list.map(c =>
-        c.key === card.key ? {...card, ...assign} : c
-      )
-    )
-  )
+// if (
+//   key === "format" &&
+//   val !== deck.format &&
+//   deck.published &&
+//   !canPublish(deck.list, key)
+// ) {
+//   if (
+//     !window.confirm(
+//       `Heads up! Your deck has cards/quantities not legal in "${titleCaps(
+//         val
+//       )}". It will be un-published if you change formats.`
+//     )
+//   )
+//     return
+//   deck.published = false
+// }
 
-export const addCard = (cards, board, remove, replace) => (
-  dispatch,
-  getState
-) => {
-  const {list} = getState().deck
-  if (cards.constructor !== Array) cards = [cards]
-  const newCard = card => {
-    return {
-      ...audit(card),
-      customField: card.customField || null,
-      board: board || card.board || MAIN_BOARD,
-      commander: card.commander || false,
-      key: "CardID__" + uuidv4(),
-    }
-  }
-  dispatch(
-    changeDeck(
-      "list",
-      remove
-        ? list.filter(l => cards.filter(card => l.key !== card.key).length)
-        : replace
-        ? cards.map(card => newCard(card))
-        : [...list, ...cards.map(card => newCard(card))]
-    )
-  )
-}
-
-export const giveLike = _ => (dispatch, getState) => {
-  const {
-    deck,
-    auth: {isAuthenticated, user},
-  } = getState()
-
-  if (isAuthenticated && deck.author !== user._id) {
-    let likes, liked
-    if (!user.liked.includes(deck._id)) {
-      likes = deck.likes + 1
-      liked = [...user.liked, deck._id]
-      dispatch(newMsg(`Liked ${deck.name}`, "success"))
-    } else {
-      likes = deck.likes - 1
-      liked = user.liked.filter(l => l !== deck._id)
-    }
-    axios
-      .patch(`/api/decks/${deck._id}`, {likes})
-      .then(_ => axios.patch(`/api/users/${user._id}`, {liked}))
-      .then(_ => {
-        dispatch(changeDeck("likes", likes))
-        dispatch({type: A.USER, key: "liked", val: liked})
-      })
-  }
-}
-
-export const updateDeckList = _ => (dispatch, getState) => {
+export const saveDeck = _ => (dispatch, getState) => {
   let {
-    deck: {_id, format, list, preChanges, published, suggestions, feature},
-  } = getState()
+    _id,
+    format,
+    list,
+    published,
+    suggestions,
+    feature,
+    desc,
+    allow_suggestions,
+    privacy,
+  } = getState().deck
 
   const colors = COLORS("symbol").map(s =>
     sum(list.map(c => c.mana_cost.split("").filter(i => i === s).length))
@@ -174,31 +139,17 @@ export const updateDeckList = _ => (dispatch, getState) => {
         colors,
         list: collapseDeckData(list),
         updated,
+        format,
+        desc,
+        allow_suggestions,
+        privacy,
       })
       .then(res => {
-        dispatch(newMsg("UPDATED DECKLIST", "success"))
-        dispatch(changeDeck("updated", updated))
+        dispatch(newMsg("SAVED DECK", "success"))
+        dispatch({type: A.SAVE_DECK, val: updated})
         dispatch(loadDecks())
       })
       .catch(err => console.error(err))
-  }
-  dispatch(changeDeck("preChanges", list))
-}
-
-export const newDeck = (author, {name, format, list, desc}) => (
-  dispatch,
-  getState
-) => {
-  if (author) {
-    const slug = createSlug(name, getState().main.decks)
-    axios
-      .post(`/api/decks`, {author, name, format, list, slug})
-      .then(res => {
-        dispatch(newMsg("CREATED DECK", "success"))
-        dispatch(loadDecks())
-        dispatch(openDeck(res.data))
-      })
-      .catch(err => console.error("COULD NOT CREATE DECK", err))
   }
 }
 
@@ -242,6 +193,43 @@ export const deleteDeck = _id => (dispatch, getState) => {
       })
       .catch(err => dispatch(newMsg("Problem deleting deck.", "error")))
   }
+}
+
+export const changeCard = (card = {}, assign = {}) => (dispatch, getState) =>
+  dispatch(
+    changeDeck(
+      "list",
+      getState().deck.list.map(c =>
+        c.key === card.key ? {...card, ...assign} : c
+      )
+    )
+  )
+
+export const addCard = (cards, board, remove, replace) => (
+  dispatch,
+  getState
+) => {
+  const {list} = getState().deck
+  if (cards.constructor !== Array) cards = [cards]
+  const newCard = card => {
+    return {
+      ...audit(card),
+      customField: card.customField || null,
+      board: board || card.board || MAIN_BOARD,
+      commander: card.commander || false,
+      key: "CardID__" + uuidv4(),
+    }
+  }
+  dispatch(
+    changeDeck(
+      "list",
+      remove
+        ? list.filter(l => cards.filter(card => l.key !== card.key).length)
+        : replace
+        ? cards.map(card => newCard(card))
+        : [...list, ...cards.map(card => newCard(card))]
+    )
+  )
 }
 
 export const submitSuggestion = changes => (dispatch, getState) => {
@@ -296,4 +284,30 @@ export const resolveSuggestion = (id, as) => (dispatch, getState) => {
         .filter(s => s.changes.length)
     )
   )
+}
+
+export const giveLike = _ => (dispatch, getState) => {
+  const {
+    deck,
+    auth: {isAuthenticated, user},
+  } = getState()
+
+  if (isAuthenticated && deck.author !== user._id) {
+    let likes, liked
+    if (!user.liked.includes(deck._id)) {
+      likes = deck.likes + 1
+      liked = [...user.liked, deck._id]
+      dispatch(newMsg(`Liked ${deck.name}`, "success"))
+    } else {
+      likes = deck.likes - 1
+      liked = user.liked.filter(l => l !== deck._id)
+    }
+    axios
+      .patch(`/api/decks/${deck._id}`, {likes})
+      .then(_ => axios.patch(`/api/users/${user._id}`, {liked}))
+      .then(_ => {
+        dispatch(changeDeck("likes", likes))
+        dispatch({type: A.USER, key: "liked", val: liked})
+      })
+  }
 }

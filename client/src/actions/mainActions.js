@@ -3,20 +3,37 @@ import axios from "axios"
 import * as A from "./types"
 import utilities from "../utilities"
 
-const {Q, isLegal, expandDeckData, getDecks} = utilities
+const {
+  Q,
+  isLegal,
+  expandDeckData,
+  getDecks,
+  validCardObjects,
+  BREAKPOINTS,
+} = utilities
 
 // export const setPage = page => dispatch => {
 //   dispatch({type: A.MAIN, key: "page", val: page})
 //   dispatch({type: A.MAIN, key: "modal", val: null})
 // }
 
+export const screenSize = width => (dispatch, getState) => {
+  const bp = BREAKPOINTS.filter(bp => bp <= width).length
+  const cur = getState().main.breakPoint
+  if (cur !== bp) dispatch({type: A.MAIN, key: "breakPoint", val: bp})
+}
+
 export const getCardData = _ => dispatch => {
   axios
     .get(`https://api.scryfall.com/bulk-data/oracle_cards`)
     .then(res =>
-      axios
-        .get(res.data.download_uri)
-        .then(res => dispatch({type: A.MAIN, key: "cardData", val: res.data}))
+      axios.get(res.data.download_uri).then(res =>
+        dispatch({
+          type: A.MAIN,
+          key: "cardData",
+          val: validCardObjects(res.data),
+        })
+      )
     )
     .catch(err => console.log(err))
 }

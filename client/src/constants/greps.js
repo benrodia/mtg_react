@@ -169,7 +169,7 @@ export const ADVANCED_GREPS = [
 		name: "ETB Trigger",
 		grep: {
 			Text: {
-				AND: ["when", "{CARDNAME}", "enters the battlefield"],
+				AND: ["when", "[CARDNAME]", "enters the battlefield,"],
 			},
 		},
 	},
@@ -180,11 +180,26 @@ export const ADVANCED_GREPS = [
 		},
 	},
 	{
+		name: "Mana Fixer",
+		grep: {
+			Colors: {AND: ["C"]},
+			Text: {AND: ["add "], OR: ["} or {", "}, or {", "of any"]},
+		},
+	},
+	{
+		name: "Mana Rock",
+		grep: {
+			CMC: {"<=": [4]},
+			Types: {AND: ["artifact"]},
+			Text: {AND: ["{T}: add "], OR: ["} or {", "}, or {", "of any", "{C}{C}"]},
+		},
+	},
+	{
 		name: "Counter Spell",
 		grep: {
 			Types: {AND: ["instant"]},
-			// Colors: {AND: ["U"]},
-			Text: {AND: ["counter", "spell"], NOT: ["+1/+1"]},
+			Colors: {AND: ["U"]},
+			Text: {AND: ["counter target", "spell"]},
 		},
 	},
 	{
@@ -222,11 +237,27 @@ export const ADVANCED_GREPS = [
 		},
 	},
 	{
+		name: "Commander",
+		grep: {
+			Types: {AND: ["Legendary"], OR: ["Creature"]},
+			Colors: {OR: COLORS("symbol")},
+		},
+	},
+	{
 		name: "Cantrip",
 		grep: {
 			Types: {OR: ["instant", "sorcery"]},
 			CMC: {"<=": [2]},
 			Text: {AND: ["draw a card"]},
+		},
+	},
+	{
+		name: "Wheel",
+		grep: {
+			Text: {
+				AND: ["each player", "discards", "hand", "draws", "cards"],
+				OR: ["seven", "equal to"],
+			},
 		},
 	},
 	{
@@ -317,7 +348,10 @@ export const ADVANCED_GREPS = [
 	{
 		name: "Tutor",
 		grep: {
-			Text: {AND: ["search your library", "card", "hand"], OR: ["a", ...CEAL]},
+			Text: {
+				AND: ["search your library", "card", "hand"],
+				OR: ["a", ...CEAL, "basic"],
+			},
 		},
 	},
 	{
@@ -331,15 +365,22 @@ export const ADVANCED_GREPS = [
 		grep: {
 			Types: {AND: ["instant"]},
 			Text: {
-				AND: ["creature", "gets", "/", "until end"],
+				AND: ["gets", "/", "until end"],
 				OR: ["target", "creatures"],
 			},
 		},
 	},
 	{
-		name: "Extra Turnvv",
+		name: "Extra Turn",
 		grep: {
 			Text: {AND: ["take an extra turn"]},
+		},
+	},
+	{
+		name: "Anthem",
+		grep: {
+			Text: {AND: ["creatures you control get", " +1/+1"]},
+			Types: {OR: ["enchantment", "creature"]},
 		},
 	},
 ]

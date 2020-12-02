@@ -1,6 +1,12 @@
 export const HOME_DIR = "/"
 export const PROXY = ``
-// export const PROXY = `https://localhost:5000/`
+export const BREAKPOINTS = [
+	600, //mobile
+	1200, //tablet
+	1800, //laptop
+	2400, //desktop
+	3000, //tv
+]
 
 export const LIBRARY = "Library"
 export const HAND = "Hand"

@@ -2,7 +2,7 @@ import store from "../store"
 import axios from "axios"
 import slugify from "slugify"
 import uniqueSlug from "unique-slug"
-
+import * as A from "../actions/types"
 import {INIT_DECK_STATE, INIT_SETTINGS_STATE} from "../constants/initialState"
 import {expandDeckData, collapseDeckData} from "./receiveCards"
 
@@ -74,14 +74,12 @@ export const createSlug = (name = "", from) => {
 
 export const resetCache = _ => {
 	console.log("resetCache")
-	// localStorage.removeItem("user")
-	// localStorage.removeItem("token")
-	localStorage.removeItem("settings")
-	sessionStorage.removeItem("settings")
-	localStorage.removeItem("filters")
-	sessionStorage.removeItem("filters")
-	localStorage.removeItem("deck")
-	sessionStorage.removeItem("deck")
+	localStorage.removeItem(A.SETTINGS)
+	sessionStorage.removeItem(A.SETTINGS)
+	localStorage.removeItem(A.FILTERS)
+	sessionStorage.removeItem(A.FILTERS)
+	localStorage.removeItem(A.DECK)
+	sessionStorage.removeItem(A.DECK)
 	setTimeout(_ => window.location.reload(), 500)
 }
 

@@ -10,10 +10,19 @@ import NewDeck from "./NewDeck"
 
 const {HOME_DIR, getDecks} = utilities
 
-export default connect(({main: {decks, cardData, refresh}, auth: {user: {_id, followed}}}) => {
-	return {decks, cardData, refresh, _id, followed}
-}, actions)(
+export default connect(
 	({
+		main: {decks, cardData, refresh},
+		auth: {
+			user: {_id, followed},
+		},
+	}) => {
+		return {decks, cardData, refresh, _id, followed}
+	},
+	actions
+)(
+	({
+		context,
 		direct,
 		decks,
 		flags,
@@ -33,11 +42,13 @@ export default connect(({main: {decks, cardData, refresh}, auth: {user: {_id, fo
 		const viewDecks = (direct || decks || []).filter(d => {
 			flags = flags || []
 			let included = true
-			if (included && flags.includes("followed")) included = followed.includes(d._id)
-			if (included && flags.includes("published")) included = d.published
-			if (included && flags.includes("helpWanted")) included = d.helpWanted >= 3
-			if (included && flags.includes("others")) included = d.author !== _id
-			return included && (d.privacy !== "Private" || you)
+			const inc = inc => included && flags.includes(inc)
+			if (inc("followed")) included = followed.includes(d._id)
+			if (inc("published")) included = d.published
+			if (inc("helpWanted")) included = d.helpWanted >= 3
+			if (inc("others")) included = d.author !== _id
+			if (you) included = d.author === _id
+			return included && (d.privacy === "Public" || you)
 		})
 
 		return (
@@ -45,7 +56,7 @@ export default connect(({main: {decks, cardData, refresh}, auth: {user: {_id, fo
 				{children}
 				<div className="decks big-block center full-width fill wrap">
 					{viewDecks.map(d => (
-						<DeckTile key={"TILE__" + d._id} deck={d} />
+						<DeckTile key={"TILE__" + d._id} deck={d} context={context} />
 					))}
 				</div>
 			</div>
