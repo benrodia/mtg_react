@@ -3,9 +3,10 @@ import React, {useState, useEffect, useRef} from "react"
 import {connect} from "react-redux"
 import actions from "../actions"
 
-import {CARD_SIZE} from "../constants/definitions"
+import {CARD_SIZE, ZONES} from "../constants/definitions"
 import {ItemTypes} from "../constants/data"
 import {Q} from "../functions/cardFunctions"
+import {cardMoveMsg} from "../functions/text"
 import {tutorableCards, clickPlace} from "../functions/gameLogic"
 
 import DropSlot from "./DropSlot"
@@ -14,6 +15,7 @@ import ManaSource from "./ManaSource"
 import Counters from "./Counters"
 import BasicSearch from "./BasicSearch"
 import CardControls from "./CardControls"
+import ContextMenu from "./ContextMenu"
 
 export default connect(({playtest: {deck, look, size, hideHand}}) => {
   return {deck, look, size, hideHand}
@@ -71,7 +73,7 @@ export default connect(({playtest: {deck, look, size, hideHand}}) => {
           : context === "list" || zone === "Command"
           ? cards
           : cards.splice(cards.length - (look || 1), look || 1).map(c => {
-              return {...c, face_down: !look}
+              return {...c, face_down: zone === "Library" && !look}
             })
 
       return (
@@ -104,7 +106,7 @@ export default connect(({playtest: {deck, look, size, hideHand}}) => {
           key={zone}
           className={`zone ${zone.toLowerCase()} ${context}`}
           ref={zoneDiv}>
-          <div className="title bar even" style={{display: !header && "none"}}>
+          <div className="title bar even">
             {zone !== "Hand" ? null : (
               <h2
                 className={`clicky-icon icon-eye${hideHand ? "-off" : ""}`}
@@ -112,7 +114,6 @@ export default connect(({playtest: {deck, look, size, hideHand}}) => {
               />
             )}
             <BasicSearch
-              isHeader
               searchable
               preview
               options={cards}
@@ -124,7 +125,7 @@ export default connect(({playtest: {deck, look, size, hideHand}}) => {
             inner
           ) : (
             <div className="inner">
-              <div ref={bottom} className="bottom" />
+              <div ref={bottom} />
               {inner}
             </div>
           )}
@@ -135,54 +136,66 @@ export default connect(({playtest: {deck, look, size, hideHand}}) => {
     const renderCard = (card, ind) => {
       const tutorable = tutorableCards(card, deck)
       return (
-        <CardControls
-          key={card.key}
-          card={card}
-          context={"playtest"}
-          faceDown={zone === "Hand" && hideHand}
-          cardHeadOnly={cardHeadOnly}
-          itemType={card.commander ? ItemTypes.COMMANDER : ItemTypes.CARD}
-          style={{
-            position: context !== "list" ? "absolute" : "default",
-            top: (zone === "Library" ? -ind : ind) + "rem",
-            left: (zone === "Library" ? ind * 3 : ind) + "rem",
-            zIndex: ind,
-          }}>
-          {tutorable.from !== zone ? null : (
-            <BasicSearch
-              options={tutorable.cards}
-              placeholder="Tutor"
-              callBack={c => {
-                if (tutorable.sac) cardClick(card, true, "Graveyard")
-                cardClick(c, false, tutorable.dest)
-                handleShuffle()
-              }}
-            />
-          )}
-          {!(zone === "Library" && look) ? null : (
-            <div>
-              <button
-                className="small-button"
-                onClick={_ => moveCard({card, dest: "Library", bottom: true})}>
-                Bottom
-              </button>
-              <button
-                className="small-button"
-                onClick={_ => moveCard({card, dest: "Graveyard"})}>
-                Graveyard
-              </button>
-            </div>
-          )}
-          {zone !== "Battlefield" ? null : (
-            <>
-              <Counters card={card} />
-              <ManaSource card={card} />
-              {!Q(card, "type_line", "Token") ? null : (
-                <button onClick={_ => spawnToken(card)}>Clone</button>
-              )}
-            </>
-          )}
-        </CardControls>
+        <ContextMenu
+          options={ZONES.filter(
+            z => z !== zone && (deck.find(c => c.commander) || z !== "Command")
+          ).map(z => {
+            return {
+              label: cardMoveMsg(card, z, true),
+              callBack: _ => moveCard({card, dest: z}),
+            }
+          })}>
+          <CardControls
+            key={card.key}
+            card={card}
+            context={"playtest"}
+            faceDown={zone === "Hand" && hideHand}
+            cardHeadOnly={cardHeadOnly}
+            itemType={card.commander ? ItemTypes.COMMANDER : ItemTypes.CARD}
+            style={{
+              position: context !== "list" ? "absolute" : "default",
+              top: (zone === "Library" ? -ind : ind) + "rem",
+              left: (zone === "Library" ? ind * 3 : ind) + "rem",
+              zIndex: ind,
+            }}>
+            {tutorable.from !== zone ? null : (
+              <BasicSearch
+                options={tutorable.cards}
+                placeholder="Tutor"
+                callBack={c => {
+                  if (tutorable.sac) cardClick(card, true, "Graveyard")
+                  cardClick(c, false, tutorable.dest)
+                  handleShuffle()
+                }}
+              />
+            )}
+            {!(zone === "Library" && look) ? null : (
+              <div>
+                <button
+                  className="small-button"
+                  onClick={_ =>
+                    moveCard({card, dest: "Library", bottom: true})
+                  }>
+                  Bottom
+                </button>
+                <button
+                  className="small-button"
+                  onClick={_ => moveCard({card, dest: "Graveyard"})}>
+                  Graveyard
+                </button>
+              </div>
+            )}
+            {zone !== "Battlefield" ? null : (
+              <>
+                <Counters card={card} />
+                <ManaSource card={card} />
+                {!Q(card, "type_line", "Token") ? null : (
+                  <button onClick={_ => spawnToken(card)}>Clone</button>
+                )}
+              </>
+            )}
+          </CardControls>
+        </ContextMenu>
       )
     }
 

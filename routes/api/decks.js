@@ -2,9 +2,10 @@ const express = require("express")
 const router = express.Router()
 const auth = require("../../middleware/auth")
 
-const Deck = require("../../models/Deck")
+const {Deck} = require("../../models/Deck").schema
 
 router.get("/", (req, res) => {
+	console.log("GET DECKS", Deck)
 	Deck.find()
 		.sort({updated: -1})
 		.then(decks => res.json(decks))

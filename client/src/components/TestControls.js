@@ -39,31 +39,12 @@ export default connect(({playtest, settings: {game_log}}) => {
           <button className="smaller-button" onClick={handleTurns}>
             Pass
           </button>
-          <button className="smaller-button warning-button" onClick={_ => startTest()}>
+          <button
+            className="smaller-button warning-button"
+            onClick={_ => startTest()}>
             Restart
           </button>
           {!game_log ? null : <GameLog />}
-        </div>
-        <div className="bar">
-          <CounterInput value={life} neg addOnClick={life - 1} icon="icon-heart" callBack={e => gameState("life", e)} />
-          <CounterInput
-            value={eLife}
-            neg
-            addOnClick={eLife - 1}
-            icon="icon-heart-empty"
-            callBack={e => gameState("eLife", e)}
-          />
-          <div className="mana-counters">
-            {COLORS("symbol").map((C, ind) => (
-              <CounterInput
-                key={`counter${C}`}
-                value={mana[ind]}
-                addOnClick={1 + mana[ind]}
-                icon={`ms ms-${C.toLowerCase()}`}
-                callBack={e => handleMana(COLORS().map((c, i) => (i === ind ? e - mana[ind] : 0)))}
-              />
-            ))}
-          </div>
         </div>
       </div>
     )
@@ -76,3 +57,24 @@ export default connect(({playtest, settings: {game_log}}) => {
 // <button className="smaller-button" onClick={handleCombat}>
 //   Attack All
 // </button>
+// <div className="bar">
+//   <CounterInput value={life} neg addOnClick={life - 1} icon="icon-heart" callBack={e => gameState("life", e)} />
+//   <CounterInput
+//     value={eLife}
+//     neg
+//     addOnClick={eLife - 1}
+//     icon="icon-heart-empty"
+//     callBack={e => gameState("eLife", e)}
+//   />
+//   <div className="mana-counters">
+//     {COLORS("symbol").map((C, ind) => (
+//       <CounterInput
+//         key={`counter${C}`}
+//         value={mana[ind]}
+//         addOnClick={1 + mana[ind]}
+//         icon={`ms ms-${C.toLowerCase()}`}
+//         callBack={e => handleMana(COLORS().map((c, i) => (i === ind ? e - mana[ind] : 0)))}
+//       />
+//     ))}
+//   </div>
+// </div>

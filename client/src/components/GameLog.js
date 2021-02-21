@@ -19,17 +19,22 @@ export default connect(({playtest: {history, current, timeID}}) => {
 
   return (
     <div className="history">
-      <div className="game-log" tabIndex={"0"} onClick={_ => openLog(true)} onBlur={_ => openLog(false)}>
+      <div
+        className="game-log"
+        tabIndex={"0"}
+        onClick={_ => openLog(true)}
+        onBlur={_ => openLog(false)}>
         {past.map(p => (
           <div
             onClick={_ => open && timeTravel(p.timeID)}
             key={"GameLog_" + p.timeID}
             className={`log ${p.current > current && "inactive"} ${
-              open && p.current === current && current < history.length && "pointer"
+              open &&
+              p.current === current &&
+              current < history.length &&
+              "pointer"
             }`}>
-            <span className="action">
-              <span className="timestamp">{p.timestamp}</span> {p.msg}
-            </span>
+            <span className="action">{p.msg}</span>
           </div>
         ))}
         <div ref={bottom} />

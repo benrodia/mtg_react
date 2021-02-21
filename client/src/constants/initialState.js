@@ -8,13 +8,18 @@ import {prepForPlaytest} from "../functions/receiveCards"
 
 export const INIT_MAIN_STATE = {
 	cardData: [],
-	legalCards: [],
+	fetching: false,
 	sets: [],
 	tokens: [],
 	decks: [],
 	users: [],
 	noteLog: [],
 	modal: null,
+	contextMenu: [],
+	cardPage: {},
+	cardCombos: [],
+	pos: [0, 0, 0, 0],
+	fieldData: {gotten: false},
 }
 
 export const INIT_SETTINGS_STATE = {
@@ -48,28 +53,43 @@ export const INIT_DECK_STATE = {
 	list: [],
 	preChanges: [],
 	colors: [0, 0, 0, 0, 0, 1],
-	editing: false,
+	custom: [],
+	unsaved: false,
 }
 
 // console.log("INIT_DECK_STATE", INIT_DECK_STATE)
 
 export const INIT_FILTERS_STATE = {
 	board: MAIN_BOARD,
-	view: "list",
+	view: "text",
 	sortBy: "Type",
-	customFields: [],
+	thenSortBy: "Name",
+	searchBy: "quick",
+	resultsView: "full",
 	focus: {},
-	showPrice: false,
-	basic: {
+	tune: {},
+	quickSearch: {},
+	advanced: {
+		cart: [],
+		similarModel: {},
+		termSets: [
+			{
+				name: "Custom Filters",
+				data: [],
+			},
+		],
+		termTab: 0,
 		by: "name",
 		asc: false,
 	},
-	advanced: {
-		interested: [],
-		terms: [],
-		by: "name",
+	deckSearch: {
+		name: "",
+		flags: [],
+		sortBy: "",
 		asc: false,
-		nameEntry: "",
+		author: "---",
+		format: "---",
+		colors: [],
 	},
 	deckFilters: [],
 	deckParams: [],

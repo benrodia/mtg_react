@@ -44,9 +44,11 @@ export const creator = _id => {
 		main: {users},
 	} = store.getState()
 
-	return _id
-		? users.filter(u => u._id === _id)[0]
-		: users.filter(u => u._id === author)[0] || {}
+	return (
+		(_id
+			? users.filter(u => u._id === _id)[0]
+			: users.filter(u => u._id === author)[0]) || {}
+	)
 }
 
 export const config = getState => {
@@ -65,6 +67,7 @@ export const createSlug = (name = "", from) => {
 		const named = slugify(name, {
 			replacement: "-",
 			strict: true,
+			lower: true,
 			locale: "en",
 		})
 		const existing = from ? from.filter(f => f.slug === named).length : 0

@@ -28,17 +28,27 @@ export const rem = (num = 1) =>
     window.getComputedStyle(document.getElementsByTagName("html")[0])
       .fontSize || 16
   )
+export const wrapNum = (delt, range) =>
+  delt < 0 ? range : delt >= range ? 0 : delt
 
-export const rnd = (arr = [], num = 0) => {
+export const factorial = (x, f = 1) => (x === 0 ? 1 : x * factorial(x - f))
+
+export const rnd = (arr = [], num = 0, noDupes) => {
   if (typeof arr === "number") return Math.floor(Math.random() * arr)
   const rand = _ => arr[Math.floor(Math.random() * arr.length)]
   if (!num) return rand()
-  else return [...Array(num)].map(_ => rand())
+  else if (noDupes) {
+    const a = [...arr]
+    let r = []
+    for (var i = 0; i < num; i++) r = [...r, a.shuffle().pop()]
+
+    return r
+  } else return [...Array(num)].map(_ => rand())
 }
 
 export const paginate = (arr = [], per = 1) =>
   [...Array(Math.ceil(arr.length / per) || 1)].map((_, i) =>
-    arr.slice(per * i, per * i + per)
+    [...arr].slice(per * i, per * i + per)
   )
 
 export const timestamp = _ => {
@@ -66,13 +76,15 @@ export const formattedDate = date => {
 }
 
 export const matchStr = (t = "", searchWords = [], every = null) => {
-  const rep = /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/
-  const text = ("" + t).replace(rep, "\\$&")
+  t = `${t}`.toLowerCase()
+
+  const test = (text, el) => text.includes(`${el}`.toLowerCase())
+
   return every === true
-    ? searchWords.every(el => text.match(new RegExp(el, "i")))
+    ? searchWords.every(el => test(t, el))
     : every === false
-    ? !searchWords.every(el => text.match(new RegExp(el, "i")))
-    : searchWords.some(el => text.match(new RegExp(el, "i")))
+    ? !searchWords.every(el => test(t, el))
+    : searchWords.some(el => test(t, el))
 }
 
 export const log = objs => {
@@ -101,7 +113,7 @@ Array.prototype.shuffle = function () {
 
 Array.prototype.orderBy = function (key, asc) {
   if (!this || !this.length) return []
-  return this.sort((a, b) => (a[key] > b[key] ? (asc ? -1 : 1) : -1))
+  return this.sort((a, b) => (a[key] > b[key] ? (asc ? -1 : 1) : asc ? 1 : -1))
 }
 
 Array.prototype.unique = function (key) {

@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken")
 const auth = require("../../middleware/auth")
 require("dotenv").config()
 
-const User = require("../../models/User")
+const {User} = require("../../models/User").schema
 
 // GET ALL
 router.get("/", (req, res) => {
@@ -36,7 +36,8 @@ router.get("/", (req, res) => {
 router.post("/", (req, res) => {
 	const {name, password, email, slug} = req.body
 
-	if (!name || !password || !email) return res.status(400).json({msg: "Please enter all fields."})
+	if (!name || !password || !email)
+		return res.status(400).json({msg: "Please enter all fields."})
 
 	User.findOne({email}).then(user => {
 		if (user) return res.status(400).json({msg: "Email already in use."})
@@ -47,10 +48,15 @@ router.post("/", (req, res) => {
 				if (err) throw err
 				newUser.password = hash
 				newUser.save().then(user =>
-					jwt.sign({id: user.id}, process.env.JWT_SECRET || "jwtSecret", {expiresIn: 3600}, (err, token) => {
-						if (err) throw err
-						res.json({token, user})
-					})
+					jwt.sign(
+						{id: user.id},
+						process.env.JWT_SECRET || "jwtSecret",
+						{expiresIn: 3600},
+						(err, token) => {
+							if (err) throw err
+							res.json({token, user})
+						}
+					)
 				)
 			})
 		})

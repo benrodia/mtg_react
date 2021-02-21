@@ -1,4 +1,4 @@
-import React, {useState} from "react"
+import React, {useState, useEffect} from "react"
 import {Link} from "react-router-dom"
 import {connect} from "react-redux"
 import actions from "../actions"
@@ -16,6 +16,7 @@ const {
 	TCGplayerMassEntryURL,
 	textList,
 	canEdit,
+	getDeckDynamics,
 } = utilities
 
 export default connect(
@@ -33,11 +34,9 @@ export default connect(
 	actions
 )(
 	({
-		offset,
 		isAuthenticated,
 		author,
 		clone,
-
 		showPrice,
 		_id,
 		list,
@@ -48,6 +47,15 @@ export default connect(
 		cloneDeck,
 	}) => {
 		const [graph, setGraph] = useState("pie")
+		const [dynamics, setDynamics] = useState({})
+		// useEffect(
+		// 	_ => {
+		// 		if (list[0]&&list[0].object&&!dynamics) {}
+		// 		setDynamics(getDeckDynamics(list))
+		// 	},
+		// 	[list]
+		// )
+
 		return (
 			<div className="stats">
 				<div className="price-stats">
@@ -57,7 +65,7 @@ export default connect(
 						{sum(list.map(c => c.prices.tix)).toFixed(2)} TIX
 						{!list.filter(c => !c.prices.usd).length ? null : (
 							<p className="asterisk">
-								*Missing price data for {list.filter(c => !c.prices.usd).length}{" "}
+								*Missing prices for {list.filter(c => !c.prices.usd).length}{" "}
 								cards.
 							</p>
 						)}
@@ -71,29 +79,6 @@ export default connect(
 						<p className="asterisk">*Unaffiliated Link</p>
 					</span>
 				</div>
-
-				<br />
-				<br />
-				<Sticky offset={offset}>
-					<div className="stats-header bar even mini-spaced-bar">
-						<h3>Statistics </h3>
-						<button
-							title="Display Card Prices"
-							className={`small-button icon-toggle-${
-								showPrice ? "on selected" : "off"
-							}`}
-							onClick={_ => changeFilters("showPrice", !showPrice)}>
-							Card Price
-						</button>
-						<button
-							className={`small-button icon-chart-${
-								graph !== "pie" ? "bar" : "pie"
-							}`}
-							onClick={_ => setGraph(graph === "pie" ? "bar" : "pie")}>
-							{titleCaps(graph)}
-						</button>
-					</div>
-				</Sticky>
 				<div className="graphs bar spaced-grid">
 					<Graph graphType={graph} dataType={"Color"} />
 					<Graph graphType={graph} dataType={"Type"} />

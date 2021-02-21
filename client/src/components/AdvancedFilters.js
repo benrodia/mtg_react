@@ -2,165 +2,223 @@ import React, {useState, useEffect} from "react"
 import {connect} from "react-redux"
 import actions from "../actions"
 import axios from "axios"
-import matchSorter, {rankings} from "match-sorter"
 import {v4 as uuidv4} from "uuid"
 import utilities from "../utilities"
 
 import AdvancedField from "./AdvancedField"
+import AdvancedFilters from "./AdvancedFilters"
 import BasicSearch from "./BasicSearch"
 import Loading from "./Loading"
+import CardControls from "./CardControls"
+import ToolTip from "./ToolTip"
+import Tags from "./Tags"
 
 const {
+	Q,
 	COLORS,
 	ADVANCED_GREPS,
 	OPs,
 	formatManaSymbols,
+	itemizeDeckList,
 	rnd,
 	advancedFields,
+	convertTag,
+	pluralize,
+	titleCaps,
+	generateRandomDeck,
+	legalCommanders,
+	cls,
+	renderVal,
 } = utilities
-export default connect(({filters: {advanced: {terms, by, asc, nameEntry}}}) => {
-	return {terms, by, asc, nameEntry}
-}, actions)(({terms, by, asc, nameEntry, changeAdvanced}) => {
-	const [ex, setEx] = useState(`ex. ${rnd(ADVANCED_GREPS).name}`)
-	const [delay, setDelay] = useState(null)
-	const [search, setSearch] = useState(nameEntry || "")
+export default connect(({main: {cardData, fieldData}, filters: {advanced}}) => {
+	return {cardData, fieldData, ...advanced}
+}, actions)(
+	({
+		cardData,
+		fieldData,
+		termSets,
+		termTab,
+		by,
+		asc,
+		tags,
+		changeAdvanced,
+		getFieldData,
+		addCart,
+		getCardData,
+	}) => {
+		const [showFilters, setShowFilters] = useState(false)
+		const [ex, setEx] = useState(`ex. ${rnd(ADVANCED_GREPS).name}`)
+		const [seedCommander, setSeedCommander] = useState(null)
 
-	useEffect(
-		_ => {
-			if (delay === false) {
-				console.log("search delay", search)
-				changeAdvanced({nameEntry: search})
-			}
-		},
-		[search, delay]
-	)
+		useEffect(_ => {
+			fieldData.gotten || getFieldData()
+		}, [])
 
-	const listTerms = ({name, numeric}) => {
-		const ofName = terms.filter(n => n.name === name)
-		return !ofName.length ? null : (
-			<div key={name} className="block bar mini-spaced-bar indent">
-				<h3>{name}</h3>
-				<div className="col mini-spaced-col">
-					{OPs(numeric).map((OP, i) => {
-						const matches = ofName.filter(n => n.op === OP)
-						return !matches.length ? null : (
-							<div key={matches[0].id} className=" mini-spaced-col">
-								<div className="bar even mini-spaced-bar">
-									<b>{OP}</b>
-									<div className="bar even mini-spaced-bar">
-										{matches.map(({val, id}) => (
-											<button
-												key={id}
-												className={" warning-button inverse-small-button"}
-												onClick={_ => {
-													changeAdvanced({
-														terms: terms.filter(tx => tx.id !== id),
-													})
-												}}>
-												{name === "Colors"
-													? COLORS().filter(C => C.symbol === val)[0].name
-													: val}
-											</button>
-										))}
-									</div>
-								</div>
+		const termSet = termSets[termTab]
+
+		const Terms = ({name, colored, numeric, legality}) => {
+			const ofName = termSet.data.filter(n => n.name === name).orderBy("op")
+			return !ofName.length ? null : (
+				<div className="block mini-spaced-col">
+					<h3>{name}</h3>
+					<div className="indent bar even">
+						{ofName.map(({op, val, id}, i) => (
+							<button
+								className="mini-spaced-bar even warning-button"
+								onClick={_ => {
+									const newTermSets = [
+										...termSets
+											.map((t, ind) => {
+												const data = t.data.filter(tx => tx.id !== id)
+												return data.length || ind === 0
+													? {
+															...t,
+															data,
+													  }
+													: null
+											})
+											.filter(t => !!t),
+									]
+									if (newTermSets.length !== termSets.length)
+										changeAdvanced({
+											termTab: Math.max(
+												Math.min(termTab, termSets.length - 2),
+												0
+											),
+										})
+									changeAdvanced({termSets: newTermSets})
+								}}>
+								<span className={`dark-text icon-${cls(op)}`}>
+									{numeric ? op : null}
+								</span>
+								<span key={id}>{renderVal(val, numeric, colored)}</span>
+							</button>
+						))}
+					</div>
+				</div>
+			)
+		}
+		const TagSearch = _ => {
+			return (
+				<div className="mini-spaced-col">
+					<span className="bar start">
+						<h2>Tags</h2>
+						<ToolTip message="Tags are collections of preset search terms. Use them to help find cards with a certain effect or feel. GET INSPIRED!">
+							<span className="icon-help-circled asterisk" />
+						</ToolTip>
+					</span>
+					<div className="bar mini-spaced-bar">
+						<div className="quick-search">
+							<BasicSearch
+								searchable
+								preview
+								sort={"name"}
+								placeholder={ex}
+								options={ADVANCED_GREPS}
+								separate={"type"}
+								renderAs={t => (
+									<Tags tags={[t]}>
+										<div className="thinner-pad">
+											<b>{titleCaps(t.type)}: </b>
+											<span>{t.name}</span>
+										</div>
+									</Tags>
+								)}
+								callBack={t =>
+									termSets.filter(ts => ts.name === t.name)[0] ||
+									changeAdvanced({
+										termSets: [
+											...termSets,
+											{name: t.name, data: convertTag(t)},
+										],
+										termTab: termSets.length,
+									})
+								}
+							/>
+						</div>
+					</div>
+				</div>
+			)
+		}
+
+		const Filters = _ => (
+			<div className="col fill spread start ">
+				<div className="bar even tab-switch">
+					{termSets.map((t, i) => (
+						<div
+							key={t.name}
+							onClick={_ => changeAdvanced({termTab: i})}
+							className={`flex-row mini-spaced-bar even tab ${
+								i === termTab && "selected"
+							}`}>
+							<div
+								className={i === 0 && !termSets[0].data.length && "disabled"}
+								title={t.desc}>
+								{t.name} ({t.data.length})
 							</div>
-						)
-					})}
+							<button
+								className={`warning-button inverse-button icon-cancel ${
+									i === 0 && !termSets[0].data.length && "disabled"
+								}`}
+								onClick={e => {
+									e.stopPropagation()
+									changeAdvanced({
+										termTab: Math.max(
+											Math.min(termTab, termSets.length - 2),
+											0
+										),
+										termSets: termSets
+											.map((term, ind) =>
+												ind === i
+													? ind === 0
+														? {name: "Custom Filters", data: []}
+														: null
+													: term
+											)
+											.filter(_ => !!_),
+									})
+								}}
+							/>
+						</div>
+					))}
+				</div>
+
+				<div className="filters flex-row mini-spaced-bar full-width thin-pad">
+					{!termSet.data.length ? (
+						<Loading spinner=" " anim="none" subMessage="Add Some Filters" />
+					) : (
+						<div className="advanced-terms">
+							{advancedFields.map(a => (
+								<Terms key={a.name} {...a} />
+							))}
+						</div>
+					)}
 				</div>
 			</div>
 		)
-	}
-
-	const applyTemplate = grep => {
-		let newTerms = []
-		const gs = Object.entries(grep).map(g => {
-			const [name, ops] = g
-			return Object.entries(ops).map(o => {
-				const [op, vs] = o
-				return vs.map(val => {
-					const {trait} = advancedFields.filter(a => a.name === name)[0] || {}
-					const id = name + op + val
-					newTerms.push({name, trait, op, val, id})
-					return
-				})
-			})
-		})
-		changeAdvanced({terms: newTerms})
-	}
-
-	const byOps = [
-		{name: "Name", trait: "name"},
-		{name: "Oldest", trait: "released_at"},
-		{name: "EDHREC", trait: "edhrec_rank"},
-	]
-
-	const delaySearch = e => {
-		setSearch(e.target.value)
-		clearTimeout(delay)
-		setDelay(setTimeout(_ => setDelay(false), 300))
-	}
-
-	return (
-		<div className="big-block">
-			<div className="bar spaced-bar">
-				<div className="col">
-					<h4>Templates</h4>
-					<BasicSearch
-						searchable
-						preview
-						placeholder={ex}
-						options={ADVANCED_GREPS}
-						callBack={({grep}) => applyTemplate(grep)}
-					/>
-				</div>
-				<div className="col">
-					<h4>Order By</h4>
-					<div className="bar even">
-						<BasicSearch
-							self={byOps.filter(b => b.trait === by)[0].name}
-							options={byOps}
-							callBack={({trait}) => changeAdvanced({by: trait})}
-						/>
+		return (
+			<div className="advanced-search spaced-col">
+				<h1 className="block">Card Search</h1>
+				<div className=" max ">
+					<h2>Filters</h2>
+					<div className={showFilters || "more-less"}>
+						<div className="col-2 thinner-pad mini-spaced-col">
+							{advancedFields.map((a, i) =>
+								!showFilters && (i > 5 || i == 1 || i == 2) ? null : (
+									<AdvancedField key={"field__" + a.name} {...a} />
+								)
+							)}
+						</div>
+						<button
+							className="full-width more-less-button"
+							onClick={_ => setShowFilters(!showFilters)}>
+							{showFilters ? "Hide" : "Show All"} Filters
+						</button>
 					</div>
 				</div>
+				<TagSearch />
+				<Filters />
 			</div>
-			<div className={"block bar even mini-spaced-bar"}>
-				<h2>Filters</h2>
-				<button
-					className={`warning-button inverse-small-button ${
-						terms.length || "hide"
-					}`}
-					onClick={_ => changeAdvanced({terms: []})}>
-					Clear
-				</button>
-			</div>
-
-			{!terms.length ? (
-				<Loading spinner=" " anim="none" subMessage="Try Adding Some Filters" />
-			) : (
-				advancedFields.map(a => listTerms(a))
-			)}
-			<div className="basic-search">
-				<div className="search-bar bar even">
-					<input
-						type="text"
-						value={search}
-						onChange={delaySearch}
-						placeholder={"Enter Card Name"}
-					/>
-				</div>
-			</div>
-		</div>
-	)
-})
-
-const AdvancedForm = _ => {
-	return (
-		<div className="advanced-search spaced-col big-block gap">
-			{advancedFields.map((a, i) => {
-				return <AdvancedField key={"field__" + i} index={i} />
-			})}
-		</div>
-	)
-}
+		)
+	}
+)

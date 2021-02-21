@@ -4,10 +4,7 @@ const Schema = mongoose.Schema
 module.exports = User = mongoose.model(
 	"user",
 	new Schema({
-		object: {
-			type: String,
-			default: "user",
-		},
+		object: "user",
 		name: {
 			type: String,
 			required: true,
@@ -34,61 +31,28 @@ module.exports = User = mongoose.model(
 			required: true,
 			unique: true,
 		},
-		image: {
-			type: String,
-			default: "",
-		},
-		bio: {
-			type: String,
-			default: "",
-		},
-		liked: {
-			type: Array,
-			default: [],
-		},
-		followed: {
-			type: Array,
-			default: [],
-		},
-		blocked: {
-			type: Array,
-			default: [],
-		},
-		folders: {
-			type: Array,
-			default: [],
-		},
+		image: "",
+		bio: "",
+		liked: {type: Array, default: []},
+		followed: {type: Array, default: []},
+		blocked: {type: Array, default: []},
+		folders: {type: Array, default: []},
 		goodies: {
-			type: Object,
-			default: {
-				points: 0,
-				sleeves: [],
-				playmats: [],
-				acheivements: [],
-			},
+			points: 0,
+			sleeves: [],
+			playmats: [],
+			acheivements: [],
 		},
 		settings: {
-			type: Object,
-			default: {
-				scale: {
-					type: Number,
-					default: 100,
-				},
-				darken: {type: Number, default: 70},
-				game_log: {type: Boolean, default: true},
-				playmat: {type: String, default: ""},
-				random_playmat: {type: Boolean, default: true},
-				use_stack: {
-					type: Array,
-					default: [
-						"Action",
-						"Spell",
-						"Activated Ability",
-						"Triggered Ability",
-					],
-				},
-				mana_tolerance: {type: Number, default: 3},
-			},
+			scale: 100,
+			darken: 70,
+			game_log: true,
+			playmat: "",
+			random_playmat: true,
+			use_stack: ["Action", "Spell", "Activated Ability", "Triggered Ability"],
+			mana_tolerance: 3,
 		},
+		tagOverrides: {type: Array, default: []},
+		cardCombos: {type: Array, default: []},
 	})
 )

@@ -5,58 +5,102 @@
   animation-timing-function: ease-out;
   animation-iteration-count: 1;
   animation-play-state: forwards;
-}
-.card-head {
-  .flex-col();
-  justify-content: flex-start;
-  color: @darkest;
-  margin: 0 @thinner @thinner;
-  border-radius: @thinner;
-  background: rgba(255, 255, 255, 0.7);
-  padding: @thinnest @thinner;
-  text-align: left;
-  h4 {
-    font-size: 1rem;
-    font-family: @header;
-  }
-  &:hover {
-    cursor: pointer;
-    background: @highlight;
-  }
-  .types {
-    font-size: @small;
-    font-family: @para;
-    .ms {
-      &:before {
-        font-size: 0.8rem;
-      }
-      height: 1rem;
-      width: 1rem;
+  .card-text {
+    color: @lighter;
+    margin-bottom: @thinner;
+    &:hover {
+      cursor: pointer;
+      color: fade(@highlight, 80%);
+      text-decoration: underline;
+    }
+    .name {
+      font-family: @para;
+      font-size: 1rem;
     }
   }
-  .prices {
-    padding: @thinner;
+  .card-head {
+    .flex-row();
+    color: @darkest;
+    text-align: left;
+    .mini-icon {
+      height: 100%;
+      width: 3.5rem;
+    }
+    .col {
+      background: fade(@lightest, 80%);
+      padding: @thinner;
+      width: 15rem;
+    }
+    .top-line {
+      justify-content: space-between;
+      h4 {
+        font-family: @header;
+        .quant {
+          margin-right: @thinner;
+        }
+        .name {
+          font-size: @small;
+        }
+      }
+    }
+    &:hover {
+      cursor: pointer;
+      .col {
+        background: fade(@highlight, 80%);
+      }
+    }
+    .types {
+      font-size: @smaller;
+      font-family: @para;
+      .ms {
+        &:before {
+          font-size: 0.8rem;
+        }
+        height: 1rem;
+        width: 1rem;
+      }
+    }
+    .prices {
+      padding: @thinner;
+    }
+  }
+
+  .card-img img,
+  .card-img .loading {
+    transition: 0.2s;
+    object-fit: cover;
+    min-width: @cardW;
+    width: @cardW;
+    min-height: @cardH;
+    height: @cardH;
+    border-radius: @thin;
+  }
+  .card-img img:hover {
+    cursor: pointer;
+    box-shadow: 0 0 @thin @highlight;
   }
 }
 
-.card-img {
-  transition: 0.2s;
-  object-fit: cover;
-  min-width: @cardW;
-  width: @cardW;
-  min-height: @cardH;
-  height: @cardH;
-  border-radius: @thin;
-}
-.card-img:hover,
-.card-img.selected {
-  cursor: pointer;
-  box-shadow: 0 0 @thin @highlight;
-  transform: scale(1.1);
+.search-result .card-img img,
+.search-result .card-img .loading {
+  width: calc(@cardW*2);
+  min-width: calc(@cardW*2);
+  height: calc(@cardH*2);
+  border-radius: 1rem;
 }
 
 .grid-view {
   .prices {
     color: @lightest;
   }
+}
+
+.ms-hide {
+  height: 0;
+  width: 0;
+  transform: scale(0);
+  opacity: 0;
+  margin: 0;
+  padding: 0;
+  display: inline-block;
 }

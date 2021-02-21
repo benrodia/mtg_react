@@ -41,6 +41,7 @@ export default connect(
 		const [inForm, setInForm] = useState({email})
 		const [upForm, setUpForm] = useState({})
 		const [showPassword, setShowPassword] = useState(false)
+		const [active, setActive] = useState("in")
 
 		const setForm = (form, e) => {
 			const {name, value} = e.target
@@ -65,8 +66,8 @@ export default connect(
 						passwordConfirm === password
 		}
 
-		const inFormDiv = (
-			<div className={`in-form ${inModal || activeForm === "in" || "hide"}`}>
+		const InFormDiv = _ => (
+			<div className={`in-form`}>
 				<div className="block">
 					<h4>
 						<span>Email</span>
@@ -109,8 +110,8 @@ export default connect(
 			</div>
 		)
 
-		const upFormDiv = (
-			<div className={`up-form ${inModal || activeForm === "up" || "hide"}`}>
+		const UpFormDiv = _ => (
+			<div className={`up-form`}>
 				<div className="block">
 					<h4 className="mini-spaced-bar">
 						<span>Name</span>
@@ -229,8 +230,22 @@ export default connect(
 		)
 
 		return (
-			<div className="forms">
-				{inFormDiv} {upFormDiv}
+			<div className="block">
+				<div className="flex-row tab-switch ">
+					<div
+						className={`tab ${active === "in" && "selected"}`}
+						onClick={_ => setActive("in")}>
+						Login
+					</div>
+					<div
+						className={`tab ${active === "up" && "selected"}`}
+						onClick={_ => setActive("up")}>
+						Register
+					</div>
+				</div>
+				<div className="forms flex-row spaced-bar center start">
+					{active === "in" ? <InFormDiv /> : <UpFormDiv />}
+				</div>
 			</div>
 		)
 	}
