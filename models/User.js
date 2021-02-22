@@ -4,7 +4,10 @@ const Schema = mongoose.Schema
 module.exports = User = mongoose.model(
 	"user",
 	new Schema({
-		object: "user",
+		object: {
+			type: String,
+			default: "user",
+		},
 		name: {
 			type: String,
 			required: true,
@@ -31,28 +34,46 @@ module.exports = User = mongoose.model(
 			required: true,
 			unique: true,
 		},
-		image: "",
-		bio: "",
-		liked: {type: Array, default: []},
-		followed: {type: Array, default: []},
-		blocked: {type: Array, default: []},
-		folders: {type: Array, default: []},
+		image: {
+			type: String,
+			default: "",
+		},
+		bio: {
+			type: String,
+			default: "",
+		},
+		liked: {
+			type: Array,
+			default: [],
+		},
+		followed: {
+			type: Array,
+			default: [],
+		},
+		blocked: {
+			type: Array,
+			default: [],
+		},
 		goodies: {
-			points: 0,
-			sleeves: [],
-			playmats: [],
-			acheivements: [],
+			type: Object,
+			default: {
+				points: 0,
+				sleeves: [],
+				playmats: [],
+				acheivements: [],
+			},
 		},
 		settings: {
-			scale: 100,
-			darken: 70,
-			game_log: true,
-			playmat: "",
-			random_playmat: true,
-			use_stack: ["Action", "Spell", "Activated Ability", "Triggered Ability"],
-			mana_tolerance: 3,
+			type: Object,
+			default: {
+				scale: 100,
+				darken: 70,
+				game_log: true,
+				playmat: "",
+				random_playmat: true,
+				use_stack: ["Action", "Spell", "Activated Ability", "Triggered Ability"],
+				mana_tolerance: 3,
+			},
 		},
-		tagOverrides: {type: Array, default: []},
-		cardCombos: {type: Array, default: []},
 	})
 )

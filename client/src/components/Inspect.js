@@ -130,10 +130,10 @@ export default connect(({// auth: {
 			[cardData.length, card.name, param]
 		)
 
-		const combos = cardCombos
-			.filter(([a, b]) => a === name || b === name)
-			.map(([a, b]) => Q(cardData, "name", a === name ? b : a)[0] || null)
-			.filter(c => !!c)
+		// const combos = cardCombos
+		// 	.filter(([a, b]) => a === name || b === name)
+		// 	.map(([a, b]) => Q(cardData, "name", a === name ? b : a)[0] || null)
+		// 	.filter(c => !!c)
 
 		const Info = _ => (
 			<div className="details mini-spaced-col ">
@@ -228,47 +228,6 @@ export default connect(({// auth: {
 					<Tags of={card} />
 				</div>
 
-				<div className="combo ">
-					<h3 className="">Combos With</h3>
-					<div className="bar inner">
-						{cardData.length ? (
-							combos.length ? (
-								combos.map(c => {
-									const added = Q(cart, "name", c.name).length
-									return (
-										<div>
-											<button
-												className={`add-button icon-plus ${
-													added && "icon-ok selected"
-												}`}
-												onClick={_ => addCart(c)}>
-												{added ? added : ""}
-											</button>
-
-											<CardControls key={c.id} card={c} param={param} />
-										</div>
-									)
-								})
-							) : (
-								<Loading
-									anim="none"
-									spinner=" "
-									subMessage={"None Submitted"}
-								/>
-							)
-						) : (
-							<Loading subMessage="Loading Cards..." />
-						)}
-					</div>
-					<BasicSearch
-						searchable
-						placeholder="Search Card Names"
-						options={cardData}
-						callBack={c =>
-							updateUser({cardCombos: [...cardCombos, [name, c.name]]})
-						}
-					/>
-				</div>
 				<div className="similar ">
 					<h3 className="">Similar Cards</h3>
 					<div className="bar inner">
@@ -432,6 +391,48 @@ export default connect(({// auth: {
 		)
 	}
 )
+
+// <div className="combo ">
+// 	<h3 className="">Combos With</h3>
+// 	<div className="bar inner">
+// 		{cardData.length ? (
+// 			combos.length ? (
+// 				combos.map(c => {
+// 					const added = Q(cart, "name", c.name).length
+// 					return (
+// 						<div>
+// 							<button
+// 								className={`add-button icon-plus ${
+// 									added && "icon-ok selected"
+// 								}`}
+// 								onClick={_ => addCart(c)}>
+// 								{added ? added : ""}
+// 							</button>
+
+// 							<CardControls key={c.id} card={c} param={param} />
+// 						</div>
+// 					)
+// 				})
+// 			) : (
+// 				<Loading
+// 					anim="none"
+// 					spinner=" "
+// 					subMessage={"None Submitted"}
+// 				/>
+// 			)
+// 		) : (
+// 			<Loading subMessage="Loading Cards..." />
+// 		)}
+// 	</div>
+// 	<BasicSearch
+// 		searchable
+// 		placeholder="Search Card Names"
+// 		options={cardData}
+// 		callBack={c =>
+// 			updateUser({cardCombos: [...cardCombos, [name, c.name]]})
+// 		}
+// 	/>
+// </div>
 
 // const shiftList = by => {
 // 	if (inArea && ind) {
