@@ -6,6 +6,9 @@ import {connect} from "react-redux"
 import actions from "../actions"
 import utilities from "../utilities"
 import Loading from "./Loading"
+import CardControls from "./CardControls"
+import BasicSearch from "./BasicSearch"
+import QuickSearch from "./QuickSearch"
 
 const {
 	Q,
@@ -18,12 +21,16 @@ const {
 	legalCommanders,
 	interpretForm,
 	listDiffs,
+	itemizeDeckList,
 } = utilities
 
 let timer = null
-export default connect(({deck: {format, desc}, main: {cardData, sets}}) => {
-	return {format, desc, cardData, sets}
-}, actions)(
+export default connect(
+	({deck: {format, desc, list}, main: {cardData, sets}}) => {
+		return {format, desc, list, cardData, sets}
+	},
+	actions
+)(
 	({
 		showDiffs,
 		callBack,
@@ -35,70 +42,89 @@ export default connect(({deck: {format, desc}, main: {cardData, sets}}) => {
 		addCard,
 		openModal,
 		changeDeck,
+		getCardData,
 	}) => {
 		const exText = [...Array(7)]
-			.map((_, i) => {
-				if (!i) return "ex."
-				return rnd(3) + 1 + " " + rnd(cardData.map(c => c.name))
-			})
+			.map((_, i) =>
+				!i ? "ex." : rnd(3) + 1 + " " + rnd(cardData.map(c => c.name))
+			)
 			.join("\n")
 
 		const [form, setForm] = useState(textList(list))
 		const [cart, setCart] = useState(list || [])
+		const [typing, setTyping] = useState(true)
+		const [fetching, setFetching] = useState(false)
 
-		const getInterp = _ => {
-			const cards = interpretForm(form, cardData)
-			setCart(cards)
-			callBack && callBack(cards)
-		}
+		const {added, removed, changed} = listDiffs(list, cart)
 
-		const applyChanges = _ => {
-			addCard(cart, null, false, true)
-		}
+		console.log("sets", sets)
+		useEffect(
+			_ => {
+				if (!cardData.length && !fetching) {
+					setFetching(true)
+					getCardData()
+				} else if (!typing) setCart(interpretForm(form, cardData, list, sets))
+			},
+			[cardData.length, typing, form]
+		)
 
-		const total = cart.length
-		const {added, removed} = listDiffs(list, cart)
-		const changes = (
-			<div className="changes">
-				<h4>Changes</h4>
-				<div className="bar block spread fill">
-					<div className="added">
-						<h5>Added</h5>
-						<div className="col">
-							{added.map(({name, diff}) => (
-								<div key={name + diff} className={"icon-plus"}>
-									{diff} {name}
-								</div>
+		return (
+			<div className="raw col mini-spaced-col">
+				<QuickSearch />
+				<textarea
+					value={form}
+					rows={"15"}
+					cols={"28"}
+					onChange={e => {
+						setForm(e.target.value)
+						setTyping(true)
+						timer = setTimeout(_ => setTyping(false), 1000)
+					}}
+					placeholder={exText}
+				/>
+				<div className="diffs mini-spaced-col">
+					<div className="full-width fill bar even spread">
+						<h2>Changes</h2>
+						<button onClick={_ => addCard(cart, null, null, true)}>
+							Apply
+						</button>
+					</div>
+					<div className="inner full-width fill bar spread">
+						<div className="added">
+							<h4>Added ({added.length})</h4>
+							{itemizeDeckList(added).map((a, i) => (
+								<CardControls
+									quant={a.length}
+									nameOnly
+									card={a[0]}
+									key={`added_${a[0].id + i}`}
+								/>
 							))}
 						</div>
-					</div>
-					<div className="removed">
-						<h5>Removed</h5>
-						<div className="col">
-							{removed.map(({name, diff}) => (
-								<div key={name + diff} className={"icon-minus"}>
-									{diff} {name}
-								</div>
+						<div className="removed">
+							<h4>Removed ({removed.length})</h4>
+							{itemizeDeckList(removed).map((a, i) => (
+								<CardControls
+									quant={a.length}
+									nameOnly
+									card={a[0]}
+									key={`added_${a[0].id + i}`}
+								/>
+							))}
+						</div>
+						<div className="changed">
+							<h4>Changed ({changed.length})</h4>
+							{itemizeDeckList(changed).map((c, i) => (
+								<CardControls
+									quant={c.length}
+									nameOnly
+									card={c[0]}
+									key={`changed_${c[0].id + i}`}
+								/>
 							))}
 						</div>
 					</div>
 				</div>
-				<button onClick={_ => addCard(cart, null, false, true)}>Apply</button>
-			</div>
-		)
-
-		return (
-			<div className="raw">
-				<textarea
-					value={form}
-					rows={"15"}
-					onChange={e => {
-						setForm(e.target.value)
-						clearTimeout(timer)
-						timer = setTimeout(getInterp, 1000)
-					}}
-					placeholder={exText}
-				/>
 			</div>
 		)
 	}

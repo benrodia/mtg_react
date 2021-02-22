@@ -1,9 +1,9 @@
 import {v4 as uuidv4} from "uuid"
-import {useHistory} from "react-router-dom"
 import axios from "axios"
 import * as A from "./types"
 
 import {getLegalCards, newMsg, loadDecks} from "./mainActions"
+import {changeFilters} from "./filtersActions"
 import utilities from "../utilities"
 const {
   INIT_DECK_STATE,
@@ -26,6 +26,8 @@ const {
   creator,
   loadCache,
   fetchCollection,
+  keyInCards,
+  mapColors,
 } = utilities
 
 export const newDeck = (author, {name, format, list, desc}) => (
@@ -34,8 +36,19 @@ export const newDeck = (author, {name, format, list, desc}) => (
 ) => {
   if (author) {
     const slug = createSlug(name, getState().main.decks)
+    const colors = mapColors(list)
+
     axios
-      .post(`/api/decks`, {author, name, format, list, slug})
+      .post(`/api/decks`, {
+        author,
+        name,
+        format,
+        list,
+        slug,
+        colors,
+        feature:
+          (list[0] && list[0].image_uris && list[0].image_uris.art_crop) || "",
+      })
       .then(res => {
         dispatch(newMsg("CREATED DECK", "success"))
         dispatch(loadDecks())
@@ -56,15 +69,17 @@ export const openDeck = slug => (dispatch, getState) => {
       deck.views += 1
     }
 
+    dispatch({
+      type: A.DECK,
+      val: {...deck, unsaved: false, loading: true, list: []},
+    })
     fetchCollection(deck.list).then(list => {
-      const val = {
-        ...deck,
-        list,
-        preChanges: list,
-        clone: null,
-      }
-      cache(A.DECK, "all", val)
-      dispatch({type: A.DECK, val})
+      cache(A.DECK, "all", {...deck, list})
+      dispatch({
+        type: A.DECK,
+        val: {...deck, list, loading: false},
+      })
+      dispatch(changeFilters("tune", list.find(c => c.commander) || list[0]))
     })
   } else {
     cache(A.DECK, "all", INIT_DECK_STATE, false)
@@ -73,7 +88,7 @@ export const openDeck = slug => (dispatch, getState) => {
 }
 
 export const changeDeck = (key, val) => (dispatch, getState) => {
-  const deck = {...getState().deck}
+  let deck = {...getState().deck}
   deck[key] = val
   cache(A.DECK, "all", deck)
   if (
@@ -85,6 +100,7 @@ export const changeDeck = (key, val) => (dispatch, getState) => {
       "privacy",
       "allow_suggestions",
       "published",
+      "custom",
     ].includes(key)
   )
     deck.unsaved = true
@@ -119,10 +135,19 @@ export const saveDeck = _ => (dispatch, getState) => {
     desc,
     allow_suggestions,
     privacy,
+    custom,
+    preferences,
   } = getState().deck
 
   const colors = COLORS("symbol").map(s =>
-    sum(list.map(c => c.mana_cost.split("").filter(i => i === s).length))
+    sum(
+      list.map(
+        c =>
+          audit(c)
+            .mana_cost.split("")
+            .filter(i => i === s).length
+      )
+    )
   )
 
   if (!canPublish(list, format)) published = false
@@ -143,6 +168,8 @@ export const saveDeck = _ => (dispatch, getState) => {
         desc,
         allow_suggestions,
         privacy,
+        custom,
+        preferences,
       })
       .then(res => {
         dispatch(newMsg("SAVED DECK", "success"))
@@ -188,7 +215,7 @@ export const deleteDeck = _id => (dispatch, getState) => {
       .then(res => {
         dispatch(loadDecks())
         cache(A.DECK, "all", INIT_DECK_STATE)
-        dispatch({type: A.DECK, val: INIT_DECK_STATE})
+        dispatch(openDeck(null))
         dispatch(newMsg("DELETED DECK"))
       })
       .catch(err => dispatch(newMsg("Problem deleting deck.", "error")))
@@ -205,31 +232,35 @@ export const changeCard = (card = {}, assign = {}) => (dispatch, getState) =>
     )
   )
 
+export const changeCustom = (name = {}, assign = {}) => (
+  dispatch,
+  getState
+) => {
+  const {custom} = getState().deck
+  const ind = custom.findIndex(c => c.name === name)
+  const newCustom =
+    ind > -1
+      ? custom.map((c, i) => (i === ind ? {...c, ...assign} : c))
+      : [
+          ...custom,
+          {
+            notes: "",
+            category: null,
+            name,
+            ...assign,
+          },
+        ]
+  dispatch(changeDeck("custom", newCustom))
+}
+
 export const addCard = (cards, board, remove, replace) => (
   dispatch,
   getState
 ) => {
   const {list} = getState().deck
-  if (cards.constructor !== Array) cards = [cards]
-  const newCard = card => {
-    return {
-      ...audit(card),
-      customField: card.customField || null,
-      board: board || card.board || MAIN_BOARD,
-      commander: card.commander || false,
-      key: "CardID__" + uuidv4(),
-    }
-  }
-  dispatch(
-    changeDeck(
-      "list",
-      remove
-        ? list.filter(l => cards.filter(card => l.key !== card.key).length)
-        : replace
-        ? cards.map(card => newCard(card))
-        : [...list, ...cards.map(card => newCard(card))]
-    )
-  )
+  const newList = keyInCards(cards, board, remove, replace, list)
+  dispatch(changeDeck("list", newList))
+  dispatch(changeFilters("tune", newList[newList.length - 1]))
 }
 
 export const submitSuggestion = changes => (dispatch, getState) => {

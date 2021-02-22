@@ -84,7 +84,7 @@ export const COLORS = key => {
 			name: "Red",
 			symbol: "R",
 			basic: "Mountain",
-			fill: "#E8795B",
+			fill: "#e34c3b",
 		},
 		{
 			name: "Green",

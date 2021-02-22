@@ -20,13 +20,14 @@ function ErrorFallback({error, componentStack, resetErrorBoundary}) {
     <div role="alert">
       <p>Something went wrong:</p>
       <pre>{error.message}</pre>
-      <pre>{componentStack}</pre>
       <button onClick={resetCache}>
         <h3>Refresh Page</h3>
       </button>
     </div>
   )
 }
+// <pre>{componentStack}</pre>
+
 ReactDOM.render(
   <React.StrictMode>
     <ErrorBoundary FallbackComponent={ErrorFallback}>

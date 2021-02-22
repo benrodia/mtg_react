@@ -1,156 +1,160 @@
 import React from "react"
 import {connect} from "react-redux"
 import actions from "../actions"
-import {Link, useLocation} from "react-router-dom"
+import {Link, NavLink, useLocation, useHistory} from "react-router-dom"
 import {PieChart} from "react-minimal-pie-chart"
 
 import Hamburger from "./Hamburger"
 import BasicSearch from "./BasicSearch"
-import NewDeck from "./NewDeck"
 import DeckFeed from "./DeckFeed"
 import Login from "./Login"
 import DeckNav from "./DeckNav"
+import QuickSearch from "./QuickSearch"
+import ToolTip from "./ToolTip"
+import Icon from "./Icon"
 
 import utilities from "../utilities"
-const {HOME_DIR, subTitle, COLORS, sum} = utilities
+
+const logo = require("../imgs/mtggrip-logo-text.svg")
+const iconDeck = require("../imgs/icon-deck.svg")
+
+const {HOME_DIR, subTitle, COLORS, sum, pageButtons} = utilities
 
 export default connect(
   ({
     auth: {user, isAuthenticated},
     main: {users, decks},
-    deck,
+    deck: {slug, _id, colors, name, unsaved},
     settings: {showSubTitle},
   }) => {
-    return {user, isAuthenticated, users, decks, deck}
+    return {
+      user,
+      isAuthenticated,
+      users,
+      decks,
+      slug,
+      _id,
+      colors,
+      name,
+      unsaved,
+    }
   },
   actions
-)(({user, isAuthenticated, users, decks, deck, openModal, openDeck}) => {
-  const {pathname} = useLocation()
+)(
+  ({
+    user,
+    isAuthenticated,
+    users,
+    decks,
+    slug,
+    _id,
+    colors,
+    name,
+    unsaved,
+    openModal,
+    openDeck,
+    saveDeck,
+    closeDeck,
+  }) => {
+    const {pathname} = useLocation()
+    // <ToolTip message={`Advanced Deck Search`}>
+    //   <NavLink
+    //     to={`${HOME_DIR}/deck/search`}
+    //     className="light-text tab"
+    //     activeClassName={"selected"}>
+    //     Decks
+    //   </NavLink>
+    // </ToolTip>
 
-  return (
-    <nav className="main-header">
-      <div className="title bar even ">
-        <div className="nav bar even mini-spaced-bar">
-          <Link to={HOME_DIR}>MTG Grip</Link>
-          <BasicSearch
-            searchable
-            preview
-            defImg=<span className="icon-search" />
-            placeholder="Search Site"
-            options={[...users, ...decks]}
-            renderAs={({object, name, slug}) => (
-              <div className="bar even">
-                <Link to={`${HOME_DIR}/${object}/${slug}`}>
-                  <span
-                    className={`icon-${object === "user" ? "user" : "layers"}`}>
-                    {name}
-                  </span>
-                </Link>
-              </div>
-            )}
-          />
+    return (
+      <nav className="main-header mini-spaced-bar tab-switch">
+        <div className="left flex-row even">
+          <ToolTip message={`Main Dashboard`}>
+            <NavLink
+              to={`${HOME_DIR}/dash`}
+              className={"title light-text tab bar pad"}
+              activeClassName={"selected"}>
+              <Icon src={logo} className="logo" />
+            </NavLink>
+          </ToolTip>
+          {pageButtons.map(({label, link, icon, desc}) => (
+            <ToolTip message={desc}>
+              <NavLink
+                className="tab"
+                to={`${HOME_DIR}/${link}`}
+                activeClassName={"selected"}>
+                {label}
+              </NavLink>
+            </ToolTip>
+          ))}
         </div>
-        <div className="right bar even spaced-bar">
+        <div className="flex-row even mini-spaced-bar max nav-search-bar">
+          <QuickSearch />
+        </div>
+        <div className="right flex-row even mini-spaced-bar">
           {isAuthenticated ? (
-            <div className="bar even">
-              <div className="bar">
-                <button
-                  className="small-button bar even"
-                  onClick={_ =>
-                    openModal({title: "New Deck", content: <NewDeck />})
-                  }>
-                  <span className="icon-plus" />
-                </button>
-                <button
-                  className="small-button bar even"
-                  onClick={_ =>
-                    openModal({title: "Open Deck", content: <DeckFeed you />})
-                  }>
-                  <span className="icon-folder-open" />
-                </button>
-              </div>
-            </div>
-          ) : null}
-          {!deck._id ? null : <DeckNav />}
+            <div className="flex-row even">
+              {_id ? (
+                <>
+                  <NavLink
+                    to={`${HOME_DIR}/deck/${slug}`}
+                    className={"tab icon flex-row even mini-spaced-bar"}
+                    activeClassName={"selected"}>
+                    <ToolTip message={`View "${name}"`}>
+                      <span className="flex-row even mini-spaced-bar">
+                        <PieChart
+                          data={COLORS("fill").map((color, i) => {
+                            return {value: colors[i], color}
+                          })}
+                          startAngle={270}
+                        />
+                        <h3>
+                          {name.length > 13 ? `${name.slice(0, 10)}...` : name}
+                        </h3>
+                      </span>
+                    </ToolTip>
+                    {unsaved ? (
+                      <ToolTip message={`Save Changes to "${name}"`}>
+                        <span onClick={saveDeck}>
+                          <button className="inverse-small-button icon-unsaved" />
+                        </span>
+                      </ToolTip>
+                    ) : (
+                      <ToolTip message={`Close "${name}"`}>
+                        <span onClick={openDeck}>
+                          <Link
+                            className="light-text warning-button inverse-small-button icon-cancel"
+                            to={HOME_DIR}
+                          />
+                        </span>
+                      </ToolTip>
+                    )}
+                  </NavLink>
+                </>
+              ) : null}
 
-          {isAuthenticated ? (
-            <div className="to-profile">
-              <Link to={`${HOME_DIR}/user/${user.slug}`}>
-                <p className="bar even">
-                  {user.name}
-                  <span className="icon-user-circle-o" />
-                </p>
-              </Link>
+              <ToolTip message={`${user.name}'s Profile`}>
+                <NavLink
+                  to={`${HOME_DIR}/user/${user.slug}`}
+                  className={"icon-user-circle-o light-text  tab"}
+                  activeClassName={"selected"}
+                />
+              </ToolTip>
+              <ToolTip message={`Display and Playtester settings`}>
+                <NavLink
+                  to={`${HOME_DIR}/settings`}
+                  className={"icon-cog light-text  tab"}
+                  activeClassName={"selected"}
+                />
+              </ToolTip>
             </div>
           ) : (
-            <div className="log-in-nav">
-              <div className="bar center mini-spaced-bar">
-                <button
-                  className={`inver-button smaller-button`}
-                  onClick={_ =>
-                    openModal({
-                      title: "Log In or Sign Up",
-                      content: <Login inModal />,
-                    })
-                  }>
-                  Log In
-                </button>
-              </div>
-            </div>
+            <Link to={`${HOME_DIR}/login`}>
+              <button className={`inver-button smaller-button`}>Log In</button>
+            </Link>
           )}
         </div>
-      </div>
-    </nav>
-  )
-})
-// <Link to={`${HOME_DIR}/advanced`}>
-//   <button
-//     className={`small-button icon-cog ${
-//       pathname.includes("/advanced") && "selected"
-//     }`}>
-//     Advanced Search
-//   </button>
-// </Link>
-
-// const deckNav = _ => {
-//   const deckName = (
-//     <p className="sub-title bar mini-spaced-bar">
-//       <span className="icon">
-//         <PieChart
-//           data={COLORS("fill").map((color, i) => {
-//             return {value: deck.colors[i], color}
-//           })}
-//           startAngle={270}
-//         />
-//       </span>
-//       {deck.name || "Untitled"}
-//     </p>
-//   )
-
-//   const deckOptions = (
-//     <Hamburger vert size={"all"} drop={"down"} before={deckName}>
-//       <Link to={`${HOME_DIR}/deck/${deck.slug}`}>
-//         <button className="icon-eye small-button">View</button>
-//       </Link>
-//       <Link to={`${HOME_DIR}/build`}>
-//         <button className="icon-cog small-button">Build</button>
-//       </Link>
-//       <Link to={`${HOME_DIR}/deck/${deck.slug}/playtest`}>
-//         <button className="icon-play small-button">Playtest</button>
-//       </Link>
-//       <Link to={`${HOME_DIR}`}>
-//         <button
-//           className="icon-cancel small-button"
-//           onClick={_ => openDeck(null)}>
-//           Close
-//         </button>
-//       </Link>
-//     </Hamburger>
-//   )
-
-//   if (deck._id) {
-//     return (
-//       <div className="deck-nav bar mini-spaced-bar even">{deckOptions}</div>
-//     )
-//   } else return null
-// }
+      </nav>
+    )
+  }
+)

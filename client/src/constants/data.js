@@ -2,6 +2,34 @@ import {COLORS, CARD_TYPES, HOME_DIR, RARITY_COLOR} from "./definitions"
 import {SINGLETON} from "./greps"
 import {pluralize} from "../functions/text"
 
+export const pageButtons = [
+	{
+		label: "Create",
+		icon: require("../imgs/icon-deck-new.svg"),
+		link: `deck/new`,
+		desc: `Create a new deck from scratch, from a file, or procedurally from a seed card. (Create an account to make stuff!)`,
+		auth: true,
+	},
+	{
+		label: "Decks",
+		icon: require("../imgs/icon-deck-search.svg"),
+		link: `deck/search`,
+		desc: `Browse all user-submitted decklists.`,
+	},
+	{
+		label: "Cards",
+		icon: require("../imgs/icon-card-search.svg"),
+		link: `card/search`,
+		desc: `Find any MTG card using a tag-search system. Also add cards to your cart and export without signing in.`,
+	},
+	{
+		label: "Playtest",
+		icon: require("../imgs/icon-play.svg"),
+		link: `playtest`,
+		desc: `Playtest your favorite lists. PvP coming soon.`,
+	},
+]
+
 function importAll(r) {
 	let images = {}
 	r.keys().map(item => {
@@ -48,19 +76,20 @@ export const STACKTIONS = [
 	"Triggered Ability",
 ]
 
-export const OPs = numeric =>
-	numeric ? ["=", ">", "<", ">=", "<="] : ["AND", "OR", "NOT"]
+export const OPs = (numeric, legality) =>
+	numeric
+		? ["=", ">", "<", ">=", "<=", "!="]
+		: legality
+		? ["Legal", "Not Legal", "Restricted", "Banned"]
+		: ["AND", "OR", "NOT"]
+const numOpt = [
+	...[...Array(17)].map((_, i) => "" + i),
+	"POWER",
+	"TOUGHNESS",
+	"CMC",
+]
 
 export const advancedFields = [
-	// {
-	// 	name: "Format",
-	// 	trait: "format",
-	// 	options: FORMATS,
-	// },
-	{
-		name: "Name",
-		trait: "name",
-	},
 	{
 		name: "Colors",
 		trait: "colors",
@@ -68,36 +97,121 @@ export const advancedFields = [
 		options: COLORS("symbol"),
 	},
 	{
+		name: "Color Identity",
+		trait: "color_identity",
+		colored: true,
+		options: COLORS("symbol"),
+	},
+	{
+		name: "# of Colors",
+		trait: "colors",
+		numeric: true,
+		options: [...Array(6)].map((_, i) => i + ""),
+	},
+	{
+		name: "Name",
+		trait: "name",
+		ex: 'ex: "Witness"',
+	},
+
+	{
 		name: "Text",
 		trait: "oracle_text",
+		ex: 'ex: "When ~ enters"',
 	},
+
 	{
 		name: "Types",
 		trait: "type_line",
+		ex: 'ex. "Creature" or "Human"',
 	},
 	{
 		name: "Keywords",
 		trait: "keywords",
 	},
 	{
-		name: "Rarity",
-		trait: "rarity",
-		options: ["common", "uncommon", "rare", "mythic"],
+		name: "# of Keywords",
+		trait: "keywords",
+		numeric: true,
+		options: [...Array(10)].map((_, i) => i + ""),
 	},
+	{
+		name: "Mana Cost",
+		trait: "mana_cost",
+		ex: 'ex. "1GG"',
+	},
+
 	{
 		name: "CMC",
 		trait: "cmc",
 		numeric: true,
+		options: numOpt.filter(n => n !== "CMC"),
 	},
+
 	{
 		name: "Power",
 		trait: "power",
 		numeric: true,
+		options: numOpt.filter(n => n !== "POWER"),
 	},
 	{
 		name: "Toughness",
 		trait: "toughness",
 		numeric: true,
+		options: numOpt.filter(n => n !== "TOUGHNESS"),
+	},
+	{
+		name: "Loyalty",
+		trait: "loyalty",
+		numeric: true,
+		options: numOpt,
+	},
+	{
+		name: "Layout",
+		trait: "layout",
+		options: [
+			"normal",
+			"split",
+			"flip",
+			"transform",
+			"modal_dfc",
+			"meld",
+			"leveler",
+			"saga",
+			"adventure",
+		],
+	},
+	{
+		name: "Flavor Text",
+		trait: "flavor_text",
+		ex: 'ex. "Remembers ever word"',
+	},
+	{
+		name: "Rarity",
+		trait: "rarity",
+		options: ["common", "uncommon", "rare", "mythic"],
+	},
+	// {
+	// 	name: "Artist",
+	// 	trait: "artist",
+	// 	desc:
+	// 		"Note: Only the most recent printings of cards are included in search, not every art piece is represented.",
+	// 	ex: "ex. John Avon",
+	// },
+	{
+		name: "Price",
+		trait: "prices",
+		subTrait: "usd",
+		numeric: true,
+		desc:
+			"In US dollars, rounded down. Note: Price-data is only for the most recent printing, and many entries are incomplete.",
+		options: [...Array(100)].map((_, i) => i + ""),
+	},
+	{
+		name: "Legalities",
+		trait: "legalities",
+		legality: true,
+		options: FORMATS,
 	},
 ]
 
@@ -350,13 +464,13 @@ export const EXAMPLE_DECK_DESCS = [
 
 const priceThresholds = [
 	{val: 2, label: "bulk"},
-	{val: 5, label: "< $2"},
-	{val: 15, label: "< $5"},
-	{val: 25, label: "< $15"},
-	{val: 50, label: "< $25"},
-	{val: 100, label: "< $50"},
-	{val: 300, label: "< $100"},
-	{val: 600, label: "< $300"},
+	{val: 5, label: "$2 +"},
+	{val: 15, label: "$5 +"},
+	{val: 25, label: "$15 +"},
+	{val: 50, label: "$25 +"},
+	{val: 100, label: "$50 +"},
+	{val: 300, label: "$100 +"},
+	{val: 600, label: "$300 +"},
 	{val: 1000, label: "BLOOD MONEY"},
 ]
 
@@ -368,16 +482,16 @@ export const FILTER_TERMS = [
 		valNames: CARD_TYPES.map(T => pluralize(T)),
 		icon: true,
 	},
-	// {
-	// 	name: "Custom",
-	// 	key: "customField",
-	// 	other: 'unsorted'
-	// },
+	{
+		name: "Custom",
+		key: "custom",
+		other: "uncategorized",
+	},
 	{
 		name: "CMC",
 		key: "cmc",
 		vals: [...Array(20)].map((a, i) => i),
-		valNames: NUMBER_WORDS.map(n => n + " drop"),
+		valNames: NUMBER_WORDS.map(n => n + " drops"),
 	},
 	{
 		name: "Color",
@@ -417,10 +531,36 @@ export const FILTER_TERMS = [
 		key: "frame",
 	},
 	{
+		name: "Layout",
+		key: "layout",
+	},
+	{
 		name: "Rarity",
 		key: "rarity",
 		vals: ["mythic", "rare", "uncommon", "common"],
 		fill: ["mythic", "rare", "uncommon", "common"].map(r => RARITY_COLOR[r]),
+	},
+]
+export const THEN_FILTERS = [
+	{
+		name: "Name",
+		key: "name",
+	},
+	{
+		name: "CMC",
+		key: "cmc",
+	},
+	{
+		name: "Type",
+		key: "type_line",
+	},
+	{
+		name: "Power",
+		key: "power",
+	},
+	{
+		name: "Toughness",
+		key: "toughness",
 	},
 ]
 

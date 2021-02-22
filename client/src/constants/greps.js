@@ -1,5 +1,6 @@
 import {Q} from "../functions/cardFunctions"
 import {matchStr} from "../functions/utility"
+import {pluralize, titleCaps} from "../functions/text"
 import {COUNTERS, NUMBER_WORDS} from "./data"
 import {COLORS, CARD_TYPES} from "./definitions"
 
@@ -12,7 +13,8 @@ export const TOKEN_NAME = t => {
 		? t.name
 		: `${t.power}/${t.toughness} ${color.toLowerCase()} ${t.name}`
 }
-export const SINGLETON = format => format === "commander" || format === "brawl"
+export const SINGLETON = format =>
+	["commander", "brawl", "duel"].includes(format)
 
 export const MANA = {
 	source: card => !!Q(card, "oracle_text", ["{T}", "add "], true),
@@ -162,97 +164,615 @@ export const HAS_FLASH = card =>
 	card &&
 	(!!Q(card, "type_line", "instant") || !!Q(card, "oracle_text", "flash"))
 
-const CEAL = ["creature", "artifact", "enchantment", "land"]
+const CAEL = ["creature", "artifact", "enchantment", "land"]
+
+export const TRIGGERS = [
+	"enter",
+	"leave",
+	"attack",
+	"block",
+	"die",
+	"discard",
+	"mill",
+	"sacrifice",
+	"draw",
+	"exile",
+	"play",
+	"of untap",
+	"upkeep",
+	"draw step",
+	"main phase",
+	"combat",
+	"post-combat main",
+	"end step",
+	"end of turn",
+]
+
+export const SUBJECTS = [
+	"~",
+	"you",
+	"player",
+	"opponent",
+	...CARD_TYPES,
+	"permanent",
+]
+
+export const EFFECTS = []
+
+const factions = [
+	{
+		n: "Azorius",
+		c: ["W", "U"],
+	},
+	{
+		n: "Orzhov",
+		c: ["W", "B"],
+	},
+	{
+		n: "Boros",
+		c: ["W", "R"],
+	},
+	{
+		n: "Selesnya",
+		c: ["W", "G"],
+	},
+	{
+		n: "Dimir",
+		c: ["U", "B"],
+	},
+	{
+		n: "Izzet",
+		c: ["U", "R"],
+	},
+	{
+		n: "Simic",
+		c: ["U", "G"],
+	},
+	{
+		n: "Rakdos",
+		c: ["B", "R"],
+	},
+	{
+		n: "Golgari",
+		c: ["B", "G"],
+	},
+	{
+		n: "Gruul",
+		c: ["R", "G"],
+	},
+	{
+		n: "Bant",
+		c: ["W", "U", "G"],
+	},
+	{
+		n: "Esper",
+		c: ["W", "U", "B"],
+	},
+	{
+		n: "Grixis",
+		c: ["U", "B", "R"],
+	},
+	{
+		n: "Jund",
+		c: ["B", "R", "G"],
+	},
+	{
+		n: "Naya",
+		c: ["W", "R", "G"],
+	},
+	{
+		n: "Mardu",
+		c: ["W", "R", "B"],
+	},
+	{
+		n: "Temur",
+		c: ["U", "R", "G"],
+	},
+	{
+		n: "Abzan",
+		c: ["W", "B", "G"],
+	},
+	{
+		n: "Jeskai",
+		c: ["W", "U", "R"],
+	},
+	{
+		n: "Sultai",
+		c: ["U", "B", "G"],
+	},
+	{
+		n: "Chaos",
+		c: ["U", "B", "R", "G"],
+	},
+	{
+		n: "Aggression",
+		c: ["W", "B", "R", "G"],
+	},
+	{
+		n: "Altruism",
+		c: ["W", "U", "R", "G"],
+	},
+	{
+		n: "Growth",
+		c: ["W", "U", "B", "G"],
+	},
+	{
+		n: "Artifice",
+		c: ["W", "U", "B", "R"],
+	},
+	{
+		n: "Rainbow",
+		c: ["W", "U", "B", "R", "G"],
+	},
+]
+
+const FACTIONS = ({n, c}) => {
+	return {
+		name: `${titleCaps(n)} (${c.join("")})`,
+		type: "faction",
+		grep: {
+			"Color Identity": {
+				AND: c,
+				NOT: COLORS("symbol").filter(CO => !c.includes(CO) && CO !== "C"),
+			},
+		},
+	}
+}
+
+export const tribes = [
+	"Elf",
+	"Dragon",
+	"Zombie",
+	"Goblin",
+	"Vampire",
+	"Wizard",
+	"Sliver",
+	"Dinosaur",
+	"Human",
+	"Cat",
+	"Knight",
+	"Eldrazi",
+	"Angel",
+	"Elemental",
+	"Merfolk",
+	"Pirate",
+	"Rogue",
+	"Warrior",
+	"Shapeshifter",
+	"Wall",
+	"Spirit",
+	"God",
+	"Demon",
+	"Ally",
+	"Cleric",
+	"Faerie",
+	"Soldier",
+	"Bird",
+	"Wolf",
+	"Beast",
+	"Avatar",
+	"Shaman",
+	"Rebel",
+	"Devil",
+	"Skeleton",
+	"Dog",
+]
+export const TRIBE = (t = "") => {
+	const ves = ["Wolf", "Werewolf", "Elf"]
+	const noplu = ["Merfolk", "Eldrazi"]
+	const plued = ves.includes(t)
+		? t.slice(0, t.length - 1) + "ves"
+		: pluralize(t, noplu.filter(n => n === t).length)
+	return {
+		name: titleCaps(plued),
+		type: "tribe",
+		grep: {
+			Types: {OR: [t, "instant", "sorcery", "artifact", "enchantment", "land"]},
+			Text: {
+				AND: [t],
+				OR: [
+					"put a +1/+1 counter on",
+					"you control get",
+					"for each",
+					`whenever a`,
+					"search your library for ",
+				],
+			},
+		},
+	}
+}
 
 export const ADVANCED_GREPS = [
+	...factions.map(f => FACTIONS(f)),
+	// ...tribes.map(t => TRIBE(t)),
 	{
-		name: "ETB Trigger",
+		name: "Mana Fix",
+		type: "archetype",
 		grep: {
 			Text: {
-				AND: ["when", "[CARDNAME]", "enters the battlefield,"],
+				OR: ["} or {", "}, or {", "of any color"],
+				NOT: ["paid with either"],
 			},
 		},
 	},
 	{
-		name: "Death Trigger",
-		grep: {
-			Text: {AND: ["when", "creature", "dies,"]},
-		},
-	},
-	{
-		name: "Mana Fixer",
-		grep: {
-			Colors: {AND: ["C"]},
-			Text: {AND: ["add "], OR: ["} or {", "}, or {", "of any"]},
-		},
-	},
-	{
 		name: "Mana Rock",
+		type: "archetype",
 		grep: {
-			CMC: {"<=": [4]},
 			Types: {AND: ["artifact"]},
 			Text: {AND: ["{T}: add "], OR: ["} or {", "}, or {", "of any", "{C}{C}"]},
 		},
 	},
 	{
-		name: "Counter Spell",
+		name: "ETB",
+		alias: ["enters the battlefield"],
+		desc: "Has an ability that triggers when it enters the battlefield",
+		type: "trigger",
 		grep: {
-			Types: {AND: ["instant"]},
-			Colors: {AND: ["U"]},
-			Text: {AND: ["counter target", "spell"]},
+			Text: {
+				AND: ["when ~ enters the battlefield"],
+			},
 		},
 	},
 	{
-		name: "Spot Removal",
+		name: "Upkeep",
+		type: "trigger",
 		grep: {
-			CMC: {"<=": [4]},
-			Types: {AND: ["instant"]},
 			Text: {
-				AND: ["target creature"],
-				OR: ["destroy", "exile", "to its owner's hand"],
+				AND: ["upkeep"],
+				OR: ["beginning of", "end of"],
+			},
+		},
+	},
+	{
+		name: "Death",
+		type: "trigger",
+		grep: {
+			Text: {OR: ["creature dies", "~ dies"]},
+		},
+	},
+	{
+		name: "Enter Tapped",
+		type: "modifier",
+		grep: {
+			Text: {AND: ["~ enters the battlefield tapped"]},
+		},
+	},
+	{
+		name: "Untap",
+		type: "effect",
+		grep: {
+			Text: {
+				OR: ["untap ~", "untap target", "untap each", "untap all"],
+				NOT: ["doesn't untap", "not to untap"],
+			},
+		},
+	},
+	{
+		name: "Grower",
+		alias: ["self buff", "reinforce"],
+		type: "archetype",
+		grep: {
+			Text: {
+				OR: ["~ gets +", "~ gains", "counter on ~", "counters on ~"],
+			},
+		},
+	},
+	{
+		name: "Counter",
+		desc: "Counter target spell/ability",
+		type: "effect",
+		grep: {
+			Text: {AND: ["counter target"], OR: ["spell", "activated", "triggered"]},
+		},
+	},
+	{
+		name: "Destroy",
+		type: "effect",
+		grep: {
+			// CMC: {"<=": [4]},
+			// Types: {AND: ["instant"]},
+			Text: {
+				AND: ["destroy target"],
+				OR: [...CAEL, "planeswalker", "permanent"],
+			},
+		},
+	},
+	// {
+	// 	name: "Naturalize",
+	// 	type: "effect",
+	// 	grep: {
+	// 		Text: {
+	// 			AND: ["target", "artifact", "enchantment"],
+	// 			OR: ["destroy", "exile", "to its owner's hand"],
+	// 		},
+	// 	},
+	// },
+	{
+		name: "Land Hate",
+		type: "effect",
+		grep: {
+			Text: {
+				AND: [" land"],
+				OR: ["destroy target", "destroy all", "sacrifices", "don't untap"],
+			},
+		},
+	},
+	{
+		name: "Discard",
+		type: "effect",
+		grep: {
+			Colors: {OR: ["B"]},
+			Text: {
+				AND: ["discard"],
+				OR: ["look at", "a card", "two cards", "at random"],
 			},
 		},
 	},
 	{
 		name: "Board Wipe",
+		type: "effect",
 		grep: {
 			Text: {
 				AND: ["destroy all"],
+				OR: ["creatures", "enchantments", "artifacts", "planeswalkers"],
+			},
+		},
+	},
+	{
+		name: "Amplifier",
+		type: "modifier",
+		grep: {
+			Text: {
+				OR: ["double", , "triple", "an additional", "twice", "three times"],
+				NOT: ["double strike", "pay an additional", "an additional cost"],
+			},
+		},
+	},
+	{
+		name: "Additional Cost",
+		type: "modifier",
+
+		grep: {
+			Text: {
+				OR: ["as an additional cost"],
+			},
+		},
+	},
+	{
+		name: "Alternate Cost",
+		type: "modifier",
+		grep: {
+			Text: {
+				AND: ["cost"],
+				OR: ["cast this spell for ", "instead of paying", "rather than pay"],
+			},
+		},
+	},
+	{
+		name: "+1 Counter",
+		type: "effect",
+		grep: {
+			Text: {
+				AND: ["put", "+1/+1 counter"],
 				OR: [
-					"creatures",
-					"lands",
-					"planeswalkers",
-					"artifacts",
-					"enchantments",
+					"a +1",
+					"two +1",
+					"three +1",
+					"four +1",
+					"that many +1",
+					"equal to",
 				],
 			},
 		},
 	},
 	{
-		name: "Flying Men",
+		name: "-1 Counter",
+		type: "effect",
 		grep: {
-			CMC: {"<=": [2]},
-			Types: {AND: ["creature"]},
-			Keywords: {OR: ["flying", "shadow", "fear", "intimidate"]},
+			Text: {
+				AND: ["put", "-1/-1 counter"],
+				OR: [
+					"a -1",
+					"two -1",
+					"three -1",
+					"four -1",
+					"that many -1",
+					"equal to",
+				],
+			},
 		},
 	},
 	{
-		name: "Commander",
+		name: "Tax",
+		type: "archetype",
 		grep: {
-			Types: {AND: ["Legendary"], OR: ["Creature"]},
-			Colors: {OR: COLORS("symbol")},
+			Text: {
+				OR: ["unless that player pays", "more to cast"],
+				NOT: ["you pay", "this spell costs"],
+			},
+		},
+	},
+	{
+		name: "Pain Draw",
+		type: "effect",
+		grep: {
+			Text: {
+				AND: ["lose", "life"],
+				OR: ["draw", "put into hand"],
+			},
+		},
+	},
+	{
+		name: "Cost Reduction",
+		type: "modifier",
+		grep: {
+			Text: {
+				AND: ["cost", "less to cast"],
+			},
+		},
+	},
+	// {
+	// 	name: "Evasion",
+	// 	grep: {
+	// 		Types: {AND: ["creature"]},
+	// 		Keywords: {
+	// 			OR: [
+	// 				"flying",
+	// 				"shadow",
+	// 				"fear",
+	// 				"intimidate",
+	// 				"skulk",
+	// 				"menace",
+	// 				"protection",
+	// 				"horsemanship",
+	// 			],
+	// 		},
+	// 	},
+	// },
+	{
+		name: "Ritual",
+		type: "archetype",
+
+		grep: {
+			Types: {OR: ["instant", "sorcery"]},
+			Text: {AND: ["Add ", "mana"], NOT: ["token"]},
 		},
 	},
 	{
 		name: "Cantrip",
+		type: "archetype",
 		grep: {
-			Types: {OR: ["instant", "sorcery"]},
-			CMC: {"<=": [2]},
-			Text: {AND: ["draw a card"]},
+			// Types: {OR: ["instant", "sorcery"]},
+			Text: {
+				OR: [
+					"draw a card.",
+					"Draw a card at the beginning of next turn's upkeep",
+				],
+				NOT: ["cycling"],
+			},
+		},
+	},
+	{
+		name: "Dig",
+		type: "effect",
+		grep: {
+			Text: {OR: ["scry", "look at the top", "then discard", "surveil"]},
+		},
+	},
+	{
+		name: "Replacement",
+		type: "modifier",
+		grep: {
+			Text: {AND: ["would", "instead"]},
+		},
+	},
+	{
+		name: "Redirect",
+		type: "effect",
+		grep: {
+			Text: {AND: ["change", "target"]},
+		},
+	},
+	// {
+	// 	name: "Self Improvement",
+	// 	type: "archetype",
+	// 	grep: {
+	// 		Text: {OR: ["counter on ~", "counters on ~", "~ gains", "~ gets +"]},
+	// 	},
+	// },
+	// {
+	// 	name: "Buff",
+	// 	grep: {
+	// 		Text: {AND: ["creature"], OR: ["gain", "gets +"]},
+	// 	},
+	// },
+	// {
+	// 	name: "Debuff",
+	// 	grep: {
+	// 		Text: {AND: ["creature"], OR: ["lose", "/-"]},
+	// 	},
+	// },
+
+	{
+		name: "Burn",
+		type: "archetype",
+		grep: {
+			Text: {
+				AND: ["~ deals"],
+				OR: ["creature", "player", "planeswalker", "any target"],
+			},
+			Types: {
+				OR: ["instant", "sorcery"],
+			},
+		},
+	},
+	{
+		name: "Pinger",
+		type: "archetype",
+		grep: {
+			Text: {
+				AND: ["~ deals 1 damage"],
+			},
+			Types: {
+				OR: ["creature"],
+			},
+		},
+	},
+	{
+		name: "Emblem",
+		type: "modifier",
+		grep: {
+			Text: {
+				OR: ["an emblem", "for the rest of the game"],
+				NOT: ["ascend"],
+			},
+		},
+	},
+	{
+		name: "Draw",
+		type: "trigger",
+		grep: {
+			Text: {
+				OR: [
+					"whenever you draw",
+					"whenever a player draws",
+					"whenever an opponent draws",
+					"draw step",
+				],
+				NOT: ["skip"],
+			},
+		},
+	},
+	{
+		name: "Cast",
+		type: "trigger",
+		grep: {
+			Text: {
+				OR: [
+					"whenever you cast",
+					"whenever a player casts",
+					"whenever an opponent casts",
+				],
+			},
+		},
+	},
+	{
+		name: "Discard",
+		type: "trigger",
+		grep: {
+			Text: {
+				OR: [
+					"whenever you discard",
+					"whenever a player discards",
+					"whenever an opponent discards",
+				],
+			},
 		},
 	},
 	{
 		name: "Wheel",
+		type: "effect",
 		grep: {
 			Text: {
 				AND: ["each player", "discards", "hand", "draws", "cards"],
@@ -262,22 +782,29 @@ export const ADVANCED_GREPS = [
 	},
 	{
 		name: "Sac Outlet",
+		type: "archetype",
+
 		grep: {
-			Types: {OR: CEAL},
-			Text: {AND: ["sacrifice a", "creature", ":"]},
-		},
-	},
-	{
-		name: "Fetchland",
-		grep: {
-			Types: {AND: ["land"]},
 			Text: {
-				AND: ["{T}, pay 1 life, sacrifice", "search your library"],
+				AND: [":"],
+				OR: ["sacrifice a", "sacrifice two", "sacrifice X"],
+				NOT: ["sacrifice ~"],
 			},
 		},
 	},
+	// {
+	// 	name: "Fetchland",
+	// 	grep: {
+	// 		Types: {AND: ["land"]},
+	// 		Text: {
+	// 			AND: ["{T}, pay 1 life, sacrifice", "search your library"],
+	// 		},
+	// 	},
+	// },
 	{
 		name: "Mana Dork",
+		type: "archetype",
+
 		grep: {
 			CMC: {"<=": [3]},
 			Types: {AND: ["creature"]},
@@ -286,101 +813,504 @@ export const ADVANCED_GREPS = [
 	},
 	{
 		name: "Win the Game",
+		type: "effect",
+
 		grep: {
 			Text: {AND: ["you win the game"]},
 		},
 	},
 	{
 		name: "Lose the Game",
+		type: "effect",
 		grep: {
 			Text: {AND: ["you lose the game"]},
 		},
 	},
 	{
 		name: "Card Fall",
+		type: "trigger",
 		grep: {
 			Text: {
 				AND: ["whenever", " enters the battlefield under your control"],
-				OR: CEAL,
+				OR: CAEL,
 			},
 		},
 	},
 	{
 		name: "Blink",
+		type: "effect",
 		grep: {
 			Text: {
-				AND: ["exile target creature", "return", "to the battlefield"],
+				AND: [
+					"exile",
+					"return",
+					"to the battlefield",
+					"control at the beginning of",
+				],
 			},
 		},
 	},
 	{
-		name: "Bolt Test",
+		name: "Flicker",
+		type: "effect",
 		grep: {
-			Toughness: {">=": [4]},
+			Text: {
+				AND: ["exile", "then return", "to the battlefield"],
+			},
 		},
 	},
 	{
-		name: "Bolt",
+		name: "Bounce",
+		type: "effect",
 		grep: {
-			Colors: {AND: ["R"]},
-			Text: {AND: ["deal", "3 damage", "target"]},
+			Text: {
+				AND: ["return"],
+				OR: ["to its owner's hand", "to their owners' hands"],
+			},
 		},
 	},
+
 	{
 		name: "Clone",
+		type: "effect",
+
 		grep: {
-			Types: {OR: CEAL},
+			Types: {OR: CAEL},
 			Text: {
-				AND: ["enter", "as a copy of"],
-				OR: CEAL,
+				AND: ["~", "a copy of"],
+				OR: ["enters the battlefield as", "becomes"],
 			},
 		},
 	},
 	{
-		name: "Create Token",
+		name: "Token Spawn",
+		type: "effect",
 		grep: {
 			Text: {
 				AND: ["create", "token"],
-				OR: [],
 			},
 		},
 	},
 	{
 		name: "Tutor",
+		type: "effect",
 		grep: {
 			Text: {
-				AND: ["search your library", "card", "hand"],
-				OR: ["a", ...CEAL, "basic"],
+				NOT: ["name", "converted mana cost"],
+				AND: ["search your library for", "card"],
 			},
 		},
 	},
 	{
-		name: "Gain Life",
+		name: "Mill",
+		type: "effect",
 		grep: {
-			Text: {AND: ["you gain life"]},
+			Text: {
+				OR: ["into your graveyard", "into their graveyard", "mill"],
+			},
 		},
 	},
 	{
-		name: "Combat Trick",
+		name: "Grave Hate",
+		type: "effect",
 		grep: {
-			Types: {AND: ["instant"]},
 			Text: {
-				AND: ["gets", "/", "until end"],
-				OR: ["target", "creatures"],
+				AND: ["graveyard"],
+				OR: ["exile all cards", "exile target card", "exile each"],
+			},
+		},
+	},
+	{
+		name: "Recursion",
+		type: "effect",
+		grep: {
+			Text: {
+				AND: ["from your graveyard"],
+				OR: ["hand", "to the battlefield", "cast"],
+			},
+		},
+	},
+	{
+		name: "Land Ramp",
+		type: "effect",
+		grep: {
+			Text: {
+				AND: ["search your library", "land", "battlefield"],
+			},
+		},
+	},
+	// {
+	// 	name: "Drain Life",
+	// 	type: "effect",
+	// 	grep: {
+	// 		Text: {
+	// 			AND: ["you gain", "lose", "life"],
+	// 		},
+	// 	},
+	// },
+	// {
+	// 	name: "Combat Trick",
+	// 	type: "archetype",
+	// 	grep: {
+	// 		Types: {AND: ["instant"]},
+	// 		Text: {
+	// 			AND: ["creature"],
+	// 			OR: ["attacking", "blocking"],
+	// 		},
+	// 	},
+	// },
+	{
+		name: "Combat",
+		type: "trigger",
+		grep: {
+			Text: {
+				OR: ["beginning of combat", "end of combat"],
+			},
+		},
+	},
+	{
+		name: "Attack",
+		type: "trigger",
+		grep: {
+			Text: {
+				AND: ["whenever"],
+				OR: [
+					"~ attacks",
+					"attacks,",
+					"a creature attacks",
+					"one or more creatures attack",
+					"or attacks",
+				],
+			},
+		},
+	},
+	{
+		name: "Block",
+		type: "trigger",
+		grep: {
+			Text: {
+				AND: ["whenever"],
+				OR: [
+					"~ blocks",
+					"a creature blocks",
+					"one or more creatures block",
+					"or blocks",
+				],
 			},
 		},
 	},
 	{
 		name: "Extra Turn",
+		type: "effect",
 		grep: {
 			Text: {AND: ["take an extra turn"]},
 		},
 	},
 	{
 		name: "Anthem",
+		type: "modifier",
 		grep: {
-			Text: {AND: ["creatures you control get", " +1/+1"]},
-			Types: {OR: ["enchantment", "creature"]},
+			Text: {AND: ["creatures you control"], OR: ["get", "have"]},
+			Types: {NOT: ["instant", "sorcery"]},
+		},
+	},
+	{
+		name: "Equipment Matters",
+		type: "archetype",
+		grep: {
+			Text: {OR: ["for each equipment", "is equipped", "equipped creatures"]},
+		},
+	},
+	{
+		name: "Auras Matter",
+		type: "archetype",
+		grep: {
+			Text: {OR: ["for each aura", "is enchanted", "enchanted creatures"]},
+		},
+	},
+	{
+		name: "Power Matters",
+		type: "archetype",
+		grep: {
+			Text: {
+				AND: ["power"],
+				OR: ["equal to", "or greater", "the total "],
+				NOT: ["toughness are each"],
+			},
+			Colors: {NOT: ["W"]},
+		},
+	},
+	{
+		name: "Toughness Matters",
+		type: "archetype",
+		grep: {
+			Text: {
+				AND: ["toughness"],
+				OR: ["equal to", "or greater"],
+				NOT: ["power and"],
+			},
+		},
+	},
+	{
+		name: "Colors Matter",
+		type: "archetype",
+		grep: {
+			Text: {
+				OR: [
+					"for each color",
+					"for each basic land type",
+					"of its colors",
+					"number of colors",
+					"converge",
+				],
+			},
+		},
+	},
+	{
+		name: "Spells Matter",
+		type: "archetype",
+		grep: {
+			Text: {
+				AND: ["instant", "sorcery"],
+				OR: ["Whenever you cast an", "for each", "equal to the number of"],
+			},
+		},
+	},
+	{
+		name: "Grave Matters",
+		type: "archetype",
+		grep: {
+			Text: {
+				AND: ["graveyard"],
+				OR: ["for each", "equal to the number of", "is put into"],
+			},
+		},
+	},
+	{
+		name: "Keyword Matters",
+		type: "archetype",
+		grep: {
+			Text: {
+				AND: ["creatures you control with"],
+				NOT: ["with power", "with total", "with the chosen"],
+			},
+		},
+	},
+
+	{
+		name: "Theft",
+		type: "effect",
+		grep: {
+			Text: {AND: ["gain control"], OR: [...CAEL, "permanent", "player"]},
+		},
+	},
+	{
+		name: "Tap-Down",
+		type: "effect",
+		grep: {
+			Text: {
+				AND: ["n't untap during", "untap step"],
+				OR: ["target", "controls"],
+			},
+		},
+	},
+	{
+		name: "Fog",
+		type: "effect",
+		grep: {
+			Text: {
+				AND: ["prevent", "all", "damage"],
+				OR: ["dealt to", "dealt by", "combat"],
+			},
+		},
+	},
+	{
+		name: "Life Gain",
+		type: "trigger",
+		grep: {
+			Text: {
+				AND: ["life"],
+				OR: [
+					"whenever you gain",
+					"whenever a player gain",
+					"an opponent gain",
+					"an opponent would gain",
+					"if you gained",
+					"if you would gain",
+				],
+			},
+		},
+	},
+	{
+		name: "Life Loss",
+		type: "trigger",
+		grep: {
+			Text: {
+				AND: ["life"],
+				OR: [
+					"whenever you lose",
+					"whenever a player loses",
+					"whenever an opponent loses",
+					"if you lost",
+					"if you would lose",
+				],
+			},
+		},
+	},
+	{
+		name: "Gain Life",
+		type: "effect",
+		grep: {
+			Text: {
+				AND: ["gain", "life"],
+				OR: [
+					...NUMBERS.slice(1, 9).map(i => `${i}`),
+					"that much life",
+					"life equal to",
+				],
+			},
+		},
+	},
+	{
+		name: "Lose Life",
+		type: "effect",
+		grep: {
+			Text: {
+				AND: ["lose", "life"],
+				OR: [
+					...NUMBERS.slice(1, 9).map(i => `${i}`),
+					"that much life",
+					"life equal to",
+				],
+			},
+		},
+	},
+	{
+		name: "Choose",
+		type: "modifier",
+		grep: {
+			Text: {
+				AND: ["Choose", "—"],
+				OR: ["one", "two", "or more", "entwine"],
+			},
+		},
+	},
+	// {
+	// 	name: "Hate Bear",
+	// 	type: "archetype",
+	// 	grep: {
+	// 		Text: {
+	// 			OR: ["can't"],
+	// 			NOT: [" can't lose"],
+	// 		},
+	// 		Types: {AND: ["creature"]},
+	// 	},
+	// },
+	{
+		name: "Beatstick",
+		type: "archetype",
+		grep: {
+			Types: {AND: ["creature"]},
+			Power: {">=": ["5"]},
+			Keywords: {
+				OR: [
+					"flying",
+					"menace",
+					"trample",
+					"haste",
+					"first strike",
+					"annihilator",
+				],
+			},
+		},
+	},
+	{
+		name: "Bulk Rare",
+		type: "archetype",
+		grep: {
+			Rarity: {OR: ["rare", "mythic"]},
+			Price: {
+				"<": [1],
+			},
+		},
+	},
+	{
+		name: "Chaff",
+		type: "archetype",
+		grep: {
+			Rarity: {OR: ["common"]},
+			Price: {
+				"<": [0.25],
+			},
+		},
+	},
+
+	{
+		name: "Expensive",
+		type: "archetype",
+		grep: {
+			Price: {
+				">=": [20],
+			},
+		},
+	},
+
+	{
+		name: "Conditional",
+		type: "modifier",
+		grep: {
+			Text: {
+				OR: ["if ", "as long as"],
+				NOT: ["would"],
+			},
+		},
+	},
+
+	{
+		name: "Keyword Soup",
+		type: "archetype",
+		grep: {
+			"# of Keywords": {
+				">=": [4],
+			},
+		},
+	},
+	{
+		name: "Multicolor",
+		type: "archetype",
+		grep: {
+			"# of Colors": {
+				">=": [2],
+			},
+		},
+	},
+	{
+		name: "Animate",
+		type: "effect",
+		grep: {
+			Text: {
+				AND: ["becomes a", "/", "creature"],
+			},
+		},
+	},
+	{
+		name: "Tamper-Proof",
+		type: "archetype",
+		grep: {
+			Text: {
+				OR: [
+					"Hexproof",
+					"Shroud",
+					"Indestructible",
+					"protection",
+					"Persist",
+					"Undying",
+					"return ~ to the battlefield",
+					"regenerate ~",
+					"split second",
+					"can't be countered",
+				],
+			},
 		},
 	},
 ]

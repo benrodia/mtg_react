@@ -65,6 +65,7 @@ export default connect(({main: {sets}, deck, filters: {board, basic}}) => {
 		const [open, setOpen] = useState(false)
 		const featureImg =
 			feature || (list[0] && list[0].image_uris && list[0].image_uris.art_crop)
+
 		const pickFeatured = (
 			<div className="block mini-spaced-grid bar wrap">
 				{list.unique("id").map((c, i) => (
@@ -81,70 +82,88 @@ export default connect(({main: {sets}, deck, filters: {board, basic}}) => {
 		)
 
 		const inner = (
-			<div className="inner">
-				<div className="bar spaced-bar">
-					<div className="col mini-block">
-						<h4>Featured Card</h4>
-						<span
-							className="feature icon"
-							onClick={_ =>
-								openModal({title: "Featured Card", content: pickFeatured})
-							}>
-							<div className="change-img flex-centered">
-								<span>Change</span>
-							</div>
-							<img src={featureImg} alt="" />
-						</span>
+			<div className="bar">
+				<span className="feature-full">
+					<div
+						style={{display: canEdit() || "none"}}
+						className={`change-img flex-centered`}
+						onClick={_ =>
+							openModal({title: "Featured Card", content: pickFeatured})
+						}>
+						<span>Change</span>
 					</div>
-					<div className="col mini-block">
-						<h4>Name</h4>
-						<input
-							type="text"
-							value={name}
-							onChange={e => changeDeck("name", e.target.value)}
-						/>
-					</div>
+					<img src={featureImg} alt="" />
+				</span>
 
-					<div className="col mini-block">
-						<h4>Format</h4>
-						<BasicSearch
-							options={FORMATS}
-							self={format}
-							labelBy={f => titleCaps(f)}
-							callBack={f => changeDeck("format", f)}
-						/>
-					</div>
-					<div className="col mini-block">
-						<h4>Visibility</h4>
-						<BasicSearch
-							self={privacy}
-							options={["Public", "Unlisted", "Private"]}
-							callBack={p => changeDeck("privacy", p)}
-						/>
-					</div>
-					<div className="col mini-block">
-						<h4>Allow Suggestions</h4>
-						<BasicSearch
-							self={helpTiers[allow_suggestions || 0]}
-							options={helpTiers}
-							callBack={p =>
-								changeDeck("allow_suggestions", helpTiers.indexOf(p))
-							}
-						/>
-					</div>
+				<div className="col mini-block">
+					<h4>Name</h4>
+					<input
+						type="text"
+						value={name}
+						onChange={e => changeDeck("name", e.target.value)}
+					/>
+				</div>
+
+				<div className="col mini-block">
+					<h4>Format</h4>
+					<BasicSearch
+						options={FORMATS}
+						self={format}
+						labelBy={f => titleCaps(f)}
+						callBack={f => changeDeck("format", f)}
+					/>
 				</div>
 				<div className="col mini-block">
-					<h4>Description</h4>
-					<MdEditor
-						value={desc}
-						style={{height: "20rem"}}
-						onChange={md => changeDeck("desc", md.text)}
-						renderHTML={md => <Markdown>{md}</Markdown>}
+					<h4>Visibility</h4>
+					<BasicSearch
+						self={privacy}
+						options={["Public", "Unlisted", "Private"]}
+						callBack={p => changeDeck("privacy", p)}
+					/>
+				</div>
+				<div className="col mini-block">
+					<h4>Allow Suggestions</h4>
+					<BasicSearch
+						self={helpTiers[allow_suggestions || 0]}
+						options={helpTiers}
+						callBack={p =>
+							changeDeck("allow_suggestions", helpTiers.indexOf(p))
+						}
 					/>
 				</div>
 			</div>
 		)
 
-		return <div className="manage-list col spaced-bar">{inner}</div>
+		return <div className="manage-list col">{inner}</div>
 	}
 )
+// const featureImg =
+// 	feature || (list[0] && list[0].image_uris && list[0].image_uris.art_crop)
+// const pickFeatured = (
+// 	<div className="block mini-spaced-grid bar wrap">
+// 		{list.unique("id").map((c, i) => (
+// 			<div
+// 				key={c.id + i}
+// 				onClick={_ => {
+// 					openModal(null)
+// 					changeDeck("feature", c.image_uris.art_crop)
+// 				}}>
+// 				<Card card={c} />
+// 			</div>
+// 		))}
+// 	</div>
+// )
+
+// <div className="col mini-block">
+// 	<h4>Featured Card</h4>
+// 	<span
+// 		className="feature icon"
+// 		onClick={_ =>
+// 			openModal({title: "Featured Card", content: pickFeatured})
+// 		}>
+// 		<div className="change-img flex-centered">
+// 			<span>Change</span>
+// 		</div>
+// 		<img src={featureImg} alt="" />
+// 	</span>
+// </div>
