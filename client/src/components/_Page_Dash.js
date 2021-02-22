@@ -113,19 +113,20 @@ export default connect(
 					</div>
 				</section>
 				<DeckPreview deck={rnd(decks.filter(d => d.list.length >= 60))} />
-				<div>
-					<h2>Hot Combos!</h2>
-					<div className="bar spaced-grid">
-						{cardCombos.map(cc => (
-							<div className="bar">
-								{cc.map(n => (
-									<CardControls card={Q(cardData, "name", n)[0] || {}} />
-								))}
-							</div>
-						))}
-					</div>
-				</div>
 			</div>
 		)
 	}
 )
+
+// <div>
+// 	<h2>Hot Combos!</h2>
+// 	<div className="bar spaced-grid">
+// 		{cardCombos.map(cc => (
+// 			<div className="bar">
+// 				{cc.map(n => (
+// 					<CardControls card={Q(cardData, "name", n)[0] || {}} />
+// 				))}
+// 			</div>
+// 		))}
+// 	</div>
+// </div>
