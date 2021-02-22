@@ -10,6 +10,7 @@ mongoose
 	.connect(process.env.MONGO_URI, {
 		useNewUrlParser: true,
 		autoIndex: false,
+		// useMongoClient: true,
 	})
 	.then(_ => console.log("\nMongoDB Connected...\n"))
 	.catch(err => console.error(err))
