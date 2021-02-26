@@ -73,6 +73,12 @@
   -webkit-appearance: none;
   margin: 0;
 }
+.text-shadow {
+  text-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.5);
+}
+.box-shadow {
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.5);
+}
 .clean-button {
   border: none;
   border-radius: 0.25rem;
@@ -1408,6 +1414,9 @@ html {
 .dash-buttons .dash-button {
   width: 10rem;
   height: 14rem;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   border-radius: 1rem;
   border: 1px solid #eff5ff;
   font-size: 2rem;
@@ -1822,15 +1831,19 @@ html {
 .cart {
   position: fixed;
   z-index: 10;
-  bottom: 0;
+  top: 2.5rem;
   right: 0;
-  width: 22rem;
+  width: 10rem;
+  transition: 0.3s;
   max-height: calc(100vh - 2.5rem);
 }
+.cart > * {
+  transition: opacity 0.3s;
+}
 .cart.open {
-  top: 2.5rem;
-  background: rgba(0, 0, 0, 0.5);
+  width: 22rem;
   height: calc(100vh - 2.5rem);
+  background: rgba(0, 0, 0, 0.5);
   overflow-x: hidden;
   overflow-y: auto;
 }
@@ -1840,8 +1853,8 @@ html {
   width: 22rem;
   background: #4e4352;
 }
-.cart.open .list-inner {
-  margin-top: 5rem;
+.cart.open .board-inner {
+  margin-top: 10rem;
 }
 .more-less {
   background: linear-gradient(transparent, #4e4352);
@@ -2003,7 +2016,6 @@ html {
   justify-content: flex-start;
   align-items: center;
   transition: 0.3s ease-out;
-  background: linear-gradient(-45deg, rgba(0, 0, 0, 0.5), #4e4352);
   position: fixed;
   top: 3rem;
   left: 0;
@@ -2181,6 +2193,11 @@ html {
   box-shadow: 0 0 1rem rgba(0, 0, 0, 0.5);
   margin: 1rem auto;
 }
+.tester {
+  overflow: hidden;
+  margin-top: 3rem;
+  min-height: calc(100 - 3rem - 2.5rem);
+}
 .tester .zone {
   min-width: 7.14rem;
 }
@@ -2251,14 +2268,18 @@ html {
   color: #eff5ff;
   text-shadow: 0 0 1rem #020817;
 }
-.tester .test-counters {
+.tester .test-controls {
   position: fixed;
   top: 2.5rem;
+}
+.tester .test-counters,
+.tester .test-controls {
   background: #4e4352;
   width: 100%;
   padding: 0.5rem;
 }
-.tester .test-counters p {
+.tester .test-counters p,
+.tester .test-controls p {
   font-family: "Beleren";
   margin-left: 0.5rem;
   display: flex;
@@ -2267,20 +2288,25 @@ html {
   align-items: center;
   justify-content: flex-start;
 }
-.tester .test-counters .turn {
+.tester .test-counters .turn,
+.tester .test-controls .turn {
   width: 10rem;
 }
-.tester .test-counters .counter .discrete-input {
+.tester .test-counters .counter .discrete-input,
+.tester .test-controls .counter .discrete-input {
   height: 1.25rem;
 }
-.tester .test-counters .counter:hover * {
+.tester .test-counters .counter:hover *,
+.tester .test-controls .counter:hover * {
   color: #e6c46e;
 }
-.tester .test-counters .mana-counters {
+.tester .test-counters .mana-counters,
+.tester .test-controls .mana-counters {
   display: flex;
   flex-flow: row nowrap;
 }
-.tester .test-counters .mana-counters .counter input {
+.tester .test-counters .mana-counters .counter input,
+.tester .test-controls .mana-counters .counter input {
   width: 1rem;
 }
 .tester .game-log {
@@ -2351,28 +2377,41 @@ html {
 .tester .exile .card-container {
   animation-name: slide-in;
 }
-.tester .player-one-row {
+.tester .player-row {
   width: calc(100vw);
 }
-.tester .player-one-row .hand {
+.tester .player-row .hand {
   width: 100%;
   transition: 0.3s ease;
 }
-.tester .player-one-row .hand .row {
+.tester .player-row .hand .row {
   height: calc(10rem);
   box-shadow: none;
   background: rgba(0, 0, 0, 0.6);
 }
-.tester .player-one-row .hand .row .drop-slot {
+.tester .player-row .hand .row .drop-slot {
   width: 100%;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(0.125rem, max-content));
 }
-.tester .player-one-row .hand .row .drop-slot .card-container {
+.tester .player-row .hand .row .drop-slot .card-container {
   animation-name: flip-in;
 }
-.tester .player-one-row .hand .row .drop-slot .card-container:hover {
+.tester .player-row .hand .row .drop-slot .card-container:hover {
   transform: scale(1.3) translateY(-1rem);
+}
+.tester .player-two-row {
+  transform: rotate(180deg);
+  transform-origin: center;
+}
+.tester .player-two-row * {
+  transform-origin: center;
+}
+.tester .player-two-row .context-menu,
+.tester .player-two-row .title,
+.tester .player-two-row .test-counters,
+.tester .player-two-row .tool-tip {
+  transform: rotate(180deg);
 }
 .tester .battlefield {
   width: 100%;
@@ -2425,6 +2464,8 @@ html {
   pointer-events: all;
   filter: drop-shadow(0 0 1rem #020817);
   margin: 1rem 0.5rem 0;
+}
+.tester .stack .item p {
   max-width: 15rem;
 }
 .tester .stack .item .header {

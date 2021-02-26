@@ -92,15 +92,19 @@
 .cart {
 	position: fixed;
 	z-index: 10;
-	bottom: 0;
+	top: @headerH;
 	right: 0;
-	width: 22rem;
-
+	width: 10rem;
+	transition: 0.3s;
 	max-height: calc(100vh - @headerH);
+	& > * {
+		transition: opacity 0.3s;
+	}
 	&.open {
-		top: @headerH;
-		background: @opaque;
+		width: 22rem;
 		height: calc(100vh - @headerH);
+		// bottom: 0;
+		background: @opaque;
 		overflow-x: hidden;
 		overflow-y: auto;
 		.cart-head {
@@ -109,8 +113,8 @@
 			width: 22rem;
 			background: @dark;
 		}
-		.list-inner {
-			margin-top: 5rem;
+		.board-inner {
+			margin-top: 10rem;
 		}
 	}
 }

@@ -117,9 +117,11 @@ Array.prototype.orderBy = function (key, asc) {
 }
 
 Array.prototype.unique = function (key) {
+  if (!this || !this.length) return []
   let b = []
   for (var i = 0; i < this.length; ++i) {
-    if (key && !b.map(b => b[key]).includes(this[i][key])) b.push(this[i])
+    if (!b.find(b => (key ? b[key] === this[i][key] : b === this[i])))
+      b.push(this[i])
   }
   return b
 }

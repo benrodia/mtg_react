@@ -17,14 +17,26 @@ import BasicSearch from "./BasicSearch"
 import CardControls from "./CardControls"
 import ContextMenu from "./ContextMenu"
 
-export default connect(({playtest: {deck, look, size, hideHand}}) => {
-  return {deck, look, size, hideHand}
-}, actions)(
+export default connect(
   ({
+    main: {
+      pos: [x, y, w, h],
+    },
+    playtest: {players, first_seat, second_seat, look, cols, hideHand},
+  }) => {
+    return {w, players, first_seat, second_seat, look, cols, hideHand}
+  },
+  actions
+)(
+  ({
+    P2,
     zone,
-    deck,
+    w,
+    players,
+    first_seat,
+    second_seat,
     look,
-    size,
+    cols,
     hideHand,
     context,
     cardHeadOnly,
@@ -38,32 +50,25 @@ export default connect(({playtest: {deck, look, size, hideHand}}) => {
     spawnToken,
     toggleHand,
   }) => {
-    const zoneDiv = useRef("")
     const bottom = useRef(0)
-    const [sizeFlag, setSizeFlag] = useState(false)
-    const getSize = _ => {
-      return {
-        cols: Math.floor(zoneDiv.current.clientWidth / CARD_SIZE.w),
-        rows: Math.floor(zoneDiv.current.clientHeight / CARD_SIZE.h),
-      }
-    }
-    const shouldUpdateSize =
-      context === "grid" &&
-      !sizeFlag &&
-      zoneDiv.current &&
-      Math.floor(zoneDiv.current.clientWidth / CARD_SIZE.w) !== size.cols
-    if (shouldUpdateSize) {
-      gameState("size", getSize())
-      setSizeFlag(true)
-      setTimeout(_ => setSizeFlag(false), 1000)
-    }
+    useEffect(
+      _ => {
+        const size = Math.floor(w / CARD_SIZE.w)
+        if (size !== cols) {
+          gameState("cols", size)
+        }
+      },
+      [w]
+    )
+
     useEffect(
       _ => {
         bottom.current && bottom.current.scrollIntoView()
       },
       [bottom]
     )
-
+    const p = P2 ? second_seat : first_seat
+    const deck = (players[p] || {}).deck || []
     const cards = deck.filter(c => c.zone === zone).orderBy("order")
 
     const slot = (col, row) => {
@@ -72,9 +77,42 @@ export default connect(({playtest: {deck, look, size, hideHand}}) => {
           ? cards.filter(c => col === c.col && row === c.row)
           : context === "list" || zone === "Command"
           ? cards
-          : cards.splice(cards.length - (look || 1), look || 1).map(c => {
+          : cards.slice(-(look || 1)).map(c => {
               return {...c, face_down: zone === "Library" && !look}
             })
+
+      const renderCard = (card, ind) => {
+        const tutorable = tutorableCards(card, deck)
+        return (
+          <CardControls
+            key={card.key}
+            card={card}
+            context={"playtest"}
+            noHover={zone === "Hand"}
+            faceDown={
+              zone === "Hand" &&
+              (hideHand || (card.owner !== first_seat && !card.revealed))
+            }
+            cardHeadOnly={cardHeadOnly}
+            contextMenu={ZONES.filter(
+              z =>
+                z !== zone && (deck.find(c => c.commander) || z !== "Command")
+            ).map(z => {
+              return {
+                label: cardMoveMsg(card, z, true),
+                callBack: _ => moveCard({card, dest: z}),
+              }
+            })}
+            itemType={card.commander ? ItemTypes.COMMANDER : ItemTypes.CARD}
+            style={{
+              position: context !== "list" ? "absolute" : "default",
+              top: (zone === "Library" ? -ind : ind) + "rem",
+              left: (zone === "Library" ? ind * 3 : ind) + "rem",
+              zIndex: ind,
+            }}
+          />
+        )
+      }
 
       return (
         <DropSlot
@@ -87,32 +125,57 @@ export default connect(({playtest: {deck, look, size, hideHand}}) => {
               ? ItemTypes.COMMANDER
               : [ItemTypes.CARD, ItemTypes.COMMANDER]
           }
-          callBack={card => moveCard({card, dest: zone, col, row})}>
+          callBack={card => moveCard({card, dest: zone, col, row})}
+          className={""}>
           {cardStack[0] && cardStack.map((c, i) => renderCard(c, i))}
         </DropSlot>
       )
     }
 
-    const Zone = _ => {
-      const inner = [...Array(context === "grid" ? 4 : 1)].map((und, row) => (
-        <div key={"row" + row} className={`row row-${row}`}>
-          {[...Array(context === "grid" ? size.cols : 1)].map((und, col) =>
-            slot(col, row)
-          )}
+    const inner = [...Array(context === "grid" ? 2 : 1)].map((und, row) => (
+      <div key={"row" + row} className={`row row-${row}`}>
+        {[...Array(context === "grid" ? cols || 1 : 1)].map((und, col) =>
+          slot(col, row)
+        )}
+      </div>
+    ))
+
+    const libCont = z => (
+      <div className="library-cont">
+        <div className="library-controls bar">
+          <button
+            className={"smaller-button"}
+            onClick={_ => handleShuffle(false)}>
+            Shuffle
+          </button>
+          <div className="lookBtn">
+            <button
+              className={"smaller-button warning-button"}
+              onClick={_ => gameState("look", 0)}
+              style={{display: look || "none"}}>
+              X
+            </button>
+            <button
+              className={"smaller-button"}
+              onClick={_ => gameState("look", 1, true)}>
+              Top {look ? look : ""}
+            </button>
+          </div>
         </div>
-      ))
-      return (
-        <div
-          key={zone}
-          className={`zone ${zone.toLowerCase()} ${context}`}
-          ref={zoneDiv}>
-          <div className="title bar even">
-            {zone !== "Hand" ? null : (
-              <h2
-                className={`clicky-icon icon-eye${hideHand ? "-off" : ""}`}
-                onClick={_ => toggleHand(hideHand)}
-              />
-            )}
+        {z}
+      </div>
+    )
+
+    return (
+      <div key={zone} className={`zone ${zone.toLowerCase()} ${context}`}>
+        <div className="title bar even">
+          {zone !== "Hand" || P2 ? null : (
+            <h2
+              className={`clicky-icon icon-eye${hideHand ? "-off" : ""}`}
+              onClick={_ => toggleHand(hideHand)}
+            />
+          )}
+          {zone === "Battlefield" ? null : (
             <BasicSearch
               searchable
               preview
@@ -120,85 +183,55 @@ export default connect(({playtest: {deck, look, size, hideHand}}) => {
               placeholder={`${zone} (${cards.length})`}
               callBack={c => moveCard({card: c, dest: "Hand"})}
             />
-          </div>
-          {context !== "grid" ? (
-            inner
-          ) : (
-            <div className="inner">
-              <div ref={bottom} />
-              {inner}
-            </div>
           )}
         </div>
-      )
-    }
-
-    const renderCard = (card, ind) => {
-      const tutorable = tutorableCards(card, deck)
-      return (
-        <ContextMenu
-          options={ZONES.filter(
-            z => z !== zone && (deck.find(c => c.commander) || z !== "Command")
-          ).map(z => {
-            return {
-              label: cardMoveMsg(card, z, true),
-              callBack: _ => moveCard({card, dest: z}),
-            }
-          })}>
-          <CardControls
-            key={card.key}
-            card={card}
-            context={"playtest"}
-            faceDown={zone === "Hand" && hideHand}
-            cardHeadOnly={cardHeadOnly}
-            itemType={card.commander ? ItemTypes.COMMANDER : ItemTypes.CARD}
-            style={{
-              position: context !== "list" ? "absolute" : "default",
-              top: (zone === "Library" ? -ind : ind) + "rem",
-              left: (zone === "Library" ? ind * 3 : ind) + "rem",
-              zIndex: ind,
-            }}>
-            {tutorable.from !== zone ? null : (
-              <BasicSearch
-                options={tutorable.cards}
-                placeholder="Tutor"
-                callBack={c => {
-                  if (tutorable.sac) cardClick(card, true, "Graveyard")
-                  cardClick(c, false, tutorable.dest)
-                  handleShuffle()
-                }}
-              />
-            )}
-            {!(zone === "Library" && look) ? null : (
-              <div>
-                <button
-                  className="small-button"
-                  onClick={_ =>
-                    moveCard({card, dest: "Library", bottom: true})
-                  }>
-                  Bottom
-                </button>
-                <button
-                  className="small-button"
-                  onClick={_ => moveCard({card, dest: "Graveyard"})}>
-                  Graveyard
-                </button>
-              </div>
-            )}
-            {zone !== "Battlefield" ? null : (
-              <>
-                <Counters card={card} />
-                <ManaSource card={card} />
-                {!Q(card, "type_line", "Token") ? null : (
-                  <button onClick={_ => spawnToken(card)}>Clone</button>
-                )}
-              </>
-            )}
-          </CardControls>
-        </ContextMenu>
-      )
-    }
-
-    return Zone()
+        {context !== "grid" ? (
+          inner
+        ) : (
+          <div className="inner">
+            <div ref={bottom} />
+            {zone === "Hand" ? libCont(inner) : inner}
+          </div>
+        )}
+      </div>
+    )
   }
 )
+
+// {tutorable.from !== zone ? null : (
+//   <BasicSearch
+//     options={tutorable.cards}
+//     placeholder="Tutor"
+//     callBack={c => {
+//       if (tutorable.sac) cardClick(card, true, "Graveyard")
+//       cardClick(c, false, tutorable.dest)
+//       handleShuffle()
+//     }}
+//   />
+// )}
+
+// {!(zone === "Library" && look) ? null : (
+//   <div>
+//     <button
+//       className="small-button"
+//       onClick={_ =>
+//         moveCard({card, dest: "Library", bottom: true})
+//       }>
+//       Bottom
+//     </button>
+//     <button
+//       className="small-button"
+//       onClick={_ => moveCard({card, dest: "Graveyard"})}>
+//       Graveyard
+//     </button>
+//   </div>
+// )}
+// {zone !== "Battlefield" ? null : (
+//   <>
+//     <Counters card={card} />
+//     <ManaSource card={card} />
+//     {!Q(card, "type_line", "Token") ? null : (
+//       <button onClick={_ => spawnToken(card)}>Clone</button>
+//     )}
+//   </>
+// )}

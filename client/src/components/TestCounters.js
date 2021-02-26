@@ -13,12 +13,9 @@ export default connect(({playtest, settings: {game_log}}) => {
 }, actions)(
   ({
     game_log,
-    deck,
+    players,
+    active,
     turn,
-    look,
-    life,
-    eLife,
-    mana,
     phase,
     handleCost,
     handleCombat,
@@ -32,6 +29,8 @@ export default connect(({playtest, settings: {game_log}}) => {
     handleMana,
     cardState,
   }) => {
+    const {deck, look, life, mana} = players[active] || {}
+
     return (
       <div className="test-counters flex-row">
         <CounterInput
@@ -45,37 +44,18 @@ export default connect(({playtest, settings: {game_log}}) => {
           {COLORS("symbol").map((C, ind) => (
             <CounterInput
               key={`counter${C}`}
-              value={mana[ind]}
-              addOnClick={1 + mana[ind]}
+              value={mana ? mana[ind] : 0}
+              addOnClick={1 + (mana ? mana[ind] : 0)}
               icon={`ms ms-${C.toLowerCase()}`}
               callBack={e =>
                 handleMana(
-                  COLORS().map((c, i) => (i === ind ? e - mana[ind] : 0))
+                  COLORS().map((c, i) =>
+                    i === ind ? e - (mana ? mana[ind] : 0) : 0
+                  )
                 )
               }
             />
           ))}
-        </div>
-        {!game_log ? null : <GameLog />}
-        <div className="library-controls bar">
-          <button
-            className={"smaller-button"}
-            onClick={_ => handleShuffle(false)}>
-            Shuffle
-          </button>
-          <div className="lookBtn">
-            <button
-              className={"smaller-button warning-button"}
-              onClick={_ => gameState("look", 0)}
-              style={{display: look || "none"}}>
-              X
-            </button>
-            <button
-              className={"smaller-button"}
-              onClick={_ => gameState("look", 1, true)}>
-              Top {look ? look : ""}
-            </button>
-          </div>
         </div>
       </div>
     )

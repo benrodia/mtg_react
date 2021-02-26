@@ -33,6 +33,7 @@ export default connect(
 	actions
 )(
 	({
+		noLink,
 		decks,
 		users,
 		cardData,
@@ -83,6 +84,14 @@ export default connect(
 			})
 		}
 
+		const authors = _id
+			? [
+					{name: "---", _id: "---"},
+					users.find(u => u._id === _id),
+					...users.filter(u => u._id !== _id).orderBy("name"),
+			  ]
+			: [{name: "---", _id: "---"}, ...users.orderBy("name")]
+
 		return (
 			<div className="browse">
 				<h1 className="block">Deck Search</h1>
@@ -102,8 +111,11 @@ export default connect(
 						<BasicSearch
 							searchable
 							preview
-							self={creator(author).name || "---"}
-							options={[{name: "---", _id: "---"}, ...users.orderBy("name")]}
+							self={`${creator(author).name || "---"}${
+								author === _id ? " (you)" : ""
+							}`}
+							options={authors}
+							labelBy={a => (a._id === _id ? `${a.name} (you)` : a.name)}
 							callBack={f => changeDeckSearch({author: f._id})}
 						/>
 					</div>
@@ -171,7 +183,12 @@ export default connect(
 							<Paginated
 								options={results}
 								render={d => (
-									<DeckTile key={"TILE__" + d._id} deck={d} newDeck={d.new} />
+									<DeckTile
+										key={"TILE__" + d._id}
+										deck={d}
+										newDeck={d.new}
+										noLink={noLink}
+									/>
 								)}
 								sorts={[
 									{name: "Recent", key: "updated"},

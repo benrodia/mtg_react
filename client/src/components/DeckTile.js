@@ -22,6 +22,7 @@ export default connect(
 	actions
 )(
 	({
+		noLink,
 		deck: {
 			_id,
 			author,
@@ -38,6 +39,7 @@ export default connect(
 		openDeck,
 		deleteDeck,
 		addCart,
+		openModal,
 	}) => {
 		const [contextLink, setContextLink] = useState(null)
 		const colorData =
@@ -48,7 +50,12 @@ export default connect(
 
 		const deckLink = `${HOME_DIR}/deck/${slug}`
 
-		if (contextLink) useHistory().push(deckLink)
+		if (contextLink) {
+			if (noLink) {
+				openDeck(slug, true)
+				openModal(null)
+			} else useHistory().push(contextLink)
+		}
 
 		return (
 			<div key={_id} className={"deck-tile"}>
@@ -77,7 +84,7 @@ export default connect(
 						},
 					]}>
 					<div className="flex-row">
-						<Link to={deckLink}>
+						<span onClick={_ => setContextLink(deckLink)}>
 							<img
 								className="feature"
 								src={feature || CARD_SLEEVES["_basic.png"]}
@@ -86,29 +93,31 @@ export default connect(
 							<div className="pie">
 								<PieChart data={colorData} startAngle={270} />
 							</div>
-						</Link>
-						<div className="play-button">
-							<Link to={`${deckLink}/playtest`}>
-								<button className=" icon-play" title="Playtest Deck" />
-							</Link>
+						</span>
+						<div
+							onClick={_ => setContextLink(`${deckLink}/playtest`)}
+							className="play-button">
+							<button className=" icon-play" title="Playtest Deck" />
 						</div>
 					</div>
 					<div className="info mini-spaced-col">
-						<Link to={deckLink}>
-							<h3
-								className={`deck-title ${
-									helpWanted >= 3 && "icon-exclamation attention"
-								}`}>
-								{name}
-							</h3>
-						</Link>
+						<h3
+							onClick={_ => setContextLink(deckLink)}
+							className={`deck-title ${
+								helpWanted >= 3 && "icon-exclamation attention"
+							}`}>
+							{name}
+						</h3>
 						<div className="bar even mini-spaced-bar">
 							<p className="tag">{format}</p>
 						</div>
 						<div className="bar even mini-spaced-bar">
-							<Link to={`${HOME_DIR}/user/${creator(author).slug}`}>
+							<span
+								onClick={_ =>
+									setContextLink(`${HOME_DIR}/user/${creator(author).slug}`)
+								}>
 								<button className="user-button">{creator(author).name}</button>
-							</Link>
+							</span>
 							<p className="asterisk">Updated {ago(new Date(updated))}</p>
 						</div>
 					</div>

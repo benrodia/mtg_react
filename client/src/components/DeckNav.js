@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef} from "react"
-import {Link, useParams, useLocation} from "react-router-dom"
+import {Link, useParams, useLocation, useHistory} from "react-router-dom"
 import {connect} from "react-redux"
 import ago from "s-ago"
 import {PieChart} from "react-minimal-pie-chart"
@@ -68,7 +68,11 @@ export default connect(({main: {sets}, deck, filters: {board, basic}}) => {
 		cloneDeck,
 		deleteDeck,
 	}) => {
+		const [contextLink, setContextLink] = useState(null)
 		const {pathname} = useLocation()
+
+		contextLink && useHistory().push(contextLink)
+
 		const rightBar = _ => (
 			<div className="quick-import flex-row even thin-block">
 				{!canEdit() ? null : (
@@ -137,48 +141,51 @@ export default connect(({main: {sets}, deck, filters: {board, basic}}) => {
 		// </Link>
 
 		return (
-			<div className="deck-nav bar even spaced-bar">
-				<Title />
-				<div className="play-button">
-					<Link to={`${HOME_DIR}/deck/${slug}/playtest`}>
-						<button className="icon-play" title="Playtest Deck" />
-					</Link>
-				</div>
-				<div className="col">
-					<DeckInfo />
-					<div className="bar mini-spaced-bar">
-						{unsaved ? (
-							<Link to={`${HOME_DIR}/deck/${slug}`}>
-								<button
-									title="Save Deck"
-									className={`small-button ${
-										canPublish(list, format) ? "success" : ""
-									}-button icon-help-circled`}
-									onClick={saveDeck}>
-									Save
-								</button>
-							</Link>
-						) : (
-							<Link to="/">
-								<button
-									className={`small-button warning-button disabled icon-cancel`}>
-									Saved
-								</button>
-							</Link>
-						)}
-						<div className="flex-row even">
-							<p className="asterisk">Updated {ago(new Date(updated))}</p>
-						</div>
+			<div className="deck-nav flex-row spread even">
+				<div className="bar even spaced-bar">
+					<Title />
+					<div className="play-button">
+						<Link to={`${HOME_DIR}/playtest/lobby`}>
+							<button className="icon-play" title="Playtest Deck" />
+						</Link>
 					</div>
+					<DeckInfo />
 				</div>
 				{!canEdit() ? null : (
-					<Link to={HOME_DIR}>
+					<div className="col end thin-pad">
+						<div className="bar mini-spaced-bar">
+							{unsaved ? (
+								<Link to={`${HOME_DIR}/deck/${slug}`}>
+									<button
+										title="Save Deck"
+										className={`small-button ${
+											canPublish(list, format) ? "success" : ""
+										}-button icon-help-circled`}
+										onClick={saveDeck}>
+										Save
+									</button>
+								</Link>
+							) : (
+								<Link to="/">
+									<button
+										className={`small-button warning-button disabled icon-cancel`}>
+										Saved
+									</button>
+								</Link>
+							)}
+						</div>
+
 						<button
-							className="inverse-small-button warning-button icon-trash"
-							onClick={_ => deleteDeck(_id)}>
-							Delete Deck
+							className="inverse-small-button warning-button icon-trash thin-pad"
+							onClick={_ => {
+								if (window.confirm("Delete Deck?")) {
+									deleteDeck(_id)
+									setContextLink(HOME_DIR)
+								}
+							}}>
+							Delete
 						</button>
-					</Link>
+					</div>
 				)}
 			</div>
 		)

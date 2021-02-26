@@ -2,23 +2,34 @@ import React from "react"
 import {connect} from "react-redux"
 import actions from "../actions"
 import {formatText} from "../functions/text"
+import CardControls from "./CardControls"
 
 function TheStack({resStack, stack}) {
   const stackItems = [...stack].reverse()
 
   return (
     <div className={`stack ${!stack.length ? "empty" : ""} `}>
-      {stackItems.map((s, i) => {
-        const {key, src, text, effectType, options} = s
+      {stackItems.map(({key, src, text, effectType, options, cards}, i) => {
         const active = i === 0
+        console.log("THE STACK", text, src, effectType, cards)
         return (
-          <div key={key} style={{opacity: 1 - 0.2 * i}} className={`item action alert ${!active ? "disabled" : ""}`}>
+          <div
+            key={key}
+            style={{opacity: 1 - 0.2 * i}}
+            className={`item action alert ${!active ? "disabled" : ""}`}>
             <div className="msg2">
-              <div className="header">
+              <h2 className="header">
                 {src} - {effectType}
-              </div>
+              </h2>
               {!active ? null : <div className="body">{formatText(text)}</div>}
             </div>
+            {cards ? (
+              <div className={"bar"}>
+                {cards.map(c => (
+                  <CardControls card={c} />
+                ))}
+              </div>
+            ) : null}
             <div className="stackOp">
               {!active
                 ? null

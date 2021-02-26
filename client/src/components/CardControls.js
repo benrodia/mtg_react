@@ -119,7 +119,11 @@ export default withRouter(
 				</Link>
 			)
 
-			const withHover = o => <ToolTip card={card}>{o}</ToolTip>
+			const withHover = o => (
+				<ToolTip card={card} notes>
+					{o}
+				</ToolTip>
+			)
 
 			const obj = (
 				<Card
@@ -136,8 +140,10 @@ export default withRouter(
 			return withDrag(
 				withContextMenu(
 					param
-						? withLink(withEvents(noHover ? obj : withHover(obj)))
-						: withEvents(noHover ? obj : withHover(obj))
+						? withLink(
+								withEvents(noHover || card.face_down ? obj : withHover(obj))
+						  )
+						: withEvents(noHover || card.face_down ? obj : withHover(obj))
 				)
 			)
 		}

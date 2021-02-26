@@ -23,11 +23,16 @@ import DeckSearch from "./components/_Page_Deck_Search"
 import NewDeck from "./components/_Page_Deck_New"
 import Settings from "./components/Settings"
 import Combos from "./components/Combos"
+import AdvancedCart from "./components/AdvancedCart"
 
 const {HOME_DIR, DECK_ID, rnd, getArt} = utilities
 export default connect(
   ({
     main: {modal, users, decks, sets},
+    auth: {
+      isAuthenticated,
+      user: {_id},
+    },
     deck: {format},
     settings: {scale, random_playmat, playmat},
   }) => {
@@ -35,6 +40,8 @@ export default connect(
       modal,
       users,
       decks,
+      isAuthenticated,
+      _id,
       sets,
       format,
       scale,
@@ -53,6 +60,8 @@ export default connect(
     tokens,
     users,
     decks,
+    isAuthenticated,
+    _id,
     sets,
     loadAppData,
     getMousePos,
@@ -64,6 +73,7 @@ export default connect(
     getUsers,
     openModal,
     setCombos,
+    logout,
   }) => {
     const wrapper = useRef(0)
     const param = useLocation().pathname.split("/").slice(-1)[0]
@@ -83,9 +93,10 @@ export default connect(
         random_playmat &&
           !playmat &&
           getArt().then(art => changeSettings("playmat", art))
-        users.length
-          ? setCombos(users.map(u => u.cardCombos).flat())
-          : getUsers()
+        if (users.length) {
+          setCombos(users.map(u => u.cardCombos).flat())
+          !isAuthenticated && _id && logout()
+        } else getUsers()
         decks.length || loadDecks()
         sets.length || getSetData()
       },
@@ -104,8 +115,8 @@ export default connect(
           />
           <Route
             exact
-            path={`${HOME_DIR}/playtest`}
-            component={PlaytestLobby}
+            path={`${HOME_DIR}/playtest/:slug`}
+            component={param === "lobby" ? PlaytestLobby : Playtest}
           />
 
           <Route exact path={`${HOME_DIR}/user/:slug`} component={User} />
@@ -132,3 +143,4 @@ export default connect(
     )
   }
 )
+// <AdvancedCart />

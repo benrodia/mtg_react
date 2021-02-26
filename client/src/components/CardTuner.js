@@ -79,6 +79,13 @@ export default connect(
 			[tune]
 		)
 
+		useEffect(
+			_ => {
+				setNotes(getCustom().notes || "")
+			},
+			[custom]
+		)
+
 		const setLine = c => (
 			<div className="flex-row even mini-spaced-bar">
 				<Icon
@@ -170,7 +177,7 @@ export default connect(
 				) : (
 					<div className="inner mini-spaced-col">
 						<span className="tune-card">
-							<Card card={active} />
+							<Card card={active} imgSize={"png"} />
 							<Link to={`${HOME_DIR}/card/${createSlug(active.name)}/info`}>
 								<button className="smaller-button">View Card Page</button>
 							</Link>

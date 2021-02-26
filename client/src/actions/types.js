@@ -35,6 +35,7 @@ export const RESET_FILTERS = "RESET_FILTERS"
 // PLAYTEST
 export const INIT_GAME = "INIT_GAME"
 export const PLAYTEST = "PLAYTEST"
+export const PLAYER = "PLAYER"
 export const BOARD = "BOARD"
 export const NEW_TURN = "NEW_TURN"
 export const SHUFFLE = "SHUFFLE"

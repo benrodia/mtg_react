@@ -1,6 +1,9 @@
 @sideW: calc(@cardW*3 + 1rem);
 
 .tester {
+  overflow: hidden;
+  margin-top: 3rem;
+  min-height: calc(100 - 3rem - @headerH);
   .zone {
     min-width: @cardW;
     .title {
@@ -74,10 +77,13 @@
       }
     }
   }
-
-  .test-counters {
+  .test-controls {
     position: fixed;
+    z-index: 2000;
     top: @headerH;
+  }
+  .test-counters,
+  .test-controls {
     background: @dark;
     width: 100%;
     padding: @thin;
@@ -179,11 +185,7 @@
     }
   }
 
-  .player-one-row {
-    // position: fixed;
-    // bottom: 0;
-    // right: 0;
-    // z-index: 30;
+  .player-row {
     width: calc(100vw);
     .hand {
       width: 100%;
@@ -208,6 +210,32 @@
         }
       }
     }
+  }
+
+  .player-two-row {
+    transform: rotate(180deg);
+    transform-origin: center;
+    * {
+      transform-origin: center;
+    }
+    .context-menu,
+    .title,
+    .test-counters,
+    .tool-tip {
+      transform: rotate(180deg);
+    }
+
+    // flex-direction: column-reverse;
+    // .zones {
+    //   flex-direction: row-reverse;
+    //   .zone {
+    //     flex-direction: column-reverse;
+    //   }
+    //   .hand .row {
+    //     flex-direction: row-reverse;
+    //     justify-content: flex-end;
+    //   }
+    // }
   }
   .battlefield {
     width: 100%;
@@ -256,7 +284,9 @@
       pointer-events: all;
       filter: drop-shadow(0 0 1rem @darkest);
       margin: 1rem @thin 0;
-      max-width: 15rem;
+      p {
+        max-width: 15rem;
+      }
 
       .header {
         text-align: right;

@@ -28,21 +28,29 @@ export const itemizeDeckList = (list = [], filters, headers) => {
   return itemized
 }
 
-export function prepForPlaytest(deck, sleeve, isToken) {
+export function prepForPlaytest(deck, player, isToken) {
   const list = isToken ? [deck] : [...deck.filter(c => c.board === "Main")]
 
   return list.map((c, i) =>
     Object.assign(c, {
-      key: isToken ? "token_" + Math.random() : "card_" + i,
+      key: isToken ? "token_" + uuidv4() : "card_" + i,
       zone: isToken ? "Battlefield" : c.commander ? "Command" : "Library",
+      owner: player,
+      controller: player,
       order: i,
       row: 1,
       col: 0,
       counters: {},
       tapped: false,
       face_down: false,
+      morph_fd: false,
       flipped: false,
+      revealed: false,
       sickness: true,
+      monstrous: false,
+      exiled_with: null,
+      attached_to: null,
+      selected: false,
       mana_source: !MANA.source(c)
         ? false
         : MANA.any(c)
@@ -69,10 +77,6 @@ export const fileMeta = text => {
       )
 }
 
-// const cardNames = await axios
-//   .get(`https://api.scryfall.com/catalog/card-names`)
-//   .then(res => {
-//     return items
 export const interpretForm = (text = "", cardData, list, sets) => {
   let normal = []
   let toFetch = []
@@ -194,7 +198,7 @@ export const keyInCards = (cards, board, remove, replace, list) => {
     : replace
     ? cards.map(card => newCard(card))
     : [...list, ...cards.map(card => newCard(card))]
-  return newList
+  return newList.orderBy("name")
 }
 
 export const TCGplayerMassEntryURL = list => {

@@ -15,7 +15,6 @@ const {
 	formatManaSymbols,
 	rnd,
 	advancedFields,
-	getAllCardTypes,
 } = utilities
 export default connect(
 	({
@@ -212,7 +211,6 @@ export default connect(
 							searchable
 							preview
 							addable
-							sort
 							placeholder={placeholder}
 							options={allOptions || options || []}
 							labelBy={o => titleCaps(o)}

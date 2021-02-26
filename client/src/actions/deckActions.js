@@ -58,12 +58,12 @@ export const newDeck = (author, {name, format, list, desc}) => (
   }
 }
 
-export const openDeck = slug => (dispatch, getState) => {
+export const openDeck = (slug, noView) => (dispatch, getState) => {
   const {decks} = getState().main
   const deck = decks.filter(d => d.slug === slug)[0]
   if (deck) {
     const recent = sessionStorage.getItem("viewed-recently") || ""
-    if (!recent.includes(deck._id)) {
+    if (!recent.includes(deck._id) && !noView) {
       axios.patch(`/api/decks/${deck._id}`, {views: deck.views + 1})
       sessionStorage.setItem("viewed-recently", recent + "_" + deck._id)
       deck.views += 1
@@ -209,17 +209,15 @@ export const cloneDeck = _ => (dispatch, getState) => {
 }
 
 export const deleteDeck = _id => (dispatch, getState) => {
-  if (window.confirm("Delete Deck?")) {
-    axios
-      .delete(`/api/decks/${_id}`, config(getState))
-      .then(res => {
-        dispatch(loadDecks())
-        cache(A.DECK, "all", INIT_DECK_STATE)
-        dispatch(openDeck(null))
-        dispatch(newMsg("DELETED DECK"))
-      })
-      .catch(err => dispatch(newMsg("Problem deleting deck.", "error")))
-  }
+  axios
+    .delete(`/api/decks/${_id}`, config(getState))
+    .then(res => {
+      dispatch(loadDecks())
+      cache(A.DECK, "all", INIT_DECK_STATE)
+      dispatch(openDeck(null))
+      dispatch(newMsg("DELETED DECK"))
+    })
+    .catch(err => dispatch(newMsg("Problem deleting deck.", "error")))
 }
 
 export const changeCard = (card = {}, assign = {}) => (dispatch, getState) =>

@@ -5,7 +5,7 @@ import utilities from "../utilities"
 import Tilt from "react-tilt"
 import {LazyLoadImage} from "react-lazy-load-image-component"
 import Loading from "./Loading"
-import "react-lazy-load-image-component/src/effects/blur.css"
+// import "react-lazy-load-image-component/src/effects/blur.css"
 
 const {
 	CARD_SLEEVES,
@@ -56,12 +56,20 @@ export default connect(
 		} = getCardFace(card)
 
 		const [loaded, setLoaded] = useState(false)
+		const [src, setSrc] = useState("")
 
-		const src =
-			(faceDown || face_down
-				? sleeves
-				: image_uris && image_uris[imgSize || "normal"]) ||
-			CARD_SLEEVES["_basic.png"]
+		useEffect(
+			_ => {
+				setSrc(
+					(faceDown || face_down
+						? sleeves
+						: image_uris &&
+						  image_uris[image_uris[imgSize] ? imgSize : "normal"]) ||
+						CARD_SLEEVES["_basic.png"]
+				)
+			},
+			[card]
+		)
 
 		return cardHeadOnly ? (
 			<div className={`card-head`}>
@@ -100,7 +108,7 @@ export default connect(
 							src={src}
 							alt={name}
 							placeholder={<Loading />}
-							effect={"blur"}
+							// effect={"blur"}
 							afterLoad={_ => setLoaded(true)}
 							placeholderSrc={CARD_SLEEVES["_basic.png"]}
 							threshold={1000}

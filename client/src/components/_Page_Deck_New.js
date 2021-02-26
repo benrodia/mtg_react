@@ -81,7 +81,8 @@ export default connect(
 		)
 		const pageHistory = useHistory()
 		return (
-			<div className="new-deck">
+			<div className="new-deck section">
+				<h1 className="block">New Deck</h1>
 				<div className="block bar">
 					<div>
 						<h4>Create From File</h4>

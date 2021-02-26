@@ -35,6 +35,7 @@ export default connect(
 )(
 	({
 		addCards,
+		noLink,
 		crumbs,
 		direct,
 		decks,
@@ -100,7 +101,12 @@ export default connect(
 										)
 									}
 								}}>
-								<DeckTile key={"TILE__" + d._id} deck={d} newDeck={d.new} />
+								<DeckTile
+									key={"TILE__" + d._id}
+									deck={d}
+									newDeck={d.new}
+									noLink={noLink}
+								/>
 							</span>
 						))}
 				</div>

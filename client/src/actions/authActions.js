@@ -35,8 +35,10 @@ export const loadUser = _ => (dispatch, getState) => {
 }
 
 export const register = ({name, email, password}) => (dispatch, getState) => {
-	if (!testEmail(email)) return dispatch(newMsg("Please enter a valid email address.", "error"))
-	if (!!badPassword(password)) return dispatch(newMsg("Password Fail: " + badPassword(password), "error"))
+	if (!testEmail(email))
+		return dispatch(newMsg("Please enter a valid email address.", "error"))
+	if (!!badPassword(password))
+		return dispatch(newMsg("Password Fail: " + badPassword(password), "error"))
 	else {
 		const {users, cardData} = getState().main
 		const slug = createSlug(name, users)
@@ -53,7 +55,9 @@ export const register = ({name, email, password}) => (dispatch, getState) => {
 			})
 			.catch(err => {
 				dispatch(newMsg(err.response.data.msg, "warning"))
-				dispatch(returnErrors(err.response.data, err.response.status, "REGISTER_FAIL"))
+				dispatch(
+					returnErrors(err.response.data, err.response.status, "REGISTER_FAIL")
+				)
 				dispatch({type: A.REGISTER_FAIL})
 			})
 	}
@@ -73,15 +77,14 @@ export const login = ({email, password}) => dispatch => {
 		})
 		.catch(err => {
 			dispatch(newMsg(err.response.data, "warning"))
-			dispatch(returnErrors(err.response.data, err.response.status, "REGISTER_FAIL"))
+			dispatch(
+				returnErrors(err.response.data, err.response.status, "REGISTER_FAIL")
+			)
 			dispatch({type: A.LOGIN_FAIL})
 		})
 }
 
-export const logout = _ => dispatch => {
-	dispatch(newMsg("Seeya later!"))
-	dispatch({type: A.LOGOUT_SUCCESS})
-}
+export const logout = _ => dispatch => dispatch({type: A.LOGOUT_SUCCESS})
 
 export const returnErrors = (msg, status, id) => dispatch => {
 	return {

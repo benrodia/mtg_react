@@ -25,7 +25,7 @@ export const pageButtons = [
 	{
 		label: "Playtest",
 		icon: require("../imgs/icon-play.svg"),
-		link: `playtest`,
+		link: `playtest/lobby`,
 		desc: `Playtest your favorite lists. PvP coming soon.`,
 	},
 ]
@@ -187,6 +187,10 @@ export const advancedFields = [
 		ex: 'ex. "Remembers ever word"',
 	},
 	{
+		name: "Set",
+		trait: "set_name",
+	},
+	{
 		name: "Rarity",
 		trait: "rarity",
 		options: ["common", "uncommon", "rare", "mythic"],
@@ -212,6 +216,12 @@ export const advancedFields = [
 		trait: "legalities",
 		legality: true,
 		options: FORMATS,
+	},
+	{
+		name: "EDHREC Rank",
+		trait: "edhrec_rank",
+		numeric: true,
+		options: [...Array(50)].map((_, i) => i * 1000 + ""),
 	},
 ]
 

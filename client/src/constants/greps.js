@@ -514,8 +514,8 @@ export const ADVANCED_GREPS = [
 		type: "effect",
 		grep: {
 			Text: {
-				AND: ["destroy all"],
-				OR: ["creatures", "enchantments", "artifacts", "planeswalkers"],
+				OR: ["destroy all", "exile all"],
+				NOT: ["exile all cards", "exile ~"],
 			},
 		},
 	},

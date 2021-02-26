@@ -47,10 +47,14 @@ export const SIDE_BOARD = "Side"
 export const MAYBE_BOARD = "Maybe"
 export const BOARDS = [MAIN_BOARD, SIDE_BOARD, MAYBE_BOARD]
 
-const size_mod = 3
+// const size_mod = 3
+// export const CARD_SIZE = {
+// 	w: 16 * 2.5 * size_mod,
+// 	h: 16 * 3.5 * size_mod,
+// }
 export const CARD_SIZE = {
-	w: 16 * 2.5 * size_mod,
-	h: 16 * 3.5 * size_mod,
+	w: 100,
+	h: 140,
 }
 
 export const RARITY_COLOR = {

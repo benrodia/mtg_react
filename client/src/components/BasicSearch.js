@@ -5,7 +5,7 @@ import {v4 as uuid} from "uuid"
 import utilities from "../utilities"
 
 const {titleCaps, pluralize, wrapNum} = utilities
-export default function BasicSelect({
+export default ({
   img,
   self,
   className,
@@ -24,7 +24,7 @@ export default function BasicSelect({
   isHeader,
   limit,
   preview,
-}) {
+}) => {
   const outer = useRef(null)
   const objects =
     options && separate ? options.unique(separate).map(o => o[separate]) : []
@@ -127,6 +127,7 @@ export default function BasicSelect({
 
   const optionDivs = choices.map((o, i) => (
     <Option
+      key={o + i}
       o={o}
       i={i}
       callBack={callBack}

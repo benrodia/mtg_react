@@ -72,6 +72,21 @@ export default connect(
 	}) => {
 		const [activeForm, setActiveForm] = useState("in")
 		const [subBanner, setSubBanner] = useState(rnd(SUB_BANNERS))
+		const [deckHighlights, setDeckHighlights] = useState([])
+
+		useEffect(
+			_ => {
+				decks.length &&
+					setDeckHighlights(
+						rnd(
+							decks.filter(d => d.list.length >= 60),
+							3,
+							true
+						)
+					)
+			},
+			[decks]
+		)
 
 		return (
 			<div className="dash spaced-col">
@@ -112,7 +127,13 @@ export default connect(
 						))}
 					</div>
 				</section>
-				<DeckPreview deck={rnd(decks.filter(d => d.list.length >= 60))} />
+
+				<section className="spaced-col">
+					<h1 className="block center">Some Decks</h1>
+					{deckHighlights.map(deck => (
+						<DeckPreview deck={deck} />
+					))}
+				</section>
 			</div>
 		)
 	}

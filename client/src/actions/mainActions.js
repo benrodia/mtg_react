@@ -32,14 +32,13 @@ export const getCardData = _ => (dispatch, getState) => {
     axios
       .get(`https://api.scryfall.com/bulk-data/oracle_cards`)
       .then(res =>
-        axios.get(res.data.download_uri).then(res => {
-          console.log("CARD DATA GOTTEN")
+        axios.get(res.data.download_uri).then(res =>
           dispatch({
             type: A.MAIN,
             key: "cardData",
             val: validCardObjects(res.data),
           })
-        })
+        )
       )
       .catch(err => {
         dispatch({type: A.MAIN, key: "fetching", val: false})
@@ -122,15 +121,18 @@ export const getFieldData = _ => dispatch => {
     axios
       .get(`https://api.scryfall.com/catalog/keyword-abilities`)
       .then(k =>
-        dispatch({
-          type: A.MAIN,
-          key: "fieldData",
-          val: {
-            gotten: true,
-            type_line,
-            keywords: k.data.data,
-          },
-        })
+        axios.get(`https://api.scryfall.com/sets`).then(s =>
+          dispatch({
+            type: A.MAIN,
+            key: "fieldData",
+            val: {
+              gotten: true,
+              type_line,
+              keywords: k.data.data,
+              set_name: s.data.data.map(set => set.name),
+            },
+          })
+        )
       )
       .catch(err => console.error(err))
   )
