@@ -24,6 +24,7 @@ const {
 	getCardFace,
 	getTags,
 	reorderDate,
+	getFormattedDate,
 } = utilities
 
 export default connect(
@@ -46,6 +47,7 @@ export default connect(
 	const [contextLink, setContextLink] = useState(null)
 	const [searching, setSearching] = useState(false)
 	const [results, setResults] = useState([])
+	const [def, setDef] = useState("newest")
 
 	useEffect(
 		_ => {
@@ -54,11 +56,14 @@ export default connect(
 				if (termSets.some(t => t.data.length)) {
 					setSearching(true)
 					setResults(filterAdvanced(cardData, termSets))
-				} else setResults(rnd(cardData, 12))
+				} else if (def === "random") setResults(rnd(cardData, 12))
+				else if (def === "newest")
+					setResults(cardData.orderBy("released_at").slice(-12))
+
 				setSearching(false)
 			}
 		},
-		[cardData.length, termSets]
+		[cardData.length, termSets, def]
 	)
 
 	if (contextLink) {
@@ -152,16 +157,28 @@ export default connect(
 				{name: "CMC", key: "cmc"},
 				{name: "EDHREC", key: "edhrec_rank"},
 			]}
+			noOpsNoFilter={!termSets.some(t => t.data.length)}
 			noOps={
 				termSets.some(t => t.data.length) ? null : (
 					<span className="mini-spaced-bar bar even">
-						<span>12 Random Cards</span>
+						<span>No Search, showing: </span>
+						<button
+							onClick={_ => setDef("newest")}
+							className={`small-button icon-attention ${
+								def === "newest" && "selected"
+							}`}>
+							Newest
+						</button>
 						<button
 							onClick={_ =>
-								setResults(rnd(filterAdvanced(cardData, termSets), 12))
+								def === "random"
+									? setResults(rnd(cardData, 12))
+									: setDef("random")
 							}
-							className="small-button icon-loop">
-							Shuffle
+							className={`small-button icon-loop ${
+								def === "random" && "selected"
+							}`}>
+							Random
 						</button>
 					</span>
 				)

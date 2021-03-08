@@ -114,31 +114,42 @@ export default connect(
 							}`}
 							onClick={_ => setActive(copy)}>
 							<span onClick={e => e.stopPropagation()}>
-								<BasicSearch
-									options={prints}
-									labelBy={setLine}
-									placeholder={setLine(copy)}
-									callBack={c => {
-										changeCard(copy, c)
-										setActive(c)
-									}}
-								/>
+								{canEdit() ? (
+									<BasicSearch
+										options={prints}
+										labelBy={setLine}
+										placeholder={setLine(copy)}
+										callBack={c => {
+											changeCard(copy, c)
+											setActive(c)
+										}}
+									/>
+								) : (
+									<h3
+										className={`thin-pad ${
+											active.id === copy.id && "dark-text"
+										}`}>
+										{copy.set_name}
+									</h3>
+								)}
 							</span>
 							<div
 								className={`bar even mini-spaced-bar ${
 									active.id === copy.id && "dark-text"
 								}`}>
-								<h3>{ofSet.length}</h3>
-								<div className="bar">
-									<button
-										className="small-button icon-plus"
-										onClick={_ => addCard(copy, board)}
-									/>
-									<button
-										className="small-button icon-minus"
-										onClick={_ => addCard(copy, null, true)}
-									/>
-								</div>
+								<h3 className="thin-pad">{ofSet.length}</h3>
+								{canEdit() ? (
+									<div className="bar">
+										<button
+											className="small-button icon-plus"
+											onClick={_ => addCard(copy, board)}
+										/>
+										<button
+											className="small-button icon-minus"
+											onClick={_ => addCard(copy, null, true)}
+										/>
+									</div>
+								) : null}
 							</div>
 						</div>
 					)
@@ -166,6 +177,8 @@ export default connect(
 			)
 		}
 
+		console.log("canEdit", canEdit())
+
 		return (
 			<div className="card-tuner">
 				{!tuneSet.length || !active ? (
@@ -182,36 +195,49 @@ export default connect(
 								<button className="smaller-button">View Card Page</button>
 							</Link>
 						</span>
-						<div className="thin-pad">
+						<div className="thin-pad spaced-col">
 							<Prints />
-							<div className="mini-block">
-								<h4 className="light-text">Category</h4>
-								<BasicSearch
-									options={[
-										...custom
-											.unique("category")
-											.map(cu => cu.category)
-											.filter(cu => !!cu),
-										...getTags(active).map(t => t.name),
-									]}
-									self={getCustom().category || "Uncategorized"}
-									searchable
-									preview
-									addable
-									callBack={e => changeCustom(active.name, {category: e})}
-								/>
+							<div className="bar mini-spaced-bar even">
+								<h4 className="light-text">Category: </h4>
+								{canEdit() ? (
+									<BasicSearch
+										options={[
+											...custom
+												.unique("category")
+												.map(cu => cu.category)
+												.filter(cu => !!cu),
+											...getTags(active).map(t => t.name),
+										]}
+										self={getCustom().category || "Uncategorized"}
+										searchable
+										// unique
+										preview
+										addable
+										callBack={e => changeCustom(active.name, {category: e})}
+									/>
+								) : (
+									<p className="asterisk">
+										{getCustom().category || "Uncategorized"}
+									</p>
+								)}
 							</div>
-							<div className="mini-block">
-								<h4 className="light-text">Notes</h4>
-								<textarea
-									cols="30"
-									rows="10"
-									placeholder="Add notes about this card"
-									value={notes}
-									onChange={e =>
-										changeCustom(active.name, {notes: e.target.value})
-									}
-								/>
+							<div className="bar mini-spaced-bar">
+								<h4 className="light-text">Notes: </h4>
+								{canEdit() ? (
+									<textarea
+										cols="30"
+										rows="10"
+										placeholder="Add notes about this card"
+										value={notes}
+										onChange={e =>
+											changeCustom(active.name, {notes: e.target.value})
+										}
+									/>
+								) : notes.length ? (
+									notes.split("\n").map(n => <p className="asterisk">{n}</p>)
+								) : (
+									<p className="asterisk">No notes added</p>
+								)}
 							</div>
 							<Links />
 						</div>
@@ -221,7 +247,7 @@ export default connect(
 		)
 	}
 )
-// <div className="mini-block">
+// <div>
 // 	<h4>Tags</h4>
 // 	<div className="row">
 // 		{getTags(active).map(t => (

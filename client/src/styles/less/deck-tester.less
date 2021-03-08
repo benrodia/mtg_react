@@ -3,7 +3,7 @@
 .tester {
   overflow: hidden;
   margin-top: 3rem;
-  min-height: calc(100 - 3rem - @headerH);
+  min-height: calc(100vh - 3rem - @headerH);
   .zone {
     min-width: @cardW;
     .title {
@@ -176,8 +176,8 @@
   .exile {
     .row {
       .drop-slot {
-        min-height: @cardH;
-        min-width: @cardW;
+        // min-height: @cardH;
+        // min-width: @cardW;
       }
     }
     .card-container {
@@ -267,15 +267,16 @@
   .stack {
     position: fixed;
     left: 0;
+    right: 0;
     top: 0;
     bottom: 0;
     z-index: 100;
     display: flex;
     flex-flow: column-reverse;
     flex-wrap: nowrap;
-    align-items: flex-start;
-    justify-content: center;
-    pointer-events: none;
+    // align-items: flex-start;
+    // justify-content: center;
+    // pointer-events: none;
     background: linear-gradient(90deg, @darkest, transparent);
 
     .item {
@@ -289,7 +290,7 @@
       }
 
       .header {
-        text-align: right;
+        // text-align: right;
         font-weight: bolder;
         font-size: 1.1em;
         padding-bottom: @thin;

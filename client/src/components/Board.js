@@ -191,7 +191,7 @@ export default connect(
 				}
 				return (
 					<div className="flex-row mini-spaced-bar board-card">
-						{cardInd ? null : (
+						{!canEdit() || cardInd ? null : (
 							<div className="col quant-tickers">
 								<div
 									className="button icon-plus"

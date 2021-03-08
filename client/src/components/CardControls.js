@@ -82,6 +82,7 @@ export default withRouter(
 			const withContextMenu = o => (
 				<ContextMenu
 					options={[
+						...(contextMenu || []),
 						{
 							label: "View Card Page (hold click)",
 							callBack: _ =>
@@ -89,7 +90,6 @@ export default withRouter(
 									`${HOME_DIR}/card/${createSlug(card.name)}/${param || ""}`
 								),
 						},
-						...(contextMenu || []),
 					]}>
 					{o}
 				</ContextMenu>

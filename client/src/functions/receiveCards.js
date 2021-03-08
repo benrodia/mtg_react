@@ -9,6 +9,7 @@ import {
 } from "../constants/definitions"
 import {MANA, NUM_FROM_WORD} from "../constants/greps"
 import {CONTROL_CARD} from "../constants/data"
+import {parsePhrases} from "../functions/gameLogic"
 
 export const audit = card => Object.assign(CONTROL_CARD, card)
 
@@ -40,17 +41,19 @@ export function prepForPlaytest(deck, player, isToken) {
       order: i,
       row: 1,
       col: 0,
-      counters: {},
-      tapped: false,
       face_down: false,
       morph_fd: false,
       flipped: false,
       revealed: false,
+      counters: {},
+      tapped: false,
       sickness: true,
       monstrous: false,
+      cast: false,
       exiled_with: null,
       attached_to: null,
       selected: false,
+      pw_activated: 0,
       mana_source: !MANA.source(c)
         ? false
         : MANA.any(c)
@@ -59,6 +62,7 @@ export function prepForPlaytest(deck, player, isToken) {
           )
         : COLORS("symbol").map(co => MANA.amt(c, co)),
       isToken,
+      scripts: parsePhrases(c),
     })
   )
 }

@@ -24,6 +24,7 @@ import NewDeck from "./components/_Page_Deck_New"
 import Settings from "./components/Settings"
 import Combos from "./components/Combos"
 import AdvancedCart from "./components/AdvancedCart"
+import Tilt from "react-tilt"
 
 const {HOME_DIR, DECK_ID, rnd, getArt} = utilities
 export default connect(

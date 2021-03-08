@@ -11,6 +11,7 @@ import utilities from "../utilities"
 
 const {
   Q,
+  q,
   normalizePos,
   playLand,
   clickPlace,
@@ -20,8 +21,9 @@ const {
   cardMoveMsg,
   paidCostMsg,
   TOKEN_NAME,
+  PHASES,
   MANA,
-  WHEN,
+  // WHEN,
   ENTERS_TAPPED,
   ENTERS_COUNTERS,
   IS_SPELL,
@@ -36,8 +38,8 @@ const {
 
 // PLAYTESTER
 
-export const gameState = (key, val, addTo) => dispatch =>
-  dispatch({type: A.PLAYTEST, key, val, bool: addTo})
+export const gameState = (key, val, addTo, player) => dispatch =>
+  dispatch({type: A.PLAYTEST, key, val, bool: addTo, player})
 export const addHistory = msg => dispatch =>
   dispatch({type: A.HISTORY, val: msg})
 export const timeTravel = index => dispatch =>
@@ -52,18 +54,21 @@ export const cardState = (card, key, val) => dispatch =>
 
 export const untap = _ => dispatch =>
   dispatch({type: A.CARD, val: {tapped: false}})
-export const handleMana = (mana, replace) => dispatch =>
-  dispatch({type: A.HANDLE_MANA, val: mana, bool: replace})
+export const handleMana = (mana, replace, player) => dispatch =>
+  dispatch({type: A.HANDLE_MANA, val: mana, bool: replace, player})
 export const handleShuffle = (player, init) => dispatch => {
   dispatch({type: A.SHUFFLE, player, init})
   dispatch(addHistory(`P${(player || 0) + 1} Shuffle Library`))
 }
 export const goToPhase = (name, noDraw) => dispatch => {
+  const next = PHASES.includes(name)
+    ? name
+    : PHASES[wrapNum(PHASES.indexOf(name) + 1, PHASES.length)]
   dispatch(handleMana())
-  dispatch({type: A.PLAYTEST, key: "phase", val: name})
-  dispatch(handleAbilities(name))
-  dispatch(addHistory(`Go to ${name}`))
-  if (name === "Draw" && !noDraw) dispatch(moveCard())
+  dispatch({type: A.PLAYTEST, key: "phase", val: next})
+  dispatch(checkTriggers(next))
+  dispatch(addHistory(`Go to ${next}`))
+  if (next === "Draw" && !noDraw) dispatch(moveCard())
 }
 
 export const spawnToken = token => dispatch =>
@@ -91,7 +96,7 @@ const drawHands = player => (dispatch, getState) => {
   let kept = 0
   const deal = (num = 7, to = player) => {
     const shuffled = [...getState().playtest.players[to].deck].shuffle()
-    const hand = rnd(shuffled, num)
+    const hand = rnd(shuffled, num, true)
 
     const keep = _ => {
       for (var i = 0; i < hand.length; i++)
@@ -101,13 +106,13 @@ const drawHands = player => (dispatch, getState) => {
       if (++kept < players.length) deal(7, wrapNum(to + 1, players.length))
       else {
         dispatch(switchSeats(player))
-        dispatch(handleTurns(player, players.length < 3))
+        dispatch(handleTurns(player, players.length === 2))
       }
     }
 
     dispatch(
       addStack({
-        text: `P${to + 1} Opening Hand`,
+        text: `P${to + 1} Opening Hand (${num})`,
         cards: hand,
         options: [
           {
@@ -160,29 +165,38 @@ export const startTest = _ => (dispatch, getState) => {
     const pl = players.filter(p => p.type === "HMN" && p.deck._id)
     if (pl.length) {
       dispatch({type: A.INIT_GAME, players, format})
-      dispatch(
-        addStack({
-          text: "Choose which player is on the play",
-          options: [
-            ...pl.map((p, i) => {
-              return {
+      if (pl.length === 1) dispatch(drawHands(0))
+      else {
+        dispatch(
+          addStack({
+            text: `Choose who plays first. ${
+              players.length === 2
+                ? "(That player won't draw during their first turn.)"
+                : ""
+            }`,
+            options: [
+              ...pl.map((p, i) => {
+                return {
+                  res: _ => {
+                    dispatch(drawHands(i))
+                  },
+                  effect: `P${i + 1}`,
+                }
+              }),
+              {
+                effect: "High Roll",
                 res: _ => {
-                  dispatch(drawHands(i))
+                  const pl = rnd(players.length)
+                  dispatch(
+                    newMsg(`P${pl + 1} got the high roll. They go first.`)
+                  )
+                  dispatch(drawHands(pl))
                 },
-                effect: `P${i + 1}`,
-              }
-            }),
-            {
-              effect: "High Roll",
-              res: _ => {
-                const pl = rnd(players.length)
-                dispatch(newMsg(`P${pl + 1} got the high roll. They go first.`))
-                dispatch(drawHands(pl))
               },
-            },
-          ],
-        })
-      )
+            ],
+          })
+        )
+      }
     }
   }
 }
@@ -195,11 +209,6 @@ export const moveCard = (payload, bypass) => (dispatch, getState) => {
   const toMove = card !== undefined ? card : inLibrary[inLibrary.length - 1]
   const toDest = dest || "Hand"
   if (!toMove) return console.error("no card to move")
-  console.log(
-    "moveCard",
-    player || (card && card.owner) || active,
-    card && card.name
-  )
   const interZone = toMove.zone !== toDest
 
   const resolveMove = _ => {
@@ -233,7 +242,8 @@ export const moveCard = (payload, bypass) => (dispatch, getState) => {
       },
     })
     if (interZone) {
-      dispatch(handleAbilities(toDest, toMove))
+      dispatch(checkTriggers("enter", toDest, toMove))
+      dispatch(checkTriggers("leave", toMove.zone, toMove))
       if (!bypass) dispatch(addHistory(cardMoveMsg(toMove, toDest)))
     }
   }
@@ -254,21 +264,21 @@ export const moveCard = (payload, bypass) => (dispatch, getState) => {
   else if (IS_SPELL(toMove) && toDest === "Battlefield") {
     dispatch(
       addStack({
-        options: [
-          {
-            res: _ => {
-              dispatch(handleCost({mana: toMove.mana_cost}))
-              resolveMove()
-              dispatch(handleAbilities("Cast", toMove))
-            },
-            effect: payMana(toMove.mana_cost)
-              ? formatText(`Cast for ${toMove.mana_cost}`)
-              : "Cast Without Paying",
-          },
-        ],
+        cards: [toMove],
+        script: toMove.scripts.find(scr => scr.type === "cast"),
         cancelable: true,
         src: toMove.name,
         effectType: "Spell",
+        options: [
+          {
+            effect: "Cast Spell",
+            confirm: true,
+            res: _ => {
+              dispatch(checkTriggers("cast"))
+              resolveMove()
+            },
+          },
+        ],
       })
     )
   } else resolveMove()
@@ -324,11 +334,14 @@ export const landDrop = _ => (dispatch, getState) => {
   dispatch(cardClick(playLand(players[first_seat].deck)))
 }
 
-export const handleCost = ({mana, life, player}) => (dispatch, getState) => {
+export const payCost = ({mana, life, player, sac}, test) => (
+  dispatch,
+  getState
+) => {
   const {players, first_seat} = getState().playtest
-  const paidMana = payMana(mana || "")
+  const paidMana = payMana(mana, player)
   const paidLife = (life || 0) >= players[player || first_seat].life
-  if (paidMana) {
+  if (paidMana && !test) {
     dispatch(newMsg(paidCostMsg(paidMana), "success"))
     dispatch(cardState(paidMana.tapped, "tapped", true))
     dispatch(handleMana(paidMana.mana, true))
@@ -336,7 +349,7 @@ export const handleCost = ({mana, life, player}) => (dispatch, getState) => {
 }
 
 export const handleCombat = creatures => (dispatch, getState) => {
-  const {deck, phase} = getState().playtest
+  const {deck, phase, second_seat} = getState().playtest
   if (phase === "Main One") {
     dispatch(goToPhase("Combat"))
     dispatch(
@@ -366,7 +379,7 @@ export const handleCombat = creatures => (dispatch, getState) => {
                   )
                 )
                 dispatch(cardState(result.tapped, "tapped", true))
-                dispatch(gameState("eLife", -result.total, true))
+                dispatch(gameState("life", -result.total, true, second_seat))
                 dispatch(goToPhase("Main Two"))
               }
             },
@@ -385,26 +398,29 @@ export const addStack = ({
   text,
   cancelable,
   cards,
+  script,
 }) => (dispatch, getState) => {
   const stacktion = {
     options: [
-      ...(options || [{}]).map(op => {
+      ...(options || []).map(op => {
         return {
           res: op.res,
           color: op.color || "success",
           effect: op.effect || "Mark Resolved",
         }
       }),
-      {
-        hide: !cancelable,
-        color: "error",
-        effect: "Cancel",
-      },
-    ],
+      cancelable
+        ? {
+            color: "error",
+            effect: "Cancel",
+          }
+        : null,
+    ].filter(op => !!op),
     effectType: effectType || "Action",
     text: text || "",
     src: src || "Game",
     cards,
+    script,
   }
   if (getState().settings.use_stack.includes(stacktion.effectType))
     dispatch({type: A.ADD_STACK, val: stacktion})
@@ -414,59 +430,113 @@ export const addStack = ({
 
 export const resStack = res => dispatch => dispatch({type: A.RES_STACK})
 
-export const handleAbilities = (type, card = {}) => (dispatch, getState) => {
+export const checkTriggers = (type, zone, card = {}) => (
+  dispatch,
+  getState
+) => {
   const {players, active} = getState().playtest
   const deck = players[card.owner || 0].deck
-  const inPlay = deck.filter(c => c.zone === "Battlefield")
-
-  const executeAbilities = obj => {
-    const effects = Object.entries(obj.effect).map(ef => {
-      return [ef[0], (ef[1] && FOR_EACH(obj.text, deck)) || ef[1]]
-    })
-    const text = obj.text
-    const res = _ => {
-      for (let i = 0; i < effects.length; i++) {
-        let [key, val] = effects[i]
-        if (val !== 0) {
-          const takeEffect = setInterval(_ => {
-            if (!--val) clearInterval(takeEffect)
-            if (Object.keys(players[active]).includes(key))
-              dispatch(gameState(key, 1, true))
-            if (key === "draw") dispatch(moveCard(null, true))
-            if (key === "mill") dispatch(moveCard({dest: "Graveyard"}, true))
-            if (key === "exile") dispatch(moveCard({dest: "Exile"}, true))
-            // if (key === "token" && token) dispatch(spawnToken(token))
-          }, 100)
-        }
-      }
-    }
-    dispatch(
-      addStack({
-        text: obj.text,
-        effectType: "Triggered Ability",
-        options: [{res, effect: effectText(effects, "token")}],
-        src: obj.src,
-        cancelable: true,
-      })
+  const triggerers = players
+    .map(pl => pl.deck)
+    .flat()
+    .filter(c =>
+      c.scripts.some(
+        scr =>
+          scr.type === "trigger" &&
+          (scr.effectiveIn === c.zone || c.zone === "Battlefield")
+      )
     )
-  }
+  for (var i = 0; i < triggerers.length; i++) {
+    const scripts = triggerers[i].scripts.filter(
+      scr =>
+        scr.when &&
+        scr.when.includes(type) &&
+        scr.who &&
+        Q(
+          card,
+          ["type_line", "name"],
+          scr.who.map(w => (w === `~` ? card.name : w))
+        )
+    )
+    console.log("script", scripts)
 
-  const phrase =
-    type === "Battlefield"
-      ? "enters the battlefield"
-      : type === "Graveyard" && card.zone === "Battlefield"
-      ? "dies"
-      : type === "Graveyard" && card.zone === "Hand"
-      ? "discard"
-      : undefined
-
-  if (phrase) {
-    if (WHEN(card, phrase).self) executeAbilities(WHEN(card, phrase))
-    for (let j = 0; j < inPlay.length; j++)
-      if (Q(card, "type_line", WHEN(inPlay[j], phrase).types))
-        executeAbilities(WHEN(inPlay[j], phrase))
+    for (var j = 0; j < scripts.length; j++)
+      dispatch(
+        addStack({
+          src: triggerers[i].name,
+          text: scripts[j].text,
+          effectType: "Triggered Ability",
+          script: scripts[i],
+          cancelable: true,
+        })
+      )
   }
 }
 
 export const toggleHand = current => dispatch =>
   dispatch({type: A.PLAYTEST, key: "hideHand", val: !current})
+
+export const execEffect = script => (dispatch, getState) => {}
+
+// options: [
+//   {
+//     res: _ => {
+//       // dispatch(handleCost({mana: c.mana_cost}))
+//       resolveMove()
+//       dispatch(checkTriggers("Cast", c))
+//     },
+//     cost: c.mana_cost,
+//     effect: payMana(c.mana_cost)
+//       ? formatText(`Cast for ${c.mana_cost}`)
+//       : "Cast Without Paying",
+//   },
+// ],
+
+// const inPlay = deck.filter(c => c.zone === "Battlefield")
+
+// const executeAbilities = obj => {
+//   const effects = Object.entries(obj.effect).map(ef => {
+//     return [ef[0], (ef[1] && FOR_EACH(obj.text, deck)) || ef[1]]
+//   })
+//   const text = obj.text
+//   const res = _ => {
+//     for (let i = 0; i < effects.length; i++) {
+//       let [key, val] = effects[i]
+//       if (val !== 0) {
+//         const takeEffect = setInterval(_ => {
+//           if (!--val) clearInterval(takeEffect)
+//           if (Object.keys(players[active]).includes(key))
+//             dispatch(gameState(key, 1, true))
+//           if (key === "draw") dispatch(moveCard(null, true))
+//           if (key === "mill") dispatch(moveCard({dest: "Graveyard"}, true))
+//           if (key === "exile") dispatch(moveCard({dest: "Exile"}, true))
+//         }, 100)
+//       }
+//     }
+//   }
+//   dispatch(
+//     addStack({
+//       text: obj.text,
+//       effectType: "Triggered Ability",
+//       options: [{res, effect: effectText(effects, "token")}],
+//       src: obj.src,
+//       cancelable: true,
+//     })
+//   )
+// }
+
+// const phrase =
+//   type === "Battlefield"
+//     ? "enters the battlefield"
+//     : type === "Graveyard" && card.zone === "Battlefield"
+//     ? "dies"
+//     : type === "Graveyard" && card.zone === "Hand"
+//     ? "discard"
+//     : undefined
+
+// if (phrase) {
+//   if (WHEN(card, phrase).self) executeAbilities(WHEN(card, phrase))
+//   for (let j = 0; j < inPlay.length; j++)
+//     if (Q(card, "type_line", WHEN(inPlay[j], phrase).types))
+//       executeAbilities(WHEN(inPlay[j], phrase))
+// }

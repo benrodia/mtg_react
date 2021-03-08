@@ -751,7 +751,7 @@ html {
   top: 1rem;
   left: 25%;
   width: 50%;
-  z-index: 555;
+  z-index: 5555;
   pointer-events: none;
 }
 .notifications .notification {
@@ -1853,8 +1853,9 @@ html {
   width: 22rem;
   background: #4e4352;
 }
-.cart.open .board-inner {
+.cart.open .sub-cart-head {
   margin-top: 10rem;
+  height: calc(100vh - 2.5rem - 10rem);
 }
 .more-less {
   background: linear-gradient(transparent, #4e4352);
@@ -2196,7 +2197,7 @@ html {
 .tester {
   overflow: hidden;
   margin-top: 3rem;
-  min-height: calc(100 - 3rem - 2.5rem);
+  min-height: calc(100vh - 3rem - 2.5rem);
 }
 .tester .zone {
   min-width: 7.14rem;
@@ -2270,6 +2271,7 @@ html {
 }
 .tester .test-controls {
   position: fixed;
+  z-index: 2000;
   top: 2.5rem;
 }
 .tester .test-counters,
@@ -2364,13 +2366,6 @@ html {
   flex-flow: column-reverse;
   width: 7.14rem;
 }
-.tester .library .row .drop-slot,
-.tester .command .row .drop-slot,
-.tester .graveyard .row .drop-slot,
-.tester .exile .row .drop-slot {
-  min-height: 10rem;
-  min-width: 7.14rem;
-}
 .tester .library .card-container,
 .tester .command .card-container,
 .tester .graveyard .card-container,
@@ -2446,15 +2441,13 @@ html {
 .tester .stack {
   position: fixed;
   left: 0;
+  right: 0;
   top: 0;
   bottom: 0;
   z-index: 100;
   display: flex;
   flex-flow: column-reverse;
   flex-wrap: nowrap;
-  align-items: flex-start;
-  justify-content: center;
-  pointer-events: none;
   background: linear-gradient(90deg, #020817, transparent);
 }
 .tester .stack .item {
@@ -2469,7 +2462,6 @@ html {
   max-width: 15rem;
 }
 .tester .stack .item .header {
-  text-align: right;
   font-weight: bolder;
   font-size: 1.1em;
   padding-bottom: 0.5rem;

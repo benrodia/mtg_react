@@ -40,41 +40,44 @@ export default connect(({filters: {advanced: {termSets}}}) => {
 	)
 })
 
-const Tag = ({t, of, tags, deletable, termSets, children, changeAdvanced}) => {
+const Tag = ({t, deletable, termSets, children, changeAdvanced}) => {
 	const [tip, setTip] = useState(null)
 	const converted = convertTag(t)
 
+	console.log("converted", converted)
 	useEffect(_ => {
-		setTip(
-			<div>
-				<p>
-					Tag: <b>{t.name}</b>
-				</p>
-				<p>
-					Type: <b>{titleCaps(t.type)}</b>
-				</p>
-				<p>
-					Desc: <b>{t.desc || "---"}</b>
-				</p>
-				{converted.unique("name").map(d => (
-					<p className="mini-spaced-bar">
-						{d.name}:{" "}
-						{converted
-							.filter(c => d.trait === c.trait)
-							.map(d => {
-								const {colored, numeric} =
-									advancedFields.find(a => a.name === d.name) || {}
-								return (
-									<span>
-										<span className={`icon-${cls(d.op)}`} />
-										<b>{renderVal(d.val, numeric, colored)}</b>
-									</span>
-								)
-							})}
+		if (converted.failed) setTip("")
+		else
+			setTip(
+				<div>
+					<p>
+						Tag: <b>{t.name}</b>
 					</p>
-				))}
-			</div>
-		)
+					<p>
+						Type: <b>{titleCaps(t.type)}</b>
+					</p>
+					<p>
+						Desc: <b>{t.desc || "---"}</b>
+					</p>
+					{converted.unique("name").map(d => (
+						<p className="mini-spaced-bar">
+							{d.name}:{" "}
+							{converted
+								.filter(c => d.trait === c.trait)
+								.map(d => {
+									const {colored, numeric} =
+										advancedFields.find(a => a.name === d.name) || {}
+									return (
+										<span>
+											<span className={`icon-${cls(d.op)}`} />
+											<b>{renderVal(d.val, numeric, colored)}</b>
+										</span>
+									)
+								})}
+						</p>
+					))}
+				</div>
+			)
 	}, [])
 
 	return children ? (

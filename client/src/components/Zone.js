@@ -5,7 +5,7 @@ import actions from "../actions"
 
 import {CARD_SIZE, ZONES} from "../constants/definitions"
 import {ItemTypes} from "../constants/data"
-import {Q} from "../functions/cardFunctions"
+import {Q, normalizePos} from "../functions/cardFunctions"
 import {cardMoveMsg} from "../functions/text"
 import {tutorableCards, clickPlace} from "../functions/gameLogic"
 
@@ -16,15 +16,18 @@ import Counters from "./Counters"
 import BasicSearch from "./BasicSearch"
 import CardControls from "./CardControls"
 import ContextMenu from "./ContextMenu"
+import utilities from "../utilities"
+
+const {formatText, formatManaSymbols, snip} = utilities
 
 export default connect(
   ({
     main: {
       pos: [x, y, w, h],
     },
-    playtest: {players, first_seat, second_seat, look, cols, hideHand},
+    playtest: {players, first_seat, second_seat, cols, hideHand},
   }) => {
-    return {w, players, first_seat, second_seat, look, cols, hideHand}
+    return {w, players, first_seat, second_seat, cols, hideHand}
   },
   actions
 )(
@@ -35,7 +38,7 @@ export default connect(
     players,
     first_seat,
     second_seat,
-    look,
+
     cols,
     hideHand,
     context,
@@ -54,9 +57,7 @@ export default connect(
     useEffect(
       _ => {
         const size = Math.floor(w / CARD_SIZE.w)
-        if (size !== cols) {
-          gameState("cols", size)
-        }
+        if (size !== cols) gameState("cols", size)
       },
       [w]
     )
@@ -68,8 +69,8 @@ export default connect(
       [bottom]
     )
     const p = P2 ? second_seat : first_seat
-    const deck = (players[p] || {}).deck || []
-    const cards = deck.filter(c => c.zone === zone).orderBy("order")
+    const {deck, look} = players[p] || {}
+    const cards = (deck || []).filter(c => c.zone === zone).orderBy("order")
 
     const slot = (col, row) => {
       const cardStack =
@@ -83,6 +84,22 @@ export default connect(
 
       const renderCard = (card, ind) => {
         const tutorable = tutorableCards(card, deck)
+        const moveZones = ZONES.filter(
+          z => z !== zone && (deck.find(c => c.commander) || z !== "Command")
+        ).map(z => {
+          return {
+            label: cardMoveMsg(card, z, true),
+            callBack: _ => moveCard({card, dest: z}),
+          }
+        })
+        const activated = card.scripts
+          .filter(scr => scr.type === "activate")
+          .map(act => {
+            return {
+              label: formatManaSymbols(snip(act.text, 25)),
+              // callBack: _ => ,
+            }
+          })
         return (
           <CardControls
             key={card.key}
@@ -94,15 +111,7 @@ export default connect(
               (hideHand || (card.owner !== first_seat && !card.revealed))
             }
             cardHeadOnly={cardHeadOnly}
-            contextMenu={ZONES.filter(
-              z =>
-                z !== zone && (deck.find(c => c.commander) || z !== "Command")
-            ).map(z => {
-              return {
-                label: cardMoveMsg(card, z, true),
-                callBack: _ => moveCard({card, dest: z}),
-              }
-            })}
+            contextMenu={[...activated, ...moveZones]}
             itemType={card.commander ? ItemTypes.COMMANDER : ItemTypes.CARD}
             style={{
               position: context !== "list" ? "absolute" : "default",
@@ -140,29 +149,26 @@ export default connect(
       </div>
     ))
 
-    const libCont = z => (
-      <div className="library-cont">
-        <div className="library-controls bar">
+    const LibCont = z => (
+      <div className="library-controls bar">
+        <button
+          className={"smaller-button"}
+          onClick={_ => handleShuffle(false)}>
+          Shuffle
+        </button>
+        <div className="lookBtn">
+          <button
+            className={"smaller-button warning-button"}
+            onClick={_ => gameState("look", 0, null, p)}
+            style={{display: look || "none"}}>
+            X
+          </button>
           <button
             className={"smaller-button"}
-            onClick={_ => handleShuffle(false)}>
-            Shuffle
+            onClick={_ => gameState("look", 1, true, p)}>
+            Top {look ? look : ""}
           </button>
-          <div className="lookBtn">
-            <button
-              className={"smaller-button warning-button"}
-              onClick={_ => gameState("look", 0)}
-              style={{display: look || "none"}}>
-              X
-            </button>
-            <button
-              className={"smaller-button"}
-              onClick={_ => gameState("look", 1, true)}>
-              Top {look ? look : ""}
-            </button>
-          </div>
         </div>
-        {z}
       </div>
     )
 
@@ -185,12 +191,13 @@ export default connect(
             />
           )}
         </div>
+        {zone === "Library" ? <LibCont /> : null}
         {context !== "grid" ? (
           inner
         ) : (
           <div className="inner">
             <div ref={bottom} />
-            {zone === "Hand" ? libCont(inner) : inner}
+            {inner}
           </div>
         )}
       </div>

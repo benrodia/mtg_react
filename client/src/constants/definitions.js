@@ -107,3 +107,24 @@ export const COLORS = key => {
 		? colors.map(c => c[key])
 		: colors
 }
+
+export const cardScriptTemp = [
+	{
+		cost: [{tap: true, sac: true, mana: "{2}{W}"}],
+		select: {
+			amt: 1,
+			min: 0,
+			of: {
+				zone: ["Battlefield"],
+				type_line: ["creature"],
+				controller: "opponent",
+				owner: null,
+				colors: [],
+				power: {val: 4, op: ">="},
+				toughness: {val: null, op: null},
+				cmc: {val: null, op: null},
+			},
+			and: "exile",
+		},
+	},
+]

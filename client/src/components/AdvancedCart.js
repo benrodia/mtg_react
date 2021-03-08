@@ -106,58 +106,60 @@ export default connect(
 			to || tab === "Cart" ? addCart(c, rm) : addCard(c, to || tab, rm)
 
 		const Cart = _ => (
-			<DropSlot
-				callBack={c => {
-					if (list.find(_ => _.key === c.key)) addCard(c, null, true)
-					addC(c)
-				}}>
-				<div className={`board-inner ${opened || "hide"}`}>
-					<div className="list-inner">
-						{itemizeDeckList(listed).map(cards => (
-							<div
-								key={cards.length + cards[0].id}
-								className="flex-row mini-spaced-bar">
-								<div className="col quant-tickers">
-									<div
-										className="button icon-plus"
-										onClick={_ => addC(cards[0])}
-									/>
-									<div
-										className="button icon-minus"
-										onClick={_ => addC(cards[0], true)}
+			<div className="sub-cart-head">
+				<DropSlot
+					callBack={c => {
+						if (list.find(_ => _.key === c.key)) addCard(c, null, true)
+						addC(c)
+					}}>
+					<div className={`board-inner ${opened || "hide"}`}>
+						<div className="list-inner">
+							{itemizeDeckList(listed).map(cards => (
+								<div
+									key={cards.length + cards[0].id}
+									className="flex-row mini-spaced-bar">
+									<div className="col quant-tickers">
+										<div
+											className="button icon-plus"
+											onClick={_ => addC(cards[0])}
+										/>
+										<div
+											className="button icon-minus"
+											onClick={_ => addC(cards[0], true)}
+										/>
+									</div>
+									<CardControls
+										card={cards[0]}
+										quant={cards.length}
+										itemType={ItemTypes.CARD}
+										param={param}
+										cardHeadOnly
+										contextMenu={[
+											{
+												label: "Add to Cart",
+												callBack: _ => addCart(cards[0]),
+											},
+											{
+												label: "Remove from Cart",
+												callBack: _ => addCart(cards[0], true),
+												color:
+													cart.find(({name}) => name === cards[0].name) ||
+													"disabled",
+											},
+											...BOARDS.map(B => {
+												return {
+													label: `Add to ${B}board`,
+													callBack: _ => addCard(cards[0], B),
+												}
+											}),
+										]}
 									/>
 								</div>
-								<CardControls
-									card={cards[0]}
-									quant={cards.length}
-									itemType={ItemTypes.CARD}
-									param={param}
-									cardHeadOnly
-									contextMenu={[
-										{
-											label: "Add to Cart",
-											callBack: _ => addCart(cards[0]),
-										},
-										{
-											label: "Remove from Cart",
-											callBack: _ => addCart(cards[0], true),
-											color:
-												cart.find(({name}) => name === cards[0].name) ||
-												"disabled",
-										},
-										...BOARDS.map(B => {
-											return {
-												label: `Add to ${B}board`,
-												callBack: _ => addCard(cards[0], B),
-											}
-										}),
-									]}
-								/>
-							</div>
-						))}
+							))}
+						</div>
 					</div>
-				</div>
-			</DropSlot>
+				</DropSlot>
+			</div>
 		)
 
 		return (
@@ -192,7 +194,7 @@ export default connect(
 										</button>
 									</ToolTip>
 								</NavLink>
-								{unsaved ? (
+								{canEdit() && unsaved ? (
 									<ToolTip message={`Save Changes to "${name}"`}>
 										<button onClick={saveDeck}>
 											<button className="inverse-small-button icon-unsaved" />
@@ -210,9 +212,7 @@ export default connect(
 						) : null}
 
 						<button
-							className={`icon-folder-open small-button ${
-								(cart.length && isAuthenticated) || "disabled"
-							}`}
+							className={`icon-folder-open small-button`}
 							onClick={_ =>
 								openModal({
 									title: "Add cart to deck",

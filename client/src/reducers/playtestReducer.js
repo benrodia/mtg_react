@@ -6,15 +6,27 @@ import {timestamp, wrapNum} from "../functions/utility"
 import {normalizePos} from "../functions/cardFunctions"
 import {prepForPlaytest} from "../functions/receiveCards"
 
-export default function main(
+export default function playtest(
 	playtest = INIT_PLAYTEST_STATE([], null, 0),
 	{type, key, val, bool, player, players, format, cards, init, apply}
 ) {
 	switch (type) {
 		case A.PLAYTEST:
-			return apply
+			return player
+				? {
+						...playtest,
+						players: playtest.players.map((p, i) =>
+							player > -1
+								? apply
+									? {...playtest, ...apply}
+									: {...p, [key]: bool ? playtest[key] + val : val}
+								: p
+						),
+				  }
+				: apply
 				? {...playtest, ...apply}
 				: {...playtest, [key]: bool ? playtest[key] + val : val}
+
 		case A.INIT_GAME:
 			return {
 				...playtest,
@@ -50,24 +62,33 @@ export default function main(
 		case A.HANDLE_MANA:
 			return {
 				...playtest,
-				mana: val
-					? bool
-						? [...val]
-						: playtest.mana.map((m, i) => m + val[i])
-					: COLORS().map(_ => 0),
+				players: playtest.players.map((p, i) =>
+					i === (player || playtest.active)
+						? {
+								...p,
+								mana: val
+									? bool
+										? [...val]
+										: p.mana.map((m, i) => m + val[i])
+									: COLORS().map(_ => 0),
+						  }
+						: p
+				),
 			}
 		case A.PLAYER:
 			return {
 				...playtest,
 				players: playtest.players.map(p =>
-					p === (player || playtest.active) ? {...p, [key]: val} : p
+					p === (player > -1 ? player : playtest.active)
+						? {...p, [key]: val}
+						: p
 				),
 			}
 		case A.CARD:
 			return {
 				...playtest,
 				players: playtest.players.map(p =>
-					p.id === (player || playtest.active)
+					p.id === (player > -1 ? player : playtest.active)
 						? {
 								...p,
 								deck: normalizePos(
@@ -76,15 +97,17 @@ export default function main(
 											return {...c, ...val}
 										}
 										return c
-									})
+									}),
+									playtest.cols
 								),
 						  }
 						: p
 				),
 			}
 		case A.NEW_TURN:
-			const newActive =
-				player || wrapNum(playtest.active + 1, playtest.players.length)
+			const newActive = !playtest.turn
+				? playtest.active
+				: player || wrapNum(playtest.active + 1, playtest.players.length)
 			return {
 				...playtest,
 				turn: playtest.turn + (newActive === 0 ? 1 : 0),
@@ -107,7 +130,7 @@ export default function main(
 				first_seat: newActive,
 				second_seat:
 					playtest.second_seat === newActive
-						? wrapNum(newActive + 1)
+						? wrapNum(newActive + 1, playtest.players.length)
 						: playtest.second_seat,
 			}
 		case A.SHUFFLE:

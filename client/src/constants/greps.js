@@ -99,19 +99,19 @@ export const snippet = (text = "", start = "", end = ".") => {
 	return {snip, line}
 }
 
-export const WHEN = (card = {}, phrase) => {
-	const text = card.oracle_text || ""
-	const src = card.name || ""
-	const targets = snippet(text, "When", phrase).snip
-	return {
-		src,
-		text: snippet(text, phrase).line,
-		effect: BASIC_ABILITIES(snippet(text, phrase).snip),
-		self: matchStr(targets, ["this", src]),
-		youControl: matchStr(text, ["you", "control"], true),
-		types: CARD_TYPES.filter(T => matchStr(targets, [T])),
-	}
-}
+// export const WHEN = (card = {}, phrase) => {
+// 	const text = card.oracle_text || ""
+// 	const src = card.name || ""
+// 	const targets = snippet(text, "When", phrase).snip
+// 	return {
+// 		src,
+// 		text: snippet(text, phrase).line,
+// 		effect: BASIC_ABILITIES(snippet(text, phrase).snip),
+// 		self: matchStr(targets, ["this", src]),
+// 		youControl: matchStr(text, ["you", "control"], true),
+// 		types: CARD_TYPES.filter(T => matchStr(targets, [T])),
+// 	}
+// }
 
 export const ENTERS_TAPPED = card =>
 	matchStr(card.oracle_text, [`${card.name} enters the battlefield tapped`])
@@ -195,9 +195,45 @@ export const SUBJECTS = [
 	"opponent",
 	...CARD_TYPES,
 	"permanent",
+	"card",
+	"nonland",
 ]
 
-export const EFFECTS = []
+export const EFFECTS = [
+	"destroy",
+	"discard",
+	"mill",
+	"sacrifice",
+	"draw",
+	"exile",
+	"play",
+	"cast",
+	"deal",
+	"gain control",
+	"gain",
+	"lose",
+	"win",
+	"create",
+	"scry",
+	"surveil",
+	"activate",
+	"attach",
+	"counter",
+	"fight",
+	"exchange",
+	"search",
+	"shuffle",
+	"tap ",
+	"untap",
+	"proliferate",
+	"populate",
+	"transform",
+	"return",
+	"add ",
+	"put ",
+	"reveal",
+	"look",
+]
 
 const factions = [
 	{
@@ -411,6 +447,18 @@ export const ADVANCED_GREPS = [
 		grep: {
 			Text: {
 				AND: ["when ~ enters the battlefield"],
+			},
+		},
+	},
+	{
+		name: "LTB",
+		alias: ["leaves the battlefield"],
+		desc: "Has an ability that triggers when it leaves the battlefield.",
+		type: "trigger",
+		grep: {
+			Text: {
+				AND: ["~"],
+				OR: ["~ leaves", "or leaves the battlefield"],
 			},
 		},
 	},

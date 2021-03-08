@@ -11,7 +11,7 @@ const {rnd, sum, paginate, pluralize} = utilities
 export default connect(
 	null,
 	actions
-)(({options, sorts, render, noOps}) => {
+)(({options, sorts, render, noOps, noOpsNoFilter}) => {
 	const [page, setPage] = useState(0)
 	const [pageLimit, setPageLimit] = useState(12)
 	const [sortBy, setSortBy] = useState(sorts ? sorts[0].key : "name")
@@ -102,7 +102,7 @@ export default connect(
 					</h2>
 				)}
 				<div className="bar">
-					{sorts && sorts.length ? (
+					{sorts && sorts.length && !noOpsNoFilter ? (
 						<div>
 							<h4>Sort By</h4>
 							<div className="bar">
@@ -117,17 +117,19 @@ export default connect(
 							</div>
 						</div>
 					) : null}
-					<div>
-						<h4>Per Page</h4>
-						<div className="bar">
-							<BasicSearch
-								className="small"
-								self={pageLimit}
-								options={[6, 12, 24, 36, 48]}
-								callBack={s => setPageLimit(s)}
-							/>
+					{noOpsNoFilter ? null : (
+						<div>
+							<h4>Per Page</h4>
+							<div className="bar">
+								<BasicSearch
+									className="small"
+									self={pageLimit}
+									options={[6, 12, 24, 36, 48]}
+									callBack={s => setPageLimit(s)}
+								/>
+							</div>
 						</div>
-					</div>
+					)}
 				</div>
 			</div>
 			{pages[page].length ? (

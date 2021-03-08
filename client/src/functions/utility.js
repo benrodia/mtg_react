@@ -28,22 +28,16 @@ export const rem = (num = 1) =>
     window.getComputedStyle(document.getElementsByTagName("html")[0])
       .fontSize || 16
   )
-export const wrapNum = (delt, range) =>
-  delt < 0 ? range : delt >= range ? 0 : delt
+export const wrapNum = (d, r) => (d < 0 ? r : d >= r ? 0 : d)
 
 export const factorial = (x, f = 1) => (x === 0 ? 1 : x * factorial(x - f))
 
-export const rnd = (arr = [], num = 0, noDupes) => {
-  if (typeof arr === "number") return Math.floor(Math.random() * arr)
+export const rnd = (arr = [], num, unique) => {
+  if (!isNaN(arr)) return Math.floor(Math.random() * arr)
   const rand = _ => arr[Math.floor(Math.random() * arr.length)]
   if (!num) return rand()
-  else if (noDupes) {
-    const a = [...arr]
-    let r = []
-    for (var i = 0; i < num; i++) r = [...r, a.shuffle().pop()]
-
-    return r
-  } else return [...Array(num)].map(_ => rand())
+  else if (unique) return arr.shuffle().slice(-num)
+  else return [...Array(num || 0)].map(rand)
 }
 
 export const paginate = (arr = [], per = 1) =>

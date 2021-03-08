@@ -6,7 +6,8 @@ import {MANA, CAN_TAP} from "../constants/greps"
 
 export default function payMana(cost, player) {
   const {players, active} = store.getState().playtest
-  const {mana, deck} = players[player || active]
+  const {mana, deck} = players[player || active] || players[0]
+  console.log("payMana", cost, player)
 
   let floating = [...mana]
   let [colored, generic] = convertedSymbols(cost)

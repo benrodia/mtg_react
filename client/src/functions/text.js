@@ -75,16 +75,18 @@ export const subType = (type = "") =>
 		? ""
 		: type.slice(Math.max(0, type.indexOf("—") + 1)).trim()
 
+export const legendName = n => {
+	const br = Math.max(n.indexOf(", "), n.indexOf(" the "))
+
+	return br > 0 ? n.slice(0, br) : n
+}
+
 export const subTitle = ({list, format}) => {
 	const subTitle = list.filter(c => c.commander).length
 		? ": " +
 		  list
 				.filter(c => c.commander)
-				.map(c =>
-					c.name.indexOf(",") !== -1
-						? c.name.slice(0, c.name.indexOf(","))
-						: c.name
-				)
+				.map(c => legendName(c.name))
 				.join(" & ")
 		: null
 	return (
@@ -211,7 +213,7 @@ export const textList = (list, simple) =>
 				: commander
 				? "CMDR: "
 				: ""
-			const sText = simple ? " " : ` [${set.toUpperCase()}] `
+			const sText = simple ? " " : ` [${(set || "").toUpperCase()}] `
 			return bText + cards.length + sText + name
 		})
 		.join("\n")
@@ -232,6 +234,9 @@ export const renderVal = (val, numeric, colored) =>
 		: numeric
 		? val
 		: formatManaSymbols(`"${titleCaps(val)}"`)
+
+export const snip = (t = "", to = 20) =>
+	t.length > to + 3 ? t.slice(0, to) + "..." : t
 
 /*
  * Title Caps

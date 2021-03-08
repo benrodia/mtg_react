@@ -221,6 +221,7 @@ export const deleteDeck = _id => (dispatch, getState) => {
 }
 
 export const changeCard = (card = {}, assign = {}) => (dispatch, getState) =>
+  canEdit() &&
   dispatch(
     changeDeck(
       "list",

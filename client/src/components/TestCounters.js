@@ -8,12 +8,19 @@ import GameLog from "./GameLog"
 import CounterInput from "./CounterInput"
 import BasicSearch from "./BasicSearch"
 
+import utilities from "../utilities"
+
+const {sum} = utilities
+
 export default connect(({playtest, settings: {game_log}}) => {
   return {...playtest, game_log}
 }, actions)(
   ({
+    P2,
     game_log,
     players,
+    first_seat,
+    second_seat,
     active,
     turn,
     phase,
@@ -29,7 +36,8 @@ export default connect(({playtest, settings: {game_log}}) => {
     handleMana,
     cardState,
   }) => {
-    const {deck, look, life, mana} = players[active] || {}
+    const p = P2 ? second_seat : first_seat
+    const {deck, look, life, mana} = players[p] || {}
 
     return (
       <div className="test-counters flex-row">
@@ -37,25 +45,54 @@ export default connect(({playtest, settings: {game_log}}) => {
           value={life}
           neg
           addOnClick={life - 1}
-          icon="icon-heart"
-          callBack={e => gameState("life", e)}
+          icon={`icon-heart${P2 ? "-empty" : ""}`}
+          callBack={e => gameState("life", e, null, p)}
         />
-        <div className="mana-counters flex-row">
+        <div className="mana-counters flex-row even">
           {COLORS("symbol").map((C, ind) => (
             <CounterInput
               key={`counter${C}`}
               value={mana ? mana[ind] : 0}
               addOnClick={1 + (mana ? mana[ind] : 0)}
               icon={`ms ms-${C.toLowerCase()}`}
-              callBack={e =>
+              callBack={e => {
+                console.log("mana", p)
                 handleMana(
                   COLORS().map((c, i) =>
                     i === ind ? e - (mana ? mana[ind] : 0) : 0
-                  )
+                  ),
+                  null,
+                  p
                 )
-              }
+              }}
             />
           ))}
+          <button
+            className={`smaller-button inverse-button icon-cancel ${
+              sum(mana) || "disabled"
+            }`}
+            onClick={_ => handleMana()}
+          />
+        </div>
+        <div className="library-controls bar">
+          <button
+            className={"smaller-button"}
+            onClick={_ => handleShuffle(false)}>
+            Shuffle
+          </button>
+          <div className="lookBtn">
+            <button
+              className={"smaller-button warning-button"}
+              onClick={_ => gameState("look", 0)}
+              style={{display: look || "none"}}>
+              X
+            </button>
+            <button
+              className={"smaller-button"}
+              onClick={_ => gameState("look", 1, true)}>
+              Top {look ? look : ""}
+            </button>
+          </div>
         </div>
       </div>
     )
@@ -68,13 +105,6 @@ export default connect(({playtest, settings: {game_log}}) => {
 //   labelBy={t => TOKEN_NAME(t)}
 //   valueBy={"id"}
 //   callBack={spawnToken}
-// />
-// <CounterInput
-//   value={eLife}
-//   neg
-//   addOnClick={eLife - 1}
-//   icon="icon-heart-empty"
-//   callBack={e => gameState("eLife", e)}
 // />
 
 // <button className="smaller-button" onClick={_ => cardState(deck, "tapped", false)}>

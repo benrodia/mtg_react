@@ -8,6 +8,8 @@ import {
   IS_SPELL,
   TRIGGERS,
   SUBJECTS,
+  EFFECTS,
+  NUM_FROM_WORD,
 } from "../constants/greps"
 import {
   Q,
@@ -18,6 +20,7 @@ import {
   mapColors,
 } from "../functions/cardFunctions"
 import {audit} from "../functions/receiveCards"
+import {legendName} from "../functions/text"
 import {sum, rnd, average} from "../functions/utility"
 
 export function playLand(deck) {
@@ -39,7 +42,7 @@ export function getColorIdentity(list, key) {
   return colors
 }
 
-export const chooseCommander = (card, list) => {
+export const chooseCommander = (card, list = []) => {
   if (legalCommanders("commander", [card]).length) {
     const commanders = list.filter(c => c.commander)
 
@@ -167,18 +170,24 @@ export async function generateRandomDeck({
   colors,
   cardData,
   termSets,
-  seedCommander,
+  seedCommanders,
   seedTags,
 }) {
-  const commander =
-    seedCommander || rnd(legalCommanders("commander", cardData, colors))
-  const colorI = seedCommander ? seedCommander.color_identity : colors
+  const commanders =
+    seedCommanders || rnd(legalCommanders("commander", cardData, colors), 2)
+  const colorI = seedCommanders.length
+    ? seedCommanders
+        .map(c => c.color_identity)
+        .flat()
+        .unique()
+    : colors
   const cards = cardData.filter(
     c =>
       c.legalities[format || "commander"] === "legal" &&
       (c.color_identity.every(co => colorI.includes(co)) ||
         !c.color_identity.length)
   )
+  let deck = []
 
   const filt = (type, quant, copies, tags = []) => {
     const tagged = filterAdvanced(cards, tags, true)
@@ -188,7 +197,8 @@ export async function generateRandomDeck({
           .orderBy("edhrec_rank")
           .slice(0, Math.max(150, q)),
         q,
-        true
+        true,
+        deck
       )
     return tagged.length < quant
       ? [...tagged, ...r(cards, quant - tagged.length)]
@@ -199,6 +209,7 @@ export async function generateRandomDeck({
     11,
     Q(ADVANCED_GREPS, "name", ["mana fixing", "land ramp", "mana rock"])
   )
+  deck = deck.concat(ramp)
   const removal = filt(
     [["land"], false],
     11,
@@ -211,12 +222,16 @@ export async function generateRandomDeck({
       "land hate",
     ])
   )
+  deck = deck.concat(removal)
   const value = filt(
     [["land"], false],
     11,
     Q(ADVANCED_GREPS, "name", ["tutor", "recursion", "draw"])
   )
+  deck = deck.concat(value)
   const meat = filt([["land"], false], 30)
+  deck = deck.concat(meat)
+
   const basics = COLORS()
     .filter(CO => colorI.includes(CO.symbol))
     .map(CO =>
@@ -228,15 +243,17 @@ export async function generateRandomDeck({
     )
     .flat()
 
-  const spells = [commander, ...meat, ...removal, ...ramp, ...value].filter(
-    c => !!c
-  )
-  const lands = [
-    ...filt([["land"]], 99 - spells.length - basics.length),
+  deck = [
+    ...commanders.map(com => {
+      return {...com, commander: true}
+    }),
+    ...deck,
+    ...filt([["land"]], 99 - deck.length - basics.length),
     ...basics,
   ]
-  const deck = [...spells, ...lands]
-  console.log("deck", deck)
+    .filter(c => !!c)
+    .slice(0, 100)
+
   return deck
 }
 
@@ -325,24 +342,124 @@ export const getDeckDynamics = list => {
 }
 
 export const parsePhrases = c => {
-  const lines = c.oracle_text.split("\n")
+  const lines = c.oracle_text ? c.oracle_text.split("\n") : []
+  const costs = csts =>
+    csts.split(",").map(cost => {
+      cost = cost.toLowerCase()
+
+      let cst = {text: cost}
+
+      if (cost.includes("{t}")) cst.tap = true
+      else if (cost.includes("{")) cst.mana = cost
+      else if (cost.includes("tap "))
+        cst.select = {
+          ...nums(cost),
+          controller: "you",
+          of:
+            CARD_TYPES.find(CT => cost.includes(CT.toLowerCase())) ||
+            "permanent",
+          and: "tap",
+        }
+      else if (cost.includes(`sacrifice ${legendName(c.name)}`)) cst.sac = true
+      else if (cost.includes("sacrifice")) {
+        cst.select = {
+          ...nums(cost),
+          controller: "you",
+          of:
+            CARD_TYPES.find(CT => cost.includes(CT.toLowerCase())) ||
+            "permanent",
+          and: "sacrifice",
+        }
+      }
+
+      return cst
+    })
+  const nums = ph => {
+    ph = ph.toLowerCase()
+    const amt = Math.max(
+      NUM_FROM_WORD(ph, " a "),
+      ph.includes(" x ") || ph.includes(" any number of ") ? 999 : 0,
+      1
+    )
+
+    const min =
+      ph.includes("up to") ||
+      ph.includes(" x ") ||
+      ph.includes(" any number of ")
+        ? 0
+        : amt
+    return {amt, min}
+  }
+
   const phrases = lines.map(l => {
-    let phrase = {}
+    let phrase = {type: "state", cost: [], text: l, controller: c.controller}
+    if (
+      Q(c, "type_line", ["instant", "sorcery"]) ||
+      l.includes(`when you cast ${legendName(c.name)}`)
+    )
+      phrase.type = "cast"
+    phrase.cost = costs(c.mana_cost)
 
-    if (Q(c, "type_line", ["instant", "sorcery"])) phrase.trigger = "cast"
-    else if (l.indexOf("When") + 1) {
-      phrase.trigger = "trigger"
-      l = l.slice(l.indexOf("When"), l.indexOf(","))
-      const subjects = SUBJECTS.filter(s => l.includes(s === "~" ? c.name : s))
-      const predicates = TRIGGERS.filter(s => l.includes(s))
+    if (l.includes("as an additional cost"))
+      phrase.cost = [...phrase.cost, ...costs(l.slice(l.indexOf(", ")))]
+    if (l.includes("you may") && l.includes("if you do,"))
+      phrase.cost = costs(
+        l.slice(l.indexOf("you may"), l.indexOf("if you do,"))
+      )
+    else if (l.indexOf("When") + 1 || l.indexOf("At the ") + 1) {
+      phrase.type = "trigger"
+      l = l.slice(0, l.indexOf(","))
+      const who = SUBJECTS.filter(s => l.includes(s === "~" ? c.name : s))
+      const when = TRIGGERS.filter(s => l.includes(s))
 
-      phrase = {...phrase, subjects, predicates}
+      phrase = {...phrase, who, when}
+    } else if (l.indexOf(":") + 1) {
+      phrase.type = "activate"
+      const ct = l.slice(0, l.indexOf(":"))
+      phrase.cost = costs(ct)
     }
-    phrase.effects = ""
+    const sents = (phrase.type === "activate"
+      ? l.slice(l.indexOf(":") + 1)
+      : phrase.type === "trigger"
+      ? l.slice(l.indexOf(",") + 1)
+      : l
+    )
+      .toLowerCase()
+      .split(".")
+      .map(s =>
+        s.split("then ").map(_ => _.split(" and ").map(_ => _.split(", ")))
+      )
+      .flat(3)
+      .filter(r => r.trim().length)
+      .unique()
 
+    phrase.effects = sents.map(sent => {
+      let eff = {text: sent}
+      if (sent.includes("target") || sent.includes("choose")) {
+        eff.select = {
+          ...nums(sent),
+          who: SUBJECTS.find(S => sent.includes(S)) || "you",
+          and: EFFECTS.find(E => sent.includes(E)),
+        }
+      } else {
+        eff = {
+          ...eff,
+          ...nums(sent),
+          who: SUBJECTS.find(S => sent.includes(S)) || "you",
+          and: EFFECTS.find(E => sent.includes(E)),
+        }
+      }
+
+      return eff
+    })
     return phrase
   })
-  return phrases.filter(p => p.trigger)
+  if (!phrases.find(ph => ph.type === "cast") && !c.type_line.includes("Land"))
+    phrases.push({
+      type: "cast",
+      cost: costs(c.mana_cost),
+    })
+  return phrases
 }
 
 // export const castability = (card, list) => {}

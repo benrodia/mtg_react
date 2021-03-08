@@ -22,8 +22,11 @@ const {
 	convertTag,
 	pluralize,
 	titleCaps,
+	legendName,
 	generateRandomDeck,
 	legalCommanders,
+	getTags,
+	chooseCommander,
 } = utilities
 export default connect(({main: {cardData, fieldData}, filters: {advanced}}) => {
 	return {cardData, fieldData, ...advanced}
@@ -43,9 +46,19 @@ export default connect(({main: {cardData, fieldData}, filters: {advanced}}) => {
 		addCart,
 		getCardData,
 	}) => {
-		const [seedCommander, setSeedCommander] = useState(null)
+		// const [seedCommanders, setSeedCommanders] = useState([])
 		const [seedTags, setSeedTags] = useState([])
+		const [seedDeck, setSeedDeck] = useState([])
+		const seedCommanders = seedDeck.filter(c => c.commander)
 
+		// useEffect(
+		// 	_ => {
+		// 		if (seedCommanders.length) {
+		// 			setSeedTags(seedCommanders.map(c => getTags(c)).flat())
+		// 		}
+		// 	},
+		// 	[seedCommanders]
+		// )
 		return (
 			<div className="">
 				<h2>Create Seeded EDH Deck</h2>
@@ -59,25 +72,41 @@ export default connect(({main: {cardData, fieldData}, filters: {advanced}}) => {
 								options={legalCommanders("commander", cardData)}
 								renderAs={c => <CardControls card={c} cardHeadOnly />}
 								callBack={c => {
-									setName(c.name)
-									setSeedCommander(c)
+									if (c.name) {
+										const newd = chooseCommander(c, seedDeck)
+										const commanders = newd.filter(_ => !!_.commander)
+										setName(
+											commanders.map(co => legendName(co.name)).join(" & ")
+										)
+										setSeedTags(
+											commanders
+												.map(c => getTags(c))
+												.flat()
+												.filter(t => t.type !== "faction")
+										)
+
+										setSeedDeck(newd)
+									}
 								}}
 								placeholder="Search for a Commander"
 							/>
 						</div>
-						{seedCommander ? (
-							<CardControls card={seedCommander} param="info" />
-						) : null}
+						{seedCommanders.map(c => (
+							<CardControls card={c} param="info" />
+						))}
 					</div>
-					<div className={seedCommander || "disabled"}>
+					<div className={seedCommanders.length || "disabled"}>
 						<h4>2: Choose Tags to Include</h4>
 						<BasicSearch
 							searchable
 							preview
 							placeholder={`Card Tags`}
-							options={ADVANCED_GREPS}
-							// labelBy={t => `${t.type}: ${t.name}`}
+							options={ADVANCED_GREPS.filter(t => t.type !== "faction").orderBy(
+								"type"
+							)}
+							labelBy={t => (t ? `${t.type}: ${t.name} ` : "")}
 							callBack={t =>
+								convertTag(t).failed ||
 								seedTags.find(ts => ts.name === t.name) ||
 								setSeedTags([...seedTags, t])
 							}
@@ -87,7 +116,7 @@ export default connect(({main: {cardData, fieldData}, filters: {advanced}}) => {
 								<div className="bar">
 									<Tags tags={[t]} />
 									<button
-										className="warning-button small-button icon-cancel"
+										className="warning-button inverse-button smaller-button icon-cancel"
 										onClick={_ =>
 											setSeedTags(seedTags.filter(({name}) => name !== t.name))
 										}
@@ -100,9 +129,9 @@ export default connect(({main: {cardData, fieldData}, filters: {advanced}}) => {
 						<h4>Generate List</h4>
 						<button
 							onClick={_ => {
-								seedCommander &&
+								seedCommanders.length &&
 									generateRandomDeck({
-										seedCommander,
+										seedCommanders,
 										seedTags,
 										cardData,
 									}).then(d => callBack(d))

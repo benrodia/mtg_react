@@ -115,16 +115,16 @@ export const advancedFields = [
 	},
 
 	{
+		name: "Types",
+		trait: "type_line",
+		ex: 'ex. "Creature" or "Human"',
+	},
+	{
 		name: "Text",
 		trait: "oracle_text",
 		ex: 'ex: "When ~ enters"',
 	},
 
-	{
-		name: "Types",
-		trait: "type_line",
-		ex: 'ex. "Creature" or "Human"',
-	},
 	{
 		name: "Keywords",
 		trait: "keywords",

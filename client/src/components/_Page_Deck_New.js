@@ -56,7 +56,7 @@ export default connect(
 	}) => {
 		const [name, setName] = useState("")
 		const [slug, setSlug] = useState("")
-		const [format, setFormat] = useState("casual")
+		const [format, setFormat] = useState("commander")
 		const [desc, setDesc] = useState("")
 		const [list, setList] = useState(cards || cart || [])
 		const [listForm, setListForm] = useState(textList(cards || cart) || "")

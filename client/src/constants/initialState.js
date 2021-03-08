@@ -104,10 +104,10 @@ export const INIT_PLAYTEST_STATE = (
 ) => {
 	return {
 		number: num || 0,
-		// cols: 5,
 		players: players.map((p, i) => {
 			return {
 				id: i,
+				name: p.deck.name,
 				type: p.type,
 				deck: prepForPlaytest(p.deck.list.shuffle(), i),
 				life: SINGLETON(format) ? 40 : 20,
@@ -116,6 +116,10 @@ export const INIT_PLAYTEST_STATE = (
 				reveal: false,
 				hideHand: false,
 				look: 0,
+				landsThisTurn: 0,
+				spellsThisTurn: 0,
+				drawsThisTurn: 0,
+				lifeGained: 0,
 			}
 		}),
 		turn: 0,

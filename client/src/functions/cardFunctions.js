@@ -38,6 +38,13 @@ export function Q(scope = [{}], keys = [""], vals = [], every) {
   return query.length ? query : falsey
 }
 
+export const q = (card = {}, vals = [], every) => {
+  vals = Array.isArray(vals) ? vals : [vals]
+  const test = v => Object.values(card).find(_ => `${_}`.includes(v))
+
+  return every ? vals.every(v => test(v)) : vals.find(v => test(v))
+}
+
 export const getCardFace = card => {
   const {card_faces, flipped} = card
   const {mana_cost, name, type_line, oracle_text, power, toughness} = card_faces
@@ -59,7 +66,7 @@ export const getCardFace = card => {
   }
 }
 
-export function normalizePos(deck) {
+export function normalizePos(deck, cols) {
   let zoneCards = ZONES.map(z => deck.filter(c => c.zone === z))
   for (var i = 0; i < zoneCards.length; i++) {
     zoneCards[i] = zoneCards[i].orderBy("order").map((c, i) => {
@@ -71,7 +78,7 @@ export function normalizePos(deck) {
   for (var i = 0; i < slots.length; i++) {
     let stacks = slots
       .filter(c => c.col === slots[i].col && c.row === slots[i].row)
-      .sort((a, b) => (a.stack > b.stack ? 1 : -1))
+      .orderBy("stack")
     stacks = stacks.map((s, ind) => {
       s.stack = ind
       return s
@@ -117,7 +124,9 @@ export function isLegal(card = {legalities: {}}, format = "", deckIdentity) {
   return allowed
 }
 
-export const convertTag = ({grep}) => {
+export const convertTag = (tag = {}) => {
+  const grep = tag ? tag.grep : tag
+  if (!grep) return {failed: true, ...tag}
   let newTerms = []
   const gs = Object.entries(grep).map(g => {
     const [name, ops] = g
@@ -163,6 +172,22 @@ export const filterColors = (c, terms) => {
   return (!terms.find(t => t.op === "OR") || ors) && andNots
 }
 
+export const numOp = (n, m, op) => {
+  return op === ">"
+    ? m > n
+    : op === "<"
+    ? m < n
+    : op === "="
+    ? m === n
+    : op === ">="
+    ? m >= n
+    : op === "<="
+    ? m <= n
+    : op === "!="
+    ? m !== n
+    : true
+}
+
 export const filterNumeric = (c, terms) =>
   terms.every(({trait, subTrait, op, val}) => {
     val =
@@ -177,20 +202,7 @@ export const filterNumeric = (c, terms) =>
         : parseInt(val)
     const tr = c[trait] && subTrait ? c[trait][subTrait] : c[trait]
     const cur = Array.isArray(tr) ? tr.length : Number(tr)
-    if (cur)
-      return op === ">"
-        ? cur > val
-        : op === "<"
-        ? cur < val
-        : op === "="
-        ? cur === val
-        : op === ">="
-        ? cur >= val
-        : op === "<="
-        ? cur <= val
-        : op === "!="
-        ? cur !== val
-        : true
+    if (cur) return numOp(cur, val, op)
     else return false
   })
 
@@ -322,11 +334,14 @@ export const getSimilarCards = (pool, model, returnNum = 3) => {
     .map(card => {
       const c = getCardFace(card)
       const m = getCardFace(model)
+      if (c.name === m.name) return null
       const strip = t =>
         (t.indexOf("(") < 0
           ? t
           : t.slice(0, t.indexOf("(")) + t.slice(t.indexOf(")") + 1)
-        ).replace(c.name, m.name)
+        )
+          .replace(c.name, m.name)
+          .toLowerCase()
 
       const score =
         (c.color_identity &&
@@ -345,11 +360,35 @@ export const getSimilarCards = (pool, model, returnNum = 3) => {
           strip(c.oracle_text),
           strip(m.oracle_text)
         ) *
-          35
-      return {card, weight: score / 70}
+          50 +
+        (c.oracle_text.includes(m.name) ? 100 : 0) +
+        (c.keywords.includes("partner") && m.keywords.includes("partner")) +
+        c.keywords.filter(k => m.keywords.includes(k)).length * 2.5
+      return score < 20 ? null : {card, weight: score}
     })
-    .filter(c => c.weight > 0.3 && c.card.name !== model.name)
-    .orderBy("weight")
-    .reverse()
-  return ranked.slice(0, returnNum)
+    .filter(c => !!c)
+    .orderBy("weight", true)
+    .slice(0, returnNum)
+  return ranked
+}
+
+export const getTargetable = (select, players, controller) => {
+  // const {select, controller, owner} = script || {}
+  const allCards = players.map(pl => pl.deck).flat()
+  const targetable = allCards.filter(c => {
+    const of = select.of || {}
+    let include = true
+    // if (of.controller === "you") include = c.controller === controller
+    // if (of.owner === "you") include = c.owner === owner
+    // else if (of.controller === "opponent") include = c.controller !== controller
+    // else if (of.owner === "opponent") include = c.owner !== owner
+    if (of.type_line) include = Q(c, "type_line", of.type_line)
+    if (of.colors) include = Q(c, "colors", of.colors)
+    if (of.power) include = numOp(c.power, of.power.val, of.power.op)
+    if (of.toughness)
+      include = numOp(c.toughness, of.toughness.val, of.toughness.op)
+    if (of.cmc) include = numOp(c.cmc, of.cmc.val, of.cmc.op)
+  })
+
+  return targetable
 }
