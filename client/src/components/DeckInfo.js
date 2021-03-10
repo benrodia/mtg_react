@@ -107,23 +107,6 @@ export default connect(
 									onClick={giveLike}>
 									{likes}
 								</button>
-
-								<button
-									className={canSuggest() || "disabled"}
-									onClick={_ =>
-										openModal({
-											title: "Leave a Suggestion",
-											content: <NewSuggestion />,
-										})
-									}>
-									{allow_suggestions >= 3 ? "Please, " : ""}Leave a Suggestion
-									{allow_suggestions >= 3 ? "!" : ""}
-								</button>
-								{!canSuggest() && !canEdit() ? (
-									<p className="asterisk">
-										*Log in to like and suggest changes
-									</p>
-								) : null}
 							</div>
 						)}
 					</div>
@@ -133,6 +116,22 @@ export default connect(
 	}
 )
 
+// <button
+// 	className={canSuggest() || "disabled"}
+// 	onClick={_ =>
+// 		openModal({
+// 			title: "Leave a Suggestion",
+// 			content: <NewSuggestion />,
+// 		})
+// 	}>
+// 	{allow_suggestions >= 3 ? "Please, " : ""}Leave a Suggestion
+// 	{allow_suggestions >= 3 ? "!" : ""}
+// </button>
+// {!canSuggest() && !canEdit() ? (
+// 	<p className="asterisk">
+// 		*Log in to like and suggest changes
+// 	</p>
+// ) : null}
 // <div className="block">
 // 	<Markdown>{desc}</Markdown>
 // </div>

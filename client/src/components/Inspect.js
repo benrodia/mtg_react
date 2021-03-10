@@ -267,7 +267,7 @@ export default connect(({// auth: {
 							onClick={_ =>
 								openModal({title: name, content: <img src={img} />})
 							}>
-							<Card card={target} imgSize={"png"} />
+							<Card card={{...target, flipped}} imgSize={"png"} />
 						</div>
 						{!card_faces ? null : (
 							<button className="small-button" onClick={_ => flip(!flipped)}>

@@ -22,12 +22,12 @@ export const canEdit = _id => {
 
 export const canSuggest = _ => {
 	const {
-		deck: {author, helpWanted},
+		deck: {author, allow_suggestions},
 		auth: {user, isAuthenticated},
 	} = store.getState()
 	return (
-		(isAuthenticated && user._id !== author && helpWanted > 1) ||
-		(helpWanted === 1 && areFriends(author))
+		(isAuthenticated && user._id !== author && allow_suggestions > 1) ||
+		(allow_suggestions === 1 && areFriends(author))
 	)
 }
 export const areFriends = _id => {

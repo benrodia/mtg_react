@@ -77,6 +77,14 @@ export default connect(
 			</div>
 		)
 		const yourDecks = decks.filter(d => d.author === _id)
+		const welcome = (
+			<h2 className="block bar even mini-spaced-bar">
+				<Link to={`${HOME_DIR}/user/${slug}`}>
+					<span className="inverse-button">{name}</span>
+				</Link>
+				{"'s"} Decks
+			</h2>
+		)
 
 		return noUser ? (
 			<Loading
@@ -133,7 +141,8 @@ export default connect(
 					</div>
 				</div>
 
-				<DeckFeed who={_id} />
+				<DeckFeed who={_id} header={welcome} />
+				<DeckFeed ids={liked} header={<h2>Liked Decks</h2>} />
 			</div>
 		)
 	}

@@ -93,7 +93,7 @@ export default connect(
 			: [{name: "---", _id: "---"}, ...users.orderBy("name")]
 
 		return (
-			<div className="browse">
+			<div className="decks section">
 				<h1 className="block">Deck Search</h1>
 				<span className="bar mini-spaced-bar">
 					<div className="mini-block">
@@ -177,7 +177,7 @@ export default connect(
 					</div>
 				</span>
 
-				<div className="decks full-width">
+				<div className="decks ">
 					{decks.length ? (
 						results.length ? (
 							<Paginated

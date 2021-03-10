@@ -21,7 +21,7 @@ const {Q, HOME_DIR, COLORS, titleCaps, rnd, creator} = utilities
 
 export default connect(({main: {cardData}}) => {
 	return {cardData}
-}, actions)(({deck, cardData, changeSettings}) => {
+}, actions)(({deck, cardData, changeSettings, openDeck}) => {
 	const [seedCards, setSeedCards] = useState([])
 
 	const newSeed = _ =>
@@ -37,7 +37,7 @@ export default connect(({main: {cardData}}) => {
 
 	if (!deck) return null
 
-	const {name, list, format, author, slug, feature, colors} = deck
+	const {_id, name, list, format, author, slug, feature, colors} = deck
 
 	return (
 		<div className="deck-preview big-block center col deck-nav">
@@ -73,18 +73,19 @@ export default connect(({main: {cardData}}) => {
 					<ToolTip message="Playtest this hand">
 						<Link to={`${HOME_DIR}/playtest/lobby`}>
 							<button
-								onClick={_ =>
+								onClick={_ => {
+									openDeck(slug)
 									changeSettings("players", [
-										{type: "HMN", id: uuid(), deck, hand: seedCards},
+										{type: "HMN", id: uuid(), deck: {...deck}, hand: seedCards},
 									])
-								}
+								}}
 								className="icon-play"
 							/>
 						</Link>
 					</ToolTip>
 				</div>
 				<div className="play-button">
-					<button onClick={newSeed} className="icon-shuffle" />
+					<button onClick={newSeed} className="icon-loop" />
 				</div>
 			</div>
 			<div className="bar">

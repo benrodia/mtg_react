@@ -173,7 +173,12 @@ export default connect(
         </div>
         <NavLink
           className={
-            deck.loading || !players.find(p => p.type === "HMN" && p.deck)
+            deck.loading ||
+            !players.every(
+              p =>
+                p.type === "---" || (p.type === "HMN" && p.deck && p.deck._id)
+            ) ||
+            !players.find(p => p.type === "HMN" && p.deck && p.deck._id)
               ? "disabled"
               : ""
           }

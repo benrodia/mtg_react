@@ -90,7 +90,7 @@ export const switchSeats = (first, second) => (dispatch, getState) => {
 let canRestart = true
 
 const drawHands = player => (dispatch, getState) => {
-  const {players} = getState().settings
+  const players = getState().settings.players.filter(p => p.type !== "---")
   canRestart = true
 
   let kept = 0
@@ -167,7 +167,7 @@ export const startTest = _ => (dispatch, getState) => {
     } = getState()
     const pl = players.filter(p => p.type === "HMN" && p.deck._id)
     if (pl.length) {
-      dispatch({type: A.INIT_GAME, players, format})
+      dispatch({type: A.INIT_GAME, players: pl, format})
       if (pl.length === 1) dispatch(drawHands(0))
       else {
         dispatch(

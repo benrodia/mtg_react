@@ -3,6 +3,7 @@ import axios from "axios"
 import * as A from "./types"
 
 import {getLegalCards, newMsg, loadDecks} from "./mainActions"
+import {updateUser} from "./authActions"
 import {changeFilters} from "./filtersActions"
 import utilities from "../utilities"
 const {
@@ -36,23 +37,23 @@ export const newDeck = (
 ) => (dispatch, getState) => {
   if (author) {
     const slug = createSlug(name, getState().main.decks)
-
-    axios
-      .post(`/api/decks`, {
-        author,
-        name,
-        format,
-        list,
-        slug,
-        colors,
-        feature,
-      })
-      .then(res => {
-        dispatch(newMsg("CREATED DECK", "success"))
-        dispatch(loadDecks())
-        dispatch(openDeck(res.data))
-      })
-      .catch(err => console.error("COULD NOT CREATE DECK", err))
+    if (getState().auth.isAuthenticated)
+      axios
+        .post(`/api/decks`, {
+          author,
+          name,
+          format,
+          list,
+          slug,
+          colors,
+          feature,
+        })
+        .then(res => {
+          dispatch(newMsg("CREATED DECK", "success"))
+          dispatch(loadDecks())
+          dispatch(openDeck(res.data))
+        })
+        .catch(err => console.error("COULD NOT CREATE DECK", err))
   }
 }
 
@@ -327,7 +328,9 @@ export const giveLike = _ => (dispatch, getState) => {
       .then(_ => axios.patch(`/api/users/${user._id}`, {liked}))
       .then(_ => {
         dispatch(changeDeck("likes", likes))
+        dispatch(loadDecks())
         dispatch({type: A.USER, key: "liked", val: liked})
+        dispatch(updateUser({liked}))
       })
   }
 }

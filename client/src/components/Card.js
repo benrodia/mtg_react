@@ -55,6 +55,8 @@ export default connect(
 			image_uris,
 		} = getCardFace(card)
 
+		console.log("flipped", flipped)
+
 		const [loaded, setLoaded] = useState(false)
 		const [src, setSrc] = useState("")
 

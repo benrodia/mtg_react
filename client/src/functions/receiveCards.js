@@ -93,7 +93,7 @@ export const interpretForm = (text = "", cardData, list, sets) => {
       )
     return returned
   }
-
+  let notFound = []
   const items = text.split("\n")
   for (var i = 0; i < items.length; i++) {
     const item = items[i]
@@ -125,17 +125,17 @@ export const interpretForm = (text = "", cardData, list, sets) => {
         if (inList) normal.push({quantity, card: inList})
         else toFetch.push({quantity, card})
       } else normal.push({quantity, card})
-    }
+    } else if (item.length) notFound.push(item)
   }
 
-  let final = expand(normal)
+  let found = expand(normal)
   if (toFetch.length)
     fetchCollection(expand(toFetch)).then(
-      fetched => (final = [...final, ...fetched])
+      fetched => (found = [...found, ...fetched])
     )
 
-  console.log("INTERP", normal, toFetch, final)
-  return final
+  console.log("INTERP", "normal", normal, "fetched", toFetch)
+  return {found, notFound}
 }
 
 // {

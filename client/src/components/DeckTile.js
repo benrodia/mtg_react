@@ -19,13 +19,13 @@ const {
 	snip,
 } = utilities
 
-export default connect(
-	null,
-	actions
-)(
+export default connect(({auth: {user}}) => {
+	return {user}
+}, actions)(
 	({
 		noLink,
 		deck,
+		user,
 		newMsg,
 		openDeck,
 		deleteDeck,
@@ -139,7 +139,12 @@ export default connect(
 							</button>
 							<div className="bar mini-spaced-bar">
 								<span className="icon-eye">{views}</span>
-								<span className="icon-thumbs-up">{likes}</span>
+								<span
+									className={`icon-thumbs-up ${
+										user.liked.includes(_id) && "active"
+									}`}>
+									{likes}
+								</span>
 							</div>
 						</div>
 					</div>

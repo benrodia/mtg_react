@@ -7,6 +7,7 @@ import utilities from "../utilities"
 import Loading from "./Loading"
 import DeckTile from "./DeckTile"
 import BasicSearch from "./BasicSearch"
+import Paginated from "./Paginated"
 
 const {
 	HOME_DIR,
@@ -35,6 +36,8 @@ export default connect(
 		noLink,
 		crumbs,
 		who,
+		ids,
+		header,
 		decks,
 		params,
 		you,
@@ -56,6 +59,11 @@ export default connect(
 		const [greeting, setGreeting] = useState(rnd(GREETINGS))
 
 		const {_id, followed, name, slug} = who ? creator(who) : user
+		const feed = who
+			? decks.filter(d => d.author === (who || _id))
+			: ids
+			? ids.map(id => decks.find(d => d._id === id)).filter(d => !!d)
+			: decks
 
 		const sorts = [
 			{name: "Recent", key: "updated"},
@@ -71,41 +79,28 @@ export default connect(
 			</Link>
 		)
 
-		const Welcome = _ => (
-			<h2 className="block bar even mini-spaced-bar">
-				<Link to={`${HOME_DIR}/user/${slug}`}>
-					<span className="inverse-button">{name}</span>
-				</Link>
-				{"'s"} Decks
-			</h2>
-		)
 		return (
-			<div className="browse">
-				<Welcome />
-				<div className="decks full-width">
-					{you ? <NewButton /> : null}
-					{decks
-						.filter(d => d.author === (who || _id))
-						.map(d => (
-							<span
-								onClick={_ => {
-									if (addCards && cart.length) {
-										addCard(cart)
-										newMsg(
-											`${cart.length} cards added to "${d.name}"`,
-											"success"
-										)
-									}
-								}}>
-								<DeckTile
-									key={"TILE__" + d._id}
-									deck={d}
-									newDeck={d.new}
-									noLink={noLink}
-								/>
-							</span>
-						))}
-				</div>
+			<div className="decks section">
+				{header}
+				<Paginated
+					options={feed}
+					render={d => (
+						<span
+							onClick={_ => {
+								if (addCards && cart.length) {
+									addCard(cart)
+									newMsg(`${cart.length} cards added to "${d.name}"`, "success")
+								}
+							}}>
+							<DeckTile
+								key={"TILE__" + d._id}
+								deck={d}
+								newDeck={d.new}
+								noLink={noLink}
+							/>
+						</span>
+					)}
+				/>
 			</div>
 		)
 	}

@@ -10,22 +10,24 @@ export default connect(({main: {cardData}}) => {
   let reader
 
   const handleRead = _ => {
-    if (reader.result)
+    if (reader.result) {
+      const {found, notFound} = interpretForm(
+        reader.result
+          .split("\n")
+          .filter(l => !l.includes("//"))
+          .join("\n"),
+        cardData
+      )
       callBack({
         meta: fileMeta(reader.result),
-        cards: interpretForm(
-          reader.result
-            .split("\n")
-            .filter(l => !l.includes("//"))
-            .join("\n"),
-          cardData
-        ),
+        cards: found,
+        notFound,
         text: reader.result
           .split("\n")
           .filter(l => !l.includes("//"))
           .join("\n"),
       })
-    else callBack({err: "Unable to read file."})
+    } else callBack({err: "Unable to read file."})
   }
 
   const onLoad = file => {
@@ -34,5 +36,11 @@ export default connect(({main: {cardData}}) => {
     reader.readAsText(file)
   }
 
-  return <input type="file" onChange={e => onLoad(e.target.files[0])} accept={accept || "text/plain"} />
+  return (
+    <input
+      type="file"
+      onChange={e => onLoad(e.target.files[0])}
+      accept={accept || "text/plain"}
+    />
+  )
 })

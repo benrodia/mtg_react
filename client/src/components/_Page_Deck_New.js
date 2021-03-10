@@ -71,6 +71,7 @@ export default connect(
 
 		const [exName, setExName] = useState(rnd(EXAMPLE_DECK_NAMES))
 		const [exList, setExList] = useState("")
+		const [unknown, setUnknown] = useState([])
 
 		useEffect(
 			_ => {
@@ -105,7 +106,7 @@ export default connect(
 
 		const pageHistory = useHistory()
 		return (
-			<div className="new-deck section">
+			<div className="new-deck-page section">
 				<h1 className="block">New Deck</h1>
 				<div className="block flex-row mini-spaced-bar">
 					<div>
@@ -189,8 +190,10 @@ export default connect(
 							// cols={"50"}
 							onChange={e => {
 								const val = e.target.value
+								const {found, notFound} = interpretForm(val, cardData)
 								setListForm(val)
-								setList(interpretForm(val, cardData))
+								setList(found)
+								setUnknown(notFound)
 							}}
 							placeholder={exList}
 						/>
@@ -231,6 +234,14 @@ export default connect(
 									</div>
 								))}
 							</div>
+							{unknown.length ? (
+								<div className="block">
+									<h3>Couldn't Find</h3>
+									{unknown.map(un => (
+										<p>"{un}"</p>
+									))}
+								</div>
+							) : null}
 						</div>
 					</div>
 				</div>

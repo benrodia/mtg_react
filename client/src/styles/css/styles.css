@@ -149,6 +149,9 @@
 .selected {
   background: #e6c46e;
 }
+.active {
+  color: #e6c46e;
+}
 .warning-button:hover {
   background: #ff4466;
 }
@@ -1301,25 +1304,17 @@ html {
   width: 0;
   transform: scale(0);
 }
-.browse {
-  background: #39323d;
-  color: #eff5ff;
-  padding: 1rem;
-  margin: 1rem auto 3rem;
-  max-width: 60rem;
-  box-shadow: 0 0 2rem rgba(0, 0, 0, 0.5);
-}
-.browse .new-deck {
+.new-deck {
   font-size: 1.5rem;
   padding: 0.5rem 1rem;
   height: auto;
 }
-.browse .decks {
+.decks {
   display: flex;
   flex-wrap: wrap;
-  width: 100%;
+  width: 60rem;
 }
-.browse .decks .deck-tile {
+.decks .deck-tile {
   margin-top: 1rem;
   margin-right: 1rem;
   width: 18rem;
@@ -1328,34 +1323,34 @@ html {
   background: #4e4352;
   border-radius: 0.25rem;
 }
-.browse .decks .deck-tile .flex-row {
+.decks .deck-tile .flex-row {
   height: 12rem;
 }
-.browse .decks .deck-tile .flex-row:hover .feature {
+.decks .deck-tile .flex-row:hover .feature {
   filter: brightness(0.6);
 }
-.browse .decks .deck-tile .pie {
+.decks .deck-tile .pie {
   position: absolute;
   z-index: 20;
   margin: -12.5rem 0 0 -0.5rem;
   filter: drop-shadow(0 0 0.5rem rgba(0, 0, 0, 0.5));
 }
-.browse .decks .deck-tile .pie svg {
+.decks .deck-tile .pie svg {
   height: 3.5rem;
   width: 3.5rem;
 }
-.browse .decks .deck-tile .feature {
+.decks .deck-tile .feature {
   object-fit: cover;
   width: 18rem;
   height: 12rem;
 }
-.browse .decks .deck-tile .play-button {
+.decks .deck-tile .play-button {
   position: absolute;
   z-index: 100;
   border-radius: 0;
   margin: 0 0 0 15rem;
 }
-.browse .decks .deck-tile .play-button button {
+.decks .deck-tile .play-button button {
   background: linear-gradient(90deg, transparent, #020817);
   color: #eff5ff;
   box-shadow: none;
@@ -1363,31 +1358,31 @@ html {
   width: 3rem;
   margin: 0;
 }
-.browse .decks .deck-tile .play-button:hover button {
+.decks .deck-tile .play-button:hover button {
   color: #e6c46e;
 }
-.browse .decks .deck-tile .new-button {
+.decks .deck-tile .new-button {
   height: 22rem;
   margin: 0;
 }
-.browse .decks .deck-tile .info {
+.decks .deck-tile .info {
   padding: 0.5rem;
   height: 10rem;
   border-radius: 0 0 0.25rem 0.25rem;
 }
-.browse .decks .deck-tile .info .tag {
+.decks .deck-tile .info .tag {
   margin-top: 0.25rem;
 }
-.browse .decks .deck-tile .info .updated-at {
+.decks .deck-tile .info .updated-at {
   font-style: italic;
   margin-top: 0.25rem;
 }
-.browse .decks .deck-tile .links {
+.decks .deck-tile .links {
   display: flex;
   flex-flow: column nowrap;
   width: 3rem;
 }
-.browse .decks .deck-tile .links * {
+.decks .deck-tile .links * {
   width: 100%;
   font-size: 1.1rem;
   height: 100%;
