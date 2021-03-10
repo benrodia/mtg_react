@@ -6,59 +6,101 @@ import utilities from "../utilities"
 
 import Loading from "./Loading"
 import DeckTile from "./DeckTile"
-import NewDeck from "./NewDeck"
+import BasicSearch from "./BasicSearch"
+import Paginated from "./Paginated"
 
-const {HOME_DIR, getDecks} = utilities
+const {
+	HOME_DIR,
+	getDecks,
+	creator,
+	greeting,
+	rnd,
+	GREETINGS,
+	generateRandomDeck,
+} = utilities
 
 export default connect(
 	({
 		main: {decks, cardData, refresh},
-		auth: {
-			user: {_id, followed},
+		filters: {
+			advanced: {cart},
 		},
+		auth: {isAuthenticated, user},
 	}) => {
-		return {decks, cardData, refresh, _id, followed}
+		return {decks, cart, cardData, refresh, user}
 	},
 	actions
 )(
 	({
-		context,
-		direct,
+		addCards,
+		noLink,
+		crumbs,
+		who,
+		ids,
+		header,
 		decks,
-		flags,
 		params,
 		you,
+		user,
 		hasHeader,
+		cart,
 		cardData,
 		children,
 		refresh,
-		_id,
-		followed,
+		isAuthenticated,
 		newDeck,
 		openModal,
 		refreshData,
 		loadDecks,
+		addCard,
+		addCart,
+		newMsg,
 	}) => {
-		const viewDecks = (direct || decks || []).filter(d => {
-			flags = flags || []
-			let included = true
-			const inc = inc => included && flags.includes(inc)
-			if (inc("followed")) included = followed.includes(d._id)
-			if (inc("published")) included = d.published
-			if (inc("helpWanted")) included = d.helpWanted >= 3
-			if (inc("others")) included = d.author !== _id
-			if (you) included = d.author === _id
-			return included && (d.privacy === "Public" || you)
-		})
+		const [greeting, setGreeting] = useState(rnd(GREETINGS))
+
+		const {_id, followed, name, slug} = who ? creator(who) : user
+		const feed = who
+			? decks.filter(d => d.author === (who || _id))
+			: ids
+			? ids.map(id => decks.find(d => d._id === id)).filter(d => !!d)
+			: decks
+
+		const sorts = [
+			{name: "Recent", key: "updated"},
+			{name: "Popular", key: "views"},
+			{name: "Format", key: "format"},
+		]
+
+		const NewButton = _ => (
+			<Link to={`${HOME_DIR}/deck/new`} className={"deck-tile mini-spaced-col"}>
+				<button className="icon-plus new-button feature">
+					<h3>New Deck</h3>
+				</button>
+			</Link>
+		)
 
 		return (
-			<div className="browse">
-				{children}
-				<div className="decks big-block center full-width fill wrap">
-					{viewDecks.map(d => (
-						<DeckTile key={"TILE__" + d._id} deck={d} context={context} />
-					))}
-				</div>
+			<div className="decks section">
+				{header}
+				<Paginated
+					options={feed}
+					render={d => (
+						<span
+							onClick={_ => {
+								if (addCards && cart.length) {
+									addCard(cart)
+									newMsg(`${cart.length} cards added to "${d.name}"`, "success")
+								}
+							}}>
+							<DeckTile
+								key={"TILE__" + d._id}
+								deck={d}
+								newDeck={d.new}
+								noLink={noLink}
+							/>
+						</span>
+					)}
+				/>
 			</div>
 		)
 	}

@@ -62,16 +62,14 @@ export default connect(
 		giveLike,
 	}) => {
 		const canLike = isAuthenticated && author !== user._id
+		// 		<div className="name bar even spaced-bar">
+		// 	<h3 className="tag">{titleCaps(format)}</h3>
+		// </div>
+
 		return (
 			<div className="info-readme">
 				<div className="bar even spaced-bar max">
-					<span className="feature icon">
-						<img src={feature} alt="" />
-					</span>
 					<div className="col">
-						<div className="name bar even spaced-bar">
-							<h3 className="tag">{titleCaps(format)}</h3>
-						</div>
 						<div className="mini-block bar even mini-spaced-bar">
 							<Link to={`${HOME_DIR}/user/${creator().slug}`}>
 								<h4 className="inverse-button ">{creator().name}</h4>
@@ -99,10 +97,7 @@ export default connect(
 					</div>
 				</div>
 				<div className="block">
-					<div className="desc block">
-						<div className="block">
-							<Markdown>{desc}</Markdown>
-						</div>
+					<div className="block">
 						{canEdit() ? null : (
 							<div className="bar even">
 								<button
@@ -112,23 +107,6 @@ export default connect(
 									onClick={giveLike}>
 									{likes}
 								</button>
-
-								<button
-									className={canSuggest() || "disabled"}
-									onClick={_ =>
-										openModal({
-											title: "Leave a Suggestion",
-											content: <NewSuggestion />,
-										})
-									}>
-									{allow_suggestions >= 3 ? "Please, " : ""}Leave a Suggestion
-									{allow_suggestions >= 3 ? "!" : ""}
-								</button>
-								{!canSuggest() && !canEdit() ? (
-									<p className="asterisk">
-										*Log in to like and suggest changes
-									</p>
-								) : null}
 							</div>
 						)}
 					</div>
@@ -137,3 +115,23 @@ export default connect(
 		)
 	}
 )
+
+// <button
+// 	className={canSuggest() || "disabled"}
+// 	onClick={_ =>
+// 		openModal({
+// 			title: "Leave a Suggestion",
+// 			content: <NewSuggestion />,
+// 		})
+// 	}>
+// 	{allow_suggestions >= 3 ? "Please, " : ""}Leave a Suggestion
+// 	{allow_suggestions >= 3 ? "!" : ""}
+// </button>
+// {!canSuggest() && !canEdit() ? (
+// 	<p className="asterisk">
+// 		*Log in to like and suggest changes
+// 	</p>
+// ) : null}
+// <div className="block">
+// 	<Markdown>{desc}</Markdown>
+// </div>

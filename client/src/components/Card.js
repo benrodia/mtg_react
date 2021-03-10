@@ -1,9 +1,19 @@
-import React, {useEffect} from "react"
+import React, {useEffect, useState} from "react"
 import {useLocation} from "react-router-dom"
 import {connect} from "react-redux"
 import utilities from "../utilities"
+import Tilt from "react-tilt"
+import {LazyLoadImage} from "react-lazy-load-image-component"
+import Loading from "./Loading"
+// import "react-lazy-load-image-component/src/effects/blur.css"
 
-const {CARD_SLEEVES, formatManaSymbols, formatText, subType} = utilities
+const {
+	CARD_SLEEVES,
+	formatManaSymbols,
+	formatText,
+	subType,
+	getCardFace,
+} = utilities
 
 export default connect(
 	({
@@ -17,75 +27,97 @@ export default connect(
 )(
 	({
 		card,
+		quant,
 		desc,
 		faceDown,
 		imgSize,
 		sleeves,
+		excerpt,
 		cardHeadOnly,
+		nameOnly,
 		showPrice,
 		showTypes,
 		sortBy,
 		page,
 	}) => {
-		const {face_down, flipped, tapped, prices, card_faces} = card
 		const {
+			face_down,
+			flipped,
+			tapped,
+			prices,
+			card_faces,
 			mana_cost,
 			name,
 			type_line,
 			oracle_text,
 			power,
 			toughness,
-		} = card_faces ? card_faces[flipped ? 1 : 0] : card
-		const image_uris =
-			card.image_uris ||
-			(card_faces && card_faces[flipped ? 1 : 0].image_uris) ||
-			{}
+			image_uris,
+		} = getCardFace(card)
 
-		const {pathname} = useLocation()
+		console.log("flipped", flipped)
 
-		const description = formatText(
-			`${oracle_text.slice(0, 50)}${oracle_text.length > 50 ? "..." : ""}`
-		)
-		const USD = prices.usd ? `$${prices.usd}` : null
-		const TIX = prices.tix ? `${prices.tix}tix` : null
-		const price = (
-			<p
-				className="prices"
-				style={{
-					display:
-						(!pathname.includes("playtest") && (USD || TIX) && showPrice) ||
-						"none",
-				}}>
-				<b>{USD || "???"}</b> - <b>{TIX || "???"}</b>
-			</p>
+		const [loaded, setLoaded] = useState(false)
+		const [src, setSrc] = useState("")
+
+		useEffect(
+			_ => {
+				setSrc(
+					(faceDown || face_down
+						? sleeves
+						: image_uris &&
+						  image_uris[image_uris[imgSize] ? imgSize : "normal"]) ||
+						CARD_SLEEVES["_basic.png"]
+				)
+			},
+			[card]
 		)
 
 		return cardHeadOnly ? (
 			<div className={`card-head`}>
-				<h4 className="name">{name}</h4>
-				<p className="types">
-					{power && type_line.includes("Creature")
-						? `${power}/${toughness} - `
-						: null}
-					{subType(type_line)} {formatManaSymbols(mana_cost)}
-				</p>
-				{price}
-				{!desc ? null : <p className="asterisk mini-block">{description}</p>}
+				<img className="mini-icon" src={image_uris.art_crop} />
+				<div className="col">
+					<span className="top-line bar even">
+						<h4>
+							<span className="quant">{quant || null}</span>
+							<span className="name"> {name}</span>
+						</h4>
+						<span className="flex-row mana">
+							{formatManaSymbols(mana_cost)}
+						</span>
+					</span>
+					<p className="types">
+						{type_line}
+						{power && type_line.includes("Creature")
+							? ` - ${power}/${toughness}`
+							: null}
+					</p>
+				</div>
 			</div>
+		) : nameOnly ? (
+			<h3 className="card-text">
+				{quant || null} <span className="name">{name}</span>
+			</h3>
 		) : (
-			<>
-				<img
-					src={
-						(faceDown || face_down
-							? sleeves
-							: image_uris && image_uris[imgSize || "normal"]) ||
-						CARD_SLEEVES["_basic.png"]
-					}
+			<Tilt scale={1.2}>
+				<span
 					className={`card-img`}
-					style={{transform: tapped && "rotate(90deg)"}}
-				/>
-				{price}
-			</>
+					style={{transform: tapped && "rotate(90deg)"}}>
+					{loaded ? (
+						<img src={src} alt={name} />
+					) : (
+						<LazyLoadImage
+							src={src}
+							alt={name}
+							placeholder={<Loading />}
+							// effect={"blur"}
+							afterLoad={_ => setLoaded(true)}
+							placeholderSrc={CARD_SLEEVES["_basic.png"]}
+							threshold={1000}
+						/>
+					)}
+				</span>
+			</Tilt>
 		)
 	}
 )

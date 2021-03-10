@@ -1,121 +1,95 @@
-import React from "react"
+import React, {useEffect, useRef, useState} from "react"
+import {Link, useParams} from "react-router-dom"
 import {connect} from "react-redux"
+import ago from "s-ago"
+import {PieChart} from "react-minimal-pie-chart"
 import actions from "../actions"
 import utilities from "../utilities"
 
-import Sticky from "./Sticky"
-import DropSlot from "./DropSlot"
 import BasicSearch from "./BasicSearch"
-import EditableText from "./EditableText"
+import ToolTip from "./ToolTip"
 
 const {
-	SINGLETON,
-	FILTER_TERMS,
-	ItemTypes,
+	HOME_DIR,
 	COLORS,
-	BOARDS,
-	MAIN_BOARD,
-	rem,
-	titleCaps,
+	FILTER_TERMS,
+	THEN_FILTERS,
+	textList,
+	canPublish,
 	canEdit,
+	canSuggest,
 } = utilities
 
 export default connect(
-	({
-		auth: {
-			isAuthenticated,
-			user: {_id},
-		},
-		deck: {list, format, author},
-		filters,
-	}) => {
-		return {list, format, author, ...filters, isAuthenticated, _id}
+	({main: {decks}, deck, filters: {board, view, sortBy, thenSortBy}}) => {
+		return {decks, ...deck, board, view, sortBy, thenSortBy}
 	},
 	actions
 )(
 	({
-		minified,
-		offset,
+		slug,
+		allow_suggestions,
+		suggestions,
+		editing,
+		unsaved,
 		list,
-		format,
-		author,
-		isAuthenticated,
-		_id,
-		sortBy,
-		view,
 		board,
-		showPrice,
-		showTypes,
-		customFields,
+		view,
+		sortBy,
+		thenSortBy,
 		changeFilters,
-		changeCard,
-		addCard,
 	}) => {
 		return (
-			<Sticky offset={offset}>
-				<div className="list-head">
-					<div className="board-labels">
-						{BOARDS.map(B => {
-							const cards = list.filter(c => c.board === B)
-							const legalAmt =
-								B !== MAIN_BOARD ||
-								(cards.length >= (SINGLETON(format) ? 100 : 60) &&
-									cards.length <= (SINGLETON(format) ? 100 : 600))
-							return (
-								<h2
-									key={B}
-									className={`board-label ${B === board && "active"}`}
-									onClick={_ => changeFilters("board", B)}>
-									<DropSlot
-										key={"board_header_" + B}
-										field={B}
-										accept={canEdit() ? ItemTypes.CARD : "NULL"}
-										callBack={c =>
-											c.key ? changeCard(c, {board: B}) : addCard(c, B)
-										}>
-										{B}
-										{minified ? "" : "board"}:{" "}
-										<span style={{color: !legalAmt && "#f46"}}>
-											{cards.length}
-										</span>
-									</DropSlot>
-								</h2>
-							)
-						})}
-					</div>
-					{minified ? null : (
-						<span className="view-options bar even">
+			<span className="view-options bar even mini-spaced-bar">
+				<div className="mini-block">
+					<h4>View</h4>
+					<div className="bar">
+						<ToolTip message="View Cards as Plain Text">
 							<button
-								title={`View as ${
-									view === "list" ? "Bulleted List" : "Image Grid"
+								className={`small-button icon-code ${
+									view === "text" && "selected"
 								}`}
-								className={`icon-view-mode ${view === "list" ? "-list" : ""}`}
-								onClick={_ =>
-									changeFilters("view", view === "list" ? "grid" : "list")
-								}
+								onClick={_ => changeFilters("view", "text")}
 							/>
-							<BasicSearch
-								self={FILTER_TERMS.filter(f => f.name === sortBy)[0]}
-								defImg={<span className="icon-sort-alt-down" />}
-								options={FILTER_TERMS}
-								labelBy={"name"}
-								callBack={s => changeFilters("sortBy", s.name)}
+						</ToolTip>
+						<ToolTip message="View Cards as Formatted Tiles">
+							<button
+								className={`small-button icon-th-list ${
+									view === "list" && "selected"
+								}`}
+								onClick={_ => changeFilters("view", "list")}
 							/>
-							{sortBy !== "Custom" ? null : (
-								<EditableText
-									addable
-									value={{
-										name: "New Field",
-										key: "custom" + customFields.length,
-									}}
-									list={customFields}
-									callBack={n => changeFilters("customFields", n)}
-								/>
-							)}
-						</span>
-					)}
+						</ToolTip>
+						<ToolTip message="View Cards as Stacked Images">
+							<button
+								title={"Images"}
+								className={`small-button icon-layers ${
+									view === "grid" && "selected"
+								}`}
+								onClick={_ => changeFilters("view", "grid")}
+							/>
+						</ToolTip>
+					</div>
 				</div>
-			</Sticky>
+				<div className="mini-block">
+					<h4>Sort By</h4>
+					<BasicSearch
+						self={FILTER_TERMS.filter(f => f.name === sortBy)[0]}
+						options={FILTER_TERMS}
+						labelBy={"name"}
+						callBack={s => changeFilters("sortBy", s.name)}
+					/>
+				</div>
+				<div className="mini-block">
+					<h4>Then Sort By</h4>
+					<BasicSearch
+						self={THEN_FILTERS.filter(f => f.name === thenSortBy)[0]}
+						options={THEN_FILTERS}
+						labelBy={"name"}
+						callBack={ts => changeFilters("thenSortBy", ts.name)}
+					/>
+				</div>
+			</span>
 		)
 	}
 )

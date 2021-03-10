@@ -9,40 +9,51 @@ import {
 } from "../constants/definitions"
 import {MANA, NUM_FROM_WORD} from "../constants/greps"
 import {CONTROL_CARD} from "../constants/data"
+import {parsePhrases} from "../functions/gameLogic"
 
 export const audit = card => Object.assign(CONTROL_CARD, card)
 
-export function itemizeDeckList(list, filters, headers) {
+export const itemizeDeckList = (list = [], filters, headers) => {
   let itemized = []
-  let remaining = list
+  let remaining = [...list]
   const filterFor = filters || ["name"]
   while (remaining.length) {
     const matches = remaining.filter(card =>
       filterFor.every(f => card[f] === remaining[0][f])
     )
     remaining = remaining.filter(
-      r => !matches.filter(c => c.key === r.key).length
+      r => !matches.filter(c => c.id === r.id).length
     )
     itemized.push(matches)
   }
   return itemized
 }
 
-export function prepForPlaytest(deck, sleeve, isToken) {
+export function prepForPlaytest(deck, player, isToken) {
   const list = isToken ? [deck] : [...deck.filter(c => c.board === "Main")]
 
   return list.map((c, i) =>
     Object.assign(c, {
-      key: isToken ? "token_" + Math.random() : "card_" + i,
+      key: isToken ? "token_" + uuidv4() : "card_" + i,
       zone: isToken ? "Battlefield" : c.commander ? "Command" : "Library",
+      owner: player,
+      controller: player,
       order: i,
       row: 1,
       col: 0,
+      face_down: false,
+      morph_fd: false,
+      flipped: false,
+      revealed: false,
       counters: {},
       tapped: false,
-      face_down: false,
-      flipped: false,
       sickness: true,
+      monstrous: false,
+      cast: false,
+      exiled_with: null,
+      attached_to: null,
+      selected: false,
+      pw_activated: 0,
       mana_source: !MANA.source(c)
         ? false
         : MANA.any(c)
@@ -51,6 +62,7 @@ export function prepForPlaytest(deck, sleeve, isToken) {
           )
         : COLORS("symbol").map(co => MANA.amt(c, co)),
       isToken,
+      scripts: parsePhrases(c),
     })
   )
 }
@@ -69,50 +81,70 @@ export const fileMeta = text => {
       )
 }
 
-export async function interpretForm(text = "") {
-  const items = text.split("\n")
-  const cardNames = await axios
-    .get(`https://api.scryfall.com/catalog/card-names`)
-    .then(res => {
-      const names = res.data.data
-      return items
-        .map((item, ind) => {
-          let [quantity, spaces] = [1, item.split(" ")]
-          for (var i = 0; i < spaces.length; i++)
-            if (parseInt(spaces[i]) > 1) {
-              quantity = parseInt(spaces[i])
-              break
-            }
-          const setText = item.indexOf("[")
-            ? item.slice(item.indexOf("[") + 1, item.indexOf("]")).toLowerCase()
-            : " "
-          let name = names
-            .filter(n => item.includes(n))
-            .sort((a, b) => (a.length > b.length ? 1 : -1))[0]
+export const interpretForm = (text = "", cardData, list, sets) => {
+  let normal = []
+  let toFetch = []
 
-          return (
-            !!name && {
-              quantity,
-              card: {
-                name,
-                commander: item.includes("CMDR: "),
-                board: items.slice(0, ind).filter(it => it.includes("SB:"))
-                  .length
-                  ? SIDE_BOARD
-                  : MAIN_BOARD,
-              },
-            }
-          )
-        })
-        .filter(c => !!c)
-    })
-  let returned = []
-  for (var i = 0; i < cardNames.length; i++)
-    returned = returned.concat(
-      [...Array(cardNames[i].quantity)].map(_ => cardNames[i].card)
+  const expand = its => {
+    let returned = []
+    for (var i = 0; i < its.length; i++)
+      returned = returned.concat(
+        [...Array(its[i].quantity)].map(_ => its[i].card)
+      )
+    return returned
+  }
+  let notFound = []
+  const items = text.split("\n")
+  for (var i = 0; i < items.length; i++) {
+    const item = items[i]
+    let quantity = parseInt(item, 10) || 1
+    const setText =
+      item.indexOf("[") < 0
+        ? null
+        : item.slice(item.indexOf("[") + 1, item.indexOf("]")).toLowerCase()
+
+    let card =
+      cardData
+        .filter(({name}) => item.toLowerCase().includes(name.toLowerCase()))
+        .sort((a, b) => (a.name.length > b.name.length ? -1 : 1))[0] || null
+
+    if (card) {
+      card = {
+        ...card,
+        commander: item.includes("CMDR: "),
+        board: item.includes("SB:") ? SIDE_BOARD : MAIN_BOARD,
+      }
+
+      if (
+        setText &&
+        sets &&
+        sets.filter(s => s.code === setText).length &&
+        setText !== card.set
+      ) {
+        const inList = list.find(c => c.name === card.name && c.set === setText)
+        if (inList) normal.push({quantity, card: inList})
+        else toFetch.push({quantity, card})
+      } else normal.push({quantity, card})
+    } else if (item.length) notFound.push(item)
+  }
+
+  let found = expand(normal)
+  if (toFetch.length)
+    fetchCollection(expand(toFetch)).then(
+      fetched => (found = [...found, ...fetched])
     )
-  return returned
+
+  console.log("INTERP", "normal", normal, "fetched", toFetch)
+  return {found, notFound}
 }
+
+// {
+//       ...card,
+//       commander: item.includes("CMDR: "),
+//       board: items.slice(0, ind).filter(it => it.includes("SB:")).length
+//         ? SIDE_BOARD
+//         : MAIN_BOARD,
+//     }
 
 export const collapseDeckData = (list = []) =>
   list.map(({id, set, name, board, commander}) => {
@@ -124,7 +156,16 @@ export const collapseDeckData = (list = []) =>
 
 export async function fetchCollection(list) {
   if (!list.length) return []
-  const segments = paginate(list.unique("id"), 75)
+  const segments = paginate(
+    list
+      .flat()
+      .filter(_ => _.id !== "UNKNOWN_ID")
+      .map(c => {
+        return {id: c.id}
+      }),
+    75
+  )
+  console.log("fetchCollection", segments)
   let gotten = []
   for (var i = 0; i < segments.length; i++) {
     const get = await axios.post(
@@ -136,12 +177,32 @@ export async function fetchCollection(list) {
   }
   const fetched = list
     .map(({id, board, commander}) => {
-      let m = gotten.filter(g => g.id === id)[0]
+      let m = gotten.find(g => g.id === id)
       if (!!m) m = {...m, board: board || MAIN_BOARD, commander, key: uuidv4()}
       return m
     })
     .filter(c => !!c)
   return fetched
+}
+
+export const keyInCards = (cards, board, remove, replace, list) => {
+  if (!Array.isArray(cards)) cards = [cards]
+  const newCard = card => {
+    const c = audit(card)
+    return {
+      ...c,
+      customField: c.customField || null,
+      board: board || c.board || MAIN_BOARD,
+      commander: false,
+      key: "CardID__" + uuidv4(),
+    }
+  }
+  const newList = remove
+    ? list.filter(l => cards.filter(card => l.key !== card.key).length)
+    : replace
+    ? cards.map(card => newCard(card))
+    : [...list, ...cards.map(card => newCard(card))]
+  return newList.orderBy("name")
 }
 
 export const TCGplayerMassEntryURL = list => {

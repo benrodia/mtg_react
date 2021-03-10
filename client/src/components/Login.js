@@ -1,9 +1,10 @@
 import React, {useState, useEffect} from "react"
 import {connect} from "react-redux"
+import {useHistory} from "react-router-dom"
 import actions from "../actions"
 import utilities from "../utilities"
 
-const {testEmail, badPassword, createSlug} = utilities
+const {HOME_DIR, testEmail, badPassword, createSlug} = utilities
 
 export default connect(
 	({
@@ -41,7 +42,7 @@ export default connect(
 		const [inForm, setInForm] = useState({email})
 		const [upForm, setUpForm] = useState({})
 		const [showPassword, setShowPassword] = useState(false)
-
+		const [registering, setRegistering] = useState(false)
 		const setForm = (form, e) => {
 			const {name, value} = e.target
 			return form === "in"
@@ -54,19 +55,21 @@ export default connect(
 				.length
 		const emailAvailable = text => !users.filter(u => u.email === text).length
 
-		const validate = (form = {}, up) => {
+		const validate = (form = {}) => {
 			const {name, email, password, passwordConfirm} = form
-			return !up
+			return !registering
 				? email && password
 				: testEmail(email) &&
 						!badPassword(password) &&
 						nameAvailable(name) &&
-						name.length >= 6 &&
+						name.length >= 4 &&
 						passwordConfirm === password
 		}
 
-		const inFormDiv = (
-			<div className={`in-form ${inModal || activeForm === "in" || "hide"}`}>
+		if (isAuthenticated) useHistory().push(HOME_DIR)
+
+		const InFormDiv = (
+			<div className={`in-form`}>
 				<div className="block">
 					<h4>
 						<span>Email</span>
@@ -100,7 +103,6 @@ export default connect(
 				<button
 					className={`block success-button ${validate(inForm) || "disabled"}`}
 					onClick={_ => {
-						openModal(null)
 						login(inForm)
 					}}>
 					Log In
@@ -109,8 +111,8 @@ export default connect(
 			</div>
 		)
 
-		const upFormDiv = (
-			<div className={`up-form ${inModal || activeForm === "up" || "hide"}`}>
+		const UpFormDiv = (
+			<div className={`up-form`}>
 				<div className="block">
 					<h4 className="mini-spaced-bar">
 						<span>Name</span>
@@ -118,15 +120,15 @@ export default connect(
 							className={`asterisk icon-${
 								!upForm.name || !upForm.name.length
 									? ""
-									: upForm.name.length >= 6 && nameAvailable(upForm.name)
+									: upForm.name.length >= 4 && nameAvailable(upForm.name)
 									? "ok success"
 									: "attention attention"
 							}`}>
-							{!upForm.name || !upForm.name.length || upForm.name.length >= 6
+							{!upForm.name || !upForm.name.length || upForm.name.length >= 4
 								? nameAvailable(upForm.name)
 									? ""
 									: "Already in use"
-								: "Should be 6+ characters"}
+								: "Should be at least 4 letters"}
 						</span>
 					</h4>
 					<input
@@ -218,10 +220,7 @@ export default connect(
 					className={`block success-button ${
 						validate(upForm, true, true) || "disabled"
 					}`}
-					onClick={_ => {
-						openModal(null)
-						register(upForm)
-					}}>
+					onClick={_ => register(upForm)}>
 					Sign Up
 					<span className="icon-login" />
 				</button>
@@ -229,8 +228,23 @@ export default connect(
 		)
 
 		return (
-			<div className="forms">
-				{inFormDiv} {upFormDiv}
+			<div className="section">
+				<h1 className="block">Account</h1>
+				<div className="flex-row tab-switch ">
+					<div
+						className={`tab ${registering || "selected"}`}
+						onClick={_ => setRegistering(false)}>
+						Login
+					</div>
+					<div
+						className={`tab ${registering && "selected"}`}
+						onClick={_ => setRegistering(true)}>
+						Register
+					</div>
+				</div>
+				<div className="forms flex-row spaced-bar center start">
+					{registering ? UpFormDiv : InFormDiv}
+				</div>
 			</div>
 		)
 	}

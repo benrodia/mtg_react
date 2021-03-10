@@ -1,196 +1,192 @@
 import React, {useState, useEffect} from "react"
 import {connect} from "react-redux"
+import {useHistory} from "react-router-dom"
 import actions from "../actions"
 import axios from "axios"
-import matchSorter, {rankings} from "match-sorter"
 import {v4 as uuidv4} from "uuid"
 import utilities from "../utilities"
 
-import NewDeck from "./NewDeck"
-import DeckFeed from "./DeckFeed"
-import AdvancedFilters from "./AdvancedFilters"
-import AdvancedField from "./AdvancedField"
-import AdvancedCart from "./AdvancedCart"
 import CardControls from "./CardControls"
 import Loading from "./Loading"
-import CounterInput from "./CounterInput"
+import Paginated from "./Paginated"
+import ContextMenu from "./ContextMenu"
+import Tags from "./Tags"
+import ToolTip from "./ToolTip"
 
 const {
+	Q,
+	HOME_DIR,
 	BOARDS,
-	formatManaSymbols,
-	formatText,
+	createSlug,
 	filterAdvanced,
 	rnd,
 	sum,
-	paginate,
+	getCardFace,
+	getTags,
+	reorderDate,
+	getFormattedDate,
 } = utilities
+
 export default connect(
-	({main: {cardData}, deck: {list, _id}, filters: {advanced}}) => {
-		return {cardData, list, _id, advanced}
+	({
+		main: {cardData},
+		deck: {list},
+		filters: {
+			advanced: {cart, termSets},
+		},
+	}) => {
+		return {
+			cardData,
+			list,
+			cart,
+			termSets,
+		}
 	},
 	actions
-)(
-	({
-		cardData,
-		list,
-		_id,
-		advanced,
-		changeAdvanced,
-		openModal,
-		newMsg,
-		addCard,
-		getCardData,
-	}) => {
-		const {terms, by, asc, interested, nameEntry} = advanced
-		const pageLimit = 10
-		const maxRes = 50
+)(({cardData, cart, termSets, addCard, addCart, getCardData}) => {
+	const [contextLink, setContextLink] = useState(null)
+	const [searching, setSearching] = useState(false)
+	const [results, setResults] = useState([])
+	const [def, setDef] = useState("newest")
 
-		const [loadingCards, setLoadingCards] = useState(false)
-		const [filtered, setFiltered] = useState(cardData)
-		const [results, setResults] = useState([[]])
-		const [page, setPage] = useState(0)
+	useEffect(
+		_ => {
+			if (!cardData.length) getCardData()
+			else {
+				if (termSets.some(t => t.data.length)) {
+					setSearching(true)
+					setResults(filterAdvanced(cardData, termSets))
+				} else if (def === "random") setResults(rnd(cardData, 12))
+				else if (def === "newest")
+					setResults(cardData.orderBy("released_at").slice(-12))
 
-		useEffect(
-			_ => {
-				setLoadingCards(true)
-				if (!cardData.length) {
-					getCardData()
-				}
-				if (nameEntry.length)
-					setFiltered(matchSorter(filtered, nameEntry, {keys: ["name"]}))
-				else setFiltered(filterAdvanced(cardData, advanced))
-			},
-			[cardData, terms, nameEntry]
-		)
-		useEffect(
-			_ => {
-				if (cardData.length) {
-					setPage(0)
-					setLoadingCards(false)
-					if (terms.length && !nameEntry.length)
-						setResults(
-							paginate(filtered.orderBy(by).slice(0, maxRes), pageLimit)
-						)
-					if (nameEntry.length)
-						setResults(paginate(filtered.slice(0, maxRes), pageLimit))
-					else setResults([rnd(filterAdvanced(cardData, advanced), pageLimit)])
-				}
-			},
-			[cardData, filtered, by, asc]
-		)
-		const pages =
-			results.length === 1 ? null : (
-				<div className="pages block bar even mini-spaced-bar">
-					<h4>
-						{results.length > 1
-							? `${page * pageLimit + 1}-${
-									page * pageLimit + results[page].length
-							  } of ${sum(results.map(r => r.length))}${
-									sum(results.map(r => r.length)) === maxRes ? "+" : ""
-							  }`
-							: results.length
-							? `${results[0].length}`
-							: ""}
-					</h4>
-					<div className="bar">
-						<button
-							key={"paginate_last"}
-							className={`icon-left smaller-button ${page <= 0 && "disabled"}`}
-							onClick={_ => setPage(page - 1)}
-						/>
-						{results.map((_, i) => (
-							<button
-								key={"page_btn_" + i}
-								className={`smaller-button ${page === i && "selected"}`}
-								onClick={_ => setPage(i)}>
-								{i + 1}
-							</button>
-						))}
-						<button
-							key={"paginate_next"}
-							className={`icon-right smaller-button ${
-								page >= results.length - 1 && "disabled"
-							}`}
-							onClick={_ => setPage(page + 1)}
-						/>
-					</div>
-				</div>
-			)
+				setSearching(false)
+			}
+		},
+		[cardData.length, termSets, def]
+	)
 
-		const ResultCard = ({c}) => (
-			<div key={c.id} className="mini-block bar even spread">
-				<div className="bar">
-					<CardControls card={c} context={"builder"} />
-					<div className="info">
-						<div className="bar even mini-spaced-bar">
-							<h3>{c.name}</h3>
-							<span>{formatManaSymbols(c.mana_cost)}</span>
-						</div>
-						<h4>{c.type_line}</h4>
-						<div>{formatText(c.oracle_text)}</div>
-						{c.power === undefined ? null : `${c.power}/${c.toughness}`}
-					</div>
-				</div>
-				<div className="add-to col">
-					{!_id
-						? null
-						: BOARDS.map(B => (
-								<button
-									key={B}
-									className={`small-button ${
-										!!list.filter(l => l.board === B && c.name === l.name)[0] &&
-										"selected"
-									}`}
-									onClick={_ => addCard(c, B)}>
-									{B}:{" "}
-									{list.filter(l => l.board === B && c.name === l.name).length}
-								</button>
-						  ))}
-				</div>
-			</div>
-		)
+	if (contextLink) {
+		setContextLink(null)
+		useHistory().push(contextLink)
+	}
+
+	const ResultCard = ({c, i}) => {
+		if (!c) return null
+		const {
+			name,
+			mana_cost,
+			type_line,
+			oracle_text,
+			power,
+			toughness,
+		} = getCardFace(c)
+		const added = Q(cart, "name", c.name).length
+		const tags = getTags(c)
 		return (
-			<div>
-				{terms.length || nameEntry.length ? (
-					<h2 className={"block"}>Results</h2>
-				) : (
-					<div className="block bar even mini-spaced-bar">
-						<h2>Random Cards</h2>
-						<button
-							className="small-button icon-loop"
-							onClick={_ =>
-								setResults([rnd(filterAdvanced(cardData, advanced), pageLimit)])
-							}>
-							Shuffle
-						</button>
-					</div>
-				)}
-				{pages}
-				{loadingCards ? (
-					<Loading message={"Loading Cards"} />
-				) : !results[page].length ? (
-					<Loading spinner={" "} anim="none" message="No Matches :(" />
-				) : (
-					results[page].map(c => <ResultCard key={c.id} c={c} />)
-				)}
-				{pages}
+			<div key={c.id + i} className={`result-card big`}>
+				<ToolTip
+					message={
+						<div className="mini-spaced-col">
+							<div>
+								<b>Tags: </b>
+								{tags.length
+									? tags.map(t => (
+											<div className="tag">
+												{t.type}: {t.name}
+											</div>
+									  ))
+									: "none"}
+							</div>
+							<p>
+								<b>Set: </b>
+								{c.set_name}
+							</p>
+							<p>
+								<b>Released: </b>
+								{reorderDate(c.released_at)}
+							</p>
+							<p>
+								<b>Price: </b>
+								{c.prices && `$${c.prices.usd}`}
+							</p>
+						</div>
+					}>
+					<CardControls
+						card={c}
+						classes={"search-result"}
+						param={"info"}
+						noHover
+						contextMenu={[
+							{
+								label: "Add to Cart",
+								callBack: _ => addCart(c),
+							},
+							{
+								label: "Remove from Cart",
+								callBack: _ => addCart(c, true),
+								color: cart.find(({name}) => name === c.name) || "disabled",
+							},
+							...BOARDS.map(B => {
+								return {
+									label: `Add to ${B}board`,
+									callBack: _ => addCard(c, B),
+								}
+							}),
+						]}
+					/>
+				</ToolTip>
+				<div className="flex-row mini-spaced-bar">
+					<button
+						className={`add-button icon-plus ${added && "icon-ok selected"}`}
+						onClick={_ => addCart(c)}>
+						{added || ""}
+					</button>
+				</div>
 			</div>
 		)
 	}
-)
 
-// <button
-// 	className={`small-button ${
-// 		!!interested.filter(int => int.name === c.name)[0] && "selected"
-// 	}`}
-// 	onClick={_ => {
-// 		const wo = interested.filter(int => int.name !== c.name)
-// 		changeAdvanced({
-// 			interested:
-// 				wo.length === interested.length
-// 					? [{...c, key: uuidv4()}, ...interested]
-// 					: wo,
-// 		})
-// 	}}>
-// 	Interested
-// </button>
+	return cardData.length ? (
+		<Paginated
+			options={results}
+			render={(o, i) => <ResultCard c={o} i={i} />}
+			sorts={[
+				{name: "Name", key: "name"},
+				{name: "Date", key: "released_at"},
+				{name: "CMC", key: "cmc"},
+				{name: "EDHREC", key: "edhrec_rank"},
+			]}
+			noOpsNoFilter={!termSets.some(t => t.data.length)}
+			noOps={
+				termSets.some(t => t.data.length) ? null : (
+					<span className="mini-spaced-bar bar even">
+						<span>No Search, showing: </span>
+						<button
+							onClick={_ => setDef("newest")}
+							className={`small-button icon-attention ${
+								def === "newest" && "selected"
+							}`}>
+							Newest
+						</button>
+						<button
+							onClick={_ =>
+								def === "random"
+									? setResults(rnd(cardData, 12))
+									: setDef("random")
+							}
+							className={`small-button icon-loop ${
+								def === "random" && "selected"
+							}`}>
+							Random
+						</button>
+					</span>
+				)
+			}
+		/>
+	) : searching ? (
+		<Loading message="Searching" />
+	) : (
+		<Loading message="Loading Card Data" />
+	)
+})

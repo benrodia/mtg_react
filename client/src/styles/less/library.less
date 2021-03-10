@@ -14,17 +14,26 @@
 @header: "Beleren";
 
 @lightest: #eff5ff;
-@lighter: #c6cfe4;
-@light: #8895b3;
-@dark: #313f56;
-@darker: #1f283b;
+// @lighter: #c6cfe4;
+// @light: #8895b3;
+// @dark: #313f56;
+// @darker: #1f283b;
 @darkest: #020817;
 
-@highlight: #fcd303;
+// @darkest: #eff5ff;
+@darker: #39323d;
+@dark: #4e4352;
+@light: #d6c2c8;
+@lighter: #fff4eb;
+// @lightest: #020817;
+
+// @highlight: #fcd303;
+@highlight: #e6c46e;
 @red: #ff4466;
 @green: #7be8c0;
 
 @opaque: rgba(0, 0, 0, 0.5);
+// @opaque: rgba(255, 255, 255, 0.5);
 
 @bigger: 2rem;
 @big: 1.5rem;
@@ -34,7 +43,7 @@
 @thinner: 0.25rem;
 @thinnest: 0.125rem;
 
-@headerH: 2rem;
+@headerH: 2.5rem;
 @wrapperH: calc(100vh - 2rem);
 
 @cardW: 7.14rem;
@@ -116,6 +125,13 @@
 	}
 }
 
+.text-shadow {
+	text-shadow: 0 0 @thin @opaque;
+}
+.box-shadow {
+	box-shadow: 0 0 @thin @opaque;
+}
+
 .clean-button {
 	.clean-input();
 	box-shadow: 0 0 @thin rgba(0, 0, 0, 0.5);
@@ -132,7 +148,7 @@
 .small-button {
 	.clean-button();
 	font-size: @small;
-	height: @big;
+	// height: @big;
 	padding: 0 @thin;
 	width: auto;
 }
@@ -143,7 +159,10 @@
 }
 
 .selected {
-	background: @highlight !important;
+	background: @highlight;
+}
+.active {
+	color: @highlight;
 }
 
 .warning-button {
@@ -166,7 +185,7 @@
 	border-radius: 0;
 	background: transparent;
 	box-shadow: none;
-	text-shadow: 0 0 @thin rgba(0, 0, 0, 0.5);
+	// text-shadow: 0 0 @thin rgba(0, 0, 0, 0.5);
 	&:hover {
 		background: transparent;
 		color: @light;
@@ -177,13 +196,28 @@
 .inverse-small-button {
 	.inverse-button();
 	font-size: @small;
-	height: @big;
+	border: none;
+	margin: 0;
+	padding: 0;
+
 	padding: 0;
 }
 
 .inverse-button.icon {
 	border: none;
 	cursor: pointer;
+}
+
+.icon-unsaved {
+	&::before {
+		content: "";
+		height: 0.8rem;
+		border-radius: 100%;
+		background: @lightest;
+	}
+	&:hover::before {
+		background: @green;
+	}
 }
 
 .inverse-button.warning-button:hover,
@@ -200,31 +234,31 @@
 	border-color: @green;
 }
 
-.list-item {
-	.flex-row();
-	padding: @thinnest 0;
-	animation: flash-in 1s ease-out;
-	justify-content: space-between;
-	.item-label {
-		flex-grow: 1;
-	}
-	.printing {
-		min-width: 10rem;
-	}
-}
-
-.field-label {
-	margin: @thin 0 @thinnest;
-	color: @lighter;
-}
-
 .tag {
 	font-size: @small;
 	font-weight: bolder;
+	height: 1.3rem;
 	color: @darkest !important;
 	background: @lighter;
 	border-radius: @thinnest;
-	padding: @thinnest;
+	padding: @thinnest @thinner;
+	border-left: @thinner solid @green;
+	&.green {
+		border-left: @thinner solid @green;
+	}
+	&.yellow {
+		border-left: @thinner solid @highlight;
+	}
+	&.red {
+		border-left: @thinner solid @red;
+	}
+}
+.tag.big {
+	.center();
+	font-size: 1rem;
+	height: 2.3rem;
+	background: @lighter;
+	border-radius: @thinnest;
 	border-left: @thinner solid @green;
 }
 
@@ -283,7 +317,7 @@
 	}
 	svg.common,
 	svg.common * {
-		fill: #fff;
+		fill: #000;
 	}
 	svg.uncommon,
 	svg.uncommon * {
@@ -330,12 +364,12 @@
 
 .fill .max,
 .max {
-	flex: 1 0;
+	flex-grow: 1;
 }
 
 .fill .min,
 .min {
-	flex: 0 1;
+	flex-shrink: 1;
 }
 
 .bar {
@@ -348,8 +382,24 @@
 	flex-wrap: wrap;
 }
 
+.col-2 {
+	column-count: 2;
+	break-inside: avoid;
+}
+.col-3 {
+	column-count: 3;
+	break-inside: avoid;
+}
+.col-4 {
+	column-count: 4;
+	break-inside: avoid;
+}
+
 .even {
 	align-items: center;
+}
+.nowrap {
+	flex-wrap: nowrap;
 }
 
 .center {
@@ -359,6 +409,7 @@
 	align-items: center;
 	margin-left: auto;
 	margin-right: auto;
+	// text-align: center;
 }
 
 .text-block {
@@ -367,6 +418,20 @@
 
 .spread {
 	justify-content: space-between;
+}
+
+.start {
+	align-items: flex-start;
+}
+.end {
+	align-items: flex-end;
+}
+
+.start-just {
+	justify-content: flex-start;
+}
+.end-just {
+	justify-content: flex-end;
 }
 
 .full-width {
@@ -421,6 +486,27 @@
 	.mini-spaced-bar();
 	.mini-spaced-col();
 }
+.pad {
+	padding: @thin*2;
+}
+
+.thin-pad {
+	padding: @thin;
+}
+.thinner-pad {
+	padding: @thinner;
+}
+.thinnest-pad {
+	padding: @thinnest;
+}
+
+.light-text {
+	color: @lightest;
+}
+.dark-text {
+	color: @darkest;
+	text-shadow: none;
+}
 
 // GENERAL RULES
 
@@ -436,16 +522,16 @@
 }
 
 h1,
-h2,
-h3 {
+h2 {
 	font-family: @header;
 }
 
+h3,
 h4,
 h5,
 h6 {
 	font-family: @para;
-	font-weight: bolder;
+	// font-weight: bold;
 }
 
 a {
@@ -459,8 +545,10 @@ textarea {
 	.clean-input();
 	height: auto;
 	border-radius: @thinnest;
-	padding: @thinner;
+	padding: @thin;
+	margin: 0;
 	transition: 0;
+	resize: none;
 }
 
 button {
@@ -504,6 +592,13 @@ button {
 	}
 }
 
+.flip-in {
+	animation-name: flip-in;
+	animation-duration: 0.8s;
+	animation-fill-mode: both;
+	animation-iteration-count: 1;
+}
+
 @keyframes flip-in {
 	from {
 		transform: perspective(20rem) rotateY(85deg) translateX(@cardW) scale(1.5);
@@ -516,6 +611,16 @@ button {
 .disabled {
 	filter: opacity(0.4);
 	pointer-events: none;
+}
+
+.green {
+	color: @green;
+}
+.yellow {
+	color: @highlight;
+}
+.red {
+	color: @red;
 }
 
 @keyframes flash-in {

@@ -22,12 +22,12 @@ export const canEdit = _id => {
 
 export const canSuggest = _ => {
 	const {
-		deck: {author, helpWanted},
+		deck: {author, allow_suggestions},
 		auth: {user, isAuthenticated},
 	} = store.getState()
 	return (
-		(isAuthenticated && user._id !== author && helpWanted > 1) ||
-		(helpWanted === 1 && areFriends(author))
+		(isAuthenticated && user._id !== author && allow_suggestions > 1) ||
+		(allow_suggestions === 1 && areFriends(author))
 	)
 }
 export const areFriends = _id => {
@@ -44,9 +44,11 @@ export const creator = _id => {
 		main: {users},
 	} = store.getState()
 
-	return _id
-		? users.filter(u => u._id === _id)[0]
-		: users.filter(u => u._id === author)[0] || {}
+	return (
+		(_id
+			? users.filter(u => u._id === _id)[0]
+			: users.filter(u => u._id === author)[0]) || {}
+	)
 }
 
 export const config = getState => {
@@ -65,6 +67,7 @@ export const createSlug = (name = "", from) => {
 		const named = slugify(name, {
 			replacement: "-",
 			strict: true,
+			lower: true,
 			locale: "en",
 		})
 		const existing = from ? from.filter(f => f.slug === named).length : 0

@@ -1,25 +1,15 @@
 import React, {useState, useEffect, useRef} from "react"
-import {Link, useParams, useLocation} from "react-router-dom"
+import {Link, useParams, useLocation, useHistory} from "react-router-dom"
 import {connect} from "react-redux"
 import ago from "s-ago"
 import {PieChart} from "react-minimal-pie-chart"
 import actions from "../actions"
 import utilities from "../utilities"
-import MdEditor from "react-markdown-editor-lite"
-import Markdown from "markdown-to-jsx"
-import "react-markdown-editor-lite/lib/index.css"
 
-import BasicSearch1 from "./BasicSearch1"
-import BasicSearch from "./BasicSearch"
-import ResolveSuggestions from "./ResolveSuggestions"
-import DeckStats from "./DeckStats"
-import BoardFilters from "./BoardFilters"
-import BulkEdit from "./BulkEdit"
 import Icon from "./Icon"
+import DeckInfo from "./DeckInfo"
 import Hamburger from "./Hamburger"
-import Board from "./Board"
 import DownloadFile from "./DownloadFile"
-import Card from "./Card"
 
 const {
 	HOME_DIR,
@@ -32,6 +22,8 @@ const {
 	canEdit,
 	helpTiers,
 	titleCaps,
+	creator,
+	formattedDate,
 } = utilities
 
 export default connect(({main: {sets}, deck, filters: {board, basic}}) => {
@@ -59,6 +51,9 @@ export default connect(({main: {sets}, deck, filters: {board, basic}}) => {
 		privacy,
 		editing,
 		unsaved,
+		author,
+		created,
+		updated,
 		board,
 		sets,
 		basic,
@@ -67,56 +62,20 @@ export default connect(({main: {sets}, deck, filters: {board, basic}}) => {
 		changeDeck,
 		changeFilters,
 		addCard,
+		closeDeck,
 		saveDeck,
 		openDeck,
 		cloneDeck,
 		deleteDeck,
 	}) => {
+		const [contextLink, setContextLink] = useState(null)
 		const {pathname} = useLocation()
 
-		const DeckOptions = _ => (
-			<div className="quick-import col thin-block">
-				<button
-					className="small-button icon-download"
-					onClick={_ =>
-						openModal({title: "Download File", content: <DownloadFile />})
-					}>
-					Download File
-				</button>
-				<button
-					className="small-button icon-clipboard"
-					onClick={_ => {
-						navigator.clipboard.writeText(textList(list, true))
-						newMsg("Copied list to clipboard!", "success")
-					}}>
-					Copy to Clipboard
-				</button>
-				{clone ? (
-					<Link to={`${HOME_DIR}/deck/${clone}`}>
-						<button className="small-button success-button fill">
-							Cloned! Open Deck
-						</button>
-					</Link>
-				) : (
-					<button
-						className="small-button icon-clone"
-						onClick={_ => cloneDeck()}>
-						Clone Deck
-					</button>
-				)}
-				{!canEdit() ? null : (
-					<button
-						className="inverse-small-button warning-button icon-trash"
-						onClick={_ => deleteDeck(_id)}>
-						Delete Deck
-					</button>
-				)}
-			</div>
-		)
+		contextLink && useHistory().push(contextLink)
 
-		return (
-			<div className="bar even ">
-				{!unsaved ? null : (
+		const rightBar = _ => (
+			<div className="quick-import flex-row even thin-block">
+				{!canEdit() ? null : (
 					<button
 						className={`small-button ${
 							canPublish(list, format) ? "success" : ""
@@ -126,45 +85,157 @@ export default connect(({main: {sets}, deck, filters: {board, basic}}) => {
 					</button>
 				)}
 				<button
-					className="icon-cancel warning-button inverse-small-button"
-					onClick={_ => openDeck(null)}>
-					Close
+					className="small-button icon-download"
+					onClick={_ =>
+						openModal({title: "Download File", content: <DownloadFile />})
+					}>
+					Download
 				</button>
+			</div>
+		)
+		// 		<button
+		// 	className="small-button icon-clipboard"
+		// 	onClick={_ => {
+		// 		navigator.clipboard.writeText(textList(list, true))
+		// 		newMsg("Copied list to clipboard!", "success")
+		// 	}}>
+		// 	Copy to Clipboard
+		// </button>
+		// {!canEdit() ? null : (
+		// 	<button
+		// 		className="inverse-small-button warning-button icon-trash"
+		// 		onClick={_ => deleteDeck(_id)}>
+		// 		Delete Deck
+		// 	</button>
+		// <h4>{published ? "Published" : "Draft"} by</h4>
+		// )}
 
-				<Link to={`${HOME_DIR}/deck/${slug}`}>
-					<h3 className="sub-title bar even mini-spaced-bar">
-						<span className="icon">
-							<PieChart
-								data={COLORS("fill").map((color, i) => {
-									return {value: colors[i], color}
-								})}
-								startAngle={270}
-							/>
-						</span>
-						{name || "Untitled"}
-					</h3>
-				</Link>
-				<Link to={`${HOME_DIR}/deck/${slug}/playtest`}>
-					<button
-						className={`small-button icon-play ${
-							pathname.includes("/playtest") && "selected"
-						}`}>
-						Playtest
-					</button>
-				</Link>
+		// <Link to={`${HOME_DIR}/deck/${slug}`}>
+		// </Link>
+		const Title = _ => (
+			<div className="col title mini-spaced-col">
+				<div
+					className="splash"
+					style={{
+						background: `url(${feature}) no-repeat center center`,
+						backgroundSize: "cover",
+					}}>
+					<span className="grad" />
+				</div>
+				<div className=" icon flex-row even mini-spaced-bar">
+					<PieChart
+						data={COLORS("fill").map((color, i) => {
+							return {value: colors[i], color}
+						})}
+						startAngle={270}
+					/>
+					<span>
+						<h1 className="sub-title ">{name || "Untitled"}</h1>
+						<h4>{titleCaps(format)}</h4>
+					</span>
+				</div>
+			</div>
+		)
+		// 		<Link to={`${HOME_DIR}/user/${creator(author).slug}`}>
+		// 	<button className="user-button">{creator(author).name}</button>
+		// </Link>
+
+		return (
+			<div className="deck-nav flex-row spread even">
+				<div className="bar even spaced-bar">
+					<Title />
+					<div className="play-button">
+						<Link to={`${HOME_DIR}/playtest/lobby`}>
+							<button className="icon-play" title="Playtest Deck" />
+						</Link>
+					</div>
+					<DeckInfo />
+				</div>
+				{!canEdit() ? null : (
+					<div className="col end thin-pad">
+						<div className="bar mini-spaced-bar">
+							{unsaved ? (
+								<Link to={`${HOME_DIR}/deck/${slug}`}>
+									<button
+										title="Save Deck"
+										className={`small-button ${
+											canPublish(list, format) ? "success" : ""
+										}-button icon-help-circled`}
+										onClick={saveDeck}>
+										Save
+									</button>
+								</Link>
+							) : (
+								<Link to="/">
+									<button
+										className={`small-button warning-button disabled icon-cancel`}>
+										Saved
+									</button>
+								</Link>
+							)}
+						</div>
+
+						<button
+							className="inverse-small-button warning-button icon-trash thin-pad"
+							onClick={_ => {
+								if (window.confirm("Delete Deck?")) {
+									deleteDeck(_id)
+									setContextLink(HOME_DIR)
+								}
+							}}>
+							Delete
+						</button>
+					</div>
+				)}
 			</div>
 		)
 	}
 )
+// <div className="col">
+// 	{!canEdit() ? null : (
+// 		<Link to={`${HOME_DIR}/deck/${slug}/build`}>
+// 			<button className="icon-search" title="Search For Cards" />
+// 		</Link>
+// 	)}
+// </div>
+
+// <Link to={`${HOME_DIR}/deck/${slug}`}>
+// 	<h3 className="sub-title bar even mini-spaced-bar">
+// 		<span className="icon">
+// 			<PieChart
+// 				data={COLORS("fill").map((color, i) => {
+// 					return {value: colors[i], color}
+// 				})}
+// 				startAngle={270}
+// 			/>
+// 		</span>
+// 		{name || "Untitled"}
+// 	</h3>
+// </Link>
+// <Link to={`${HOME_DIR}/deck/${slug}/playtest`}>
+// 	<button
+// 		className={`small-button icon-play ${
+// 			useLocation().includes("/playtest") && "selected"
+// 		}`}>
+// 		Playtest
+// 	</button>
+// </Link>
+
+// {!unsaved ? null : (
+// 	<button
+// 		className={`small-button ${
+// 			canPublish(list, format) ? "success" : ""
+// 		}-button max icon-ok`}
+// 		onClick={saveDeck}>
+// 		Save
+// 	</button>
+// )}
+
 // <Link to={`${HOME_DIR}/deck/${slug}`}>
 // 	<button
-// 		className={`small-button icon-layers ${
+// 		className={`small-button ${
 // 			pathname.includes("/playtest") ||
 // 			pathname.includes("/build") ||
 // 			"selected"
 // 		}`}></button>
 // </Link>
-
-// <Hamburger vert>
-// 	<DeckOptions />
-// </Hamburger>

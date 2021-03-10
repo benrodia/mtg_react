@@ -1,0 +1,147 @@
+.card-page {
+	display: flex;
+	width: 100%;
+	.main {
+		max-width: 46rem;
+	}
+
+	.result-card {
+		.add-button {
+			margin-top: -@cardH;
+			position: absolute;
+			z-index: 20;
+			opacity: 0;
+			transition: opacity 0.2s;
+		}
+		&:hover {
+			.add-button {
+				opacity: 1;
+			}
+		}
+		&.big {
+			max-width: 15rem;
+			margin-right: @thinner;
+			.add-button {
+				height: auto;
+				max-height: auto;
+				font-size: 2rem;
+				padding: @thin;
+				margin-top: -@cardH*2;
+				margin-left: 10rem;
+			}
+		}
+	}
+
+	.advanced-search {
+		.refine {
+			width: 100%;
+			border-radius: @thin;
+		}
+		.advanced-field {
+			border-radius: @thin;
+			.pages {
+				width: 18rem;
+				justify-content: space-between;
+			}
+		}
+		.mana-button {
+			padding: @thinnest;
+			border-radius: @thinnest;
+			margin-right: @thinner;
+			&:last-child {
+				margin-right: 0;
+			}
+			&:hover {
+				cursor: pointer;
+			}
+		}
+	}
+
+	.advanced-button {
+		margin: 0;
+		height: 3rem;
+		width: 7rem;
+	}
+
+	.card-search {
+		width: 46rem;
+		padding: 1rem;
+		background: @darker;
+		box-shadow: 0 0 1rem @opaque;
+		p {
+			max-width: 25rem;
+		}
+	}
+}
+.filters {
+	background: @opaque;
+}
+
+.quant-tickers {
+	.button {
+		color: @lighter;
+		&:first-child {
+			border-bottom: 1px solid @light;
+		}
+		&:hover {
+			cursor: pointer;
+			color: @light;
+		}
+	}
+}
+.cart {
+	position: fixed;
+	z-index: 10;
+	top: @headerH;
+	right: 0;
+	width: 10rem;
+	transition: 0.3s;
+	max-height: calc(100vh - @headerH);
+	& > * {
+		transition: opacity 0.3s;
+	}
+	&.open {
+		width: 22rem;
+		height: calc(100vh - @headerH);
+		// bottom: 0;
+		background: @opaque;
+		overflow-x: hidden;
+		overflow-y: auto;
+		.cart-head {
+			position: fixed;
+			z-index: 20;
+			width: 22rem;
+			background: @dark;
+		}
+		.sub-cart-head {
+			margin-top: 10rem;
+			height: calc(100vh - @headerH - 10rem);
+		}
+	}
+}
+
+.more-less {
+	background: linear-gradient(transparent, @dark);
+	border-radius: @thin;
+	.more-less-button {
+		background: transparent;
+		box-shadow: none;
+		color: @light;
+		&:hover {
+			color: @lighter;
+		}
+	}
+}
+
+.new-deck {
+	.list-inner {
+		max-height: 50vh;
+		overflow-y: auto;
+	}
+	.feature-full {
+		background-color: @darkest;
+		img {
+			background-color: transparent;
+		}
+	}
+}

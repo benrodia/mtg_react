@@ -1,4 +1,5 @@
 import axios from "axios"
+import stringSimilarity from "string-similarity"
 import {CARD_TYPES, MAIN_BOARD, ZONES, COLORS} from "../constants/definitions"
 import {advancedFields, illegalLayouts} from "../constants/data"
 import {
@@ -6,8 +7,9 @@ import {
   NO_QUANT_LIMIT,
   MANA,
   NUM_FROM_WORD,
+  ADVANCED_GREPS,
 } from "../constants/greps"
-import {matchStr} from "../functions/utility"
+import {matchStr, sum} from "../functions/utility"
 import {audit, itemizeDeckList} from "../functions/receiveCards"
 
 export function Q(scope = [{}], keys = [""], vals = [], every) {
@@ -36,7 +38,35 @@ export function Q(scope = [{}], keys = [""], vals = [], every) {
   return query.length ? query : falsey
 }
 
-export function normalizePos(deck) {
+export const q = (card = {}, vals = [], every) => {
+  vals = Array.isArray(vals) ? vals : [vals]
+  const test = v => Object.values(card).find(_ => `${_}`.includes(v))
+
+  return every ? vals.every(v => test(v)) : vals.find(v => test(v))
+}
+
+export const getCardFace = card => {
+  const {card_faces, flipped} = card
+  const {mana_cost, name, type_line, oracle_text, power, toughness} = card_faces
+    ? card_faces[flipped ? 1 : 0]
+    : card
+  const image_uris =
+    card.image_uris ||
+    (card_faces && card_faces[flipped ? 1 : 0].image_uris) ||
+    {}
+  return {
+    ...card,
+    mana_cost,
+    name,
+    type_line,
+    oracle_text,
+    power,
+    toughness,
+    image_uris,
+  }
+}
+
+export function normalizePos(deck, cols) {
   let zoneCards = ZONES.map(z => deck.filter(c => c.zone === z))
   for (var i = 0; i < zoneCards.length; i++) {
     zoneCards[i] = zoneCards[i].orderBy("order").map((c, i) => {
@@ -48,7 +78,7 @@ export function normalizePos(deck) {
   for (var i = 0; i < slots.length; i++) {
     let stacks = slots
       .filter(c => c.col === slots[i].col && c.row === slots[i].row)
-      .sort((a, b) => (a.stack > b.stack ? 1 : -1))
+      .orderBy("stack")
     stacks = stacks.map((s, ind) => {
       s.stack = ind
       return s
@@ -68,10 +98,14 @@ export const validCardObjects = cards =>
   cards.filter(
     card =>
       !(
-        Q(card, "layout", illegalLayouts) ||
-        Q(card, "border_color", ["Silver", "Gold"]) ||
-        card.set_type === "funny" ||
-        !Object.values(card.legalities).filter(le => le === "legal").length
+        Q(card, "layout", illegalLayouts)
+        // ||
+        // Q(card, "border_color", ["Silver", "Gold"])
+        // ||
+        // !Object.values(card.legalities).filter(
+        //   le => le === "legal" || le === "restricted"
+        // ).length
+        // card.set_type === "funny" ||
       )
   )
 
@@ -90,73 +124,123 @@ export function isLegal(card = {legalities: {}}, format = "", deckIdentity) {
   return allowed
 }
 
-export function filterColors(c, terms) {
-  const ofOP = o => terms.filter(f => f.op === o).map(cl => cl.val)
-  const test = clr =>
-    ["colors", "color_identity"].every(
-      co => c[co] && (c[co].length ? c[co].includes(clr) : clr === "C")
-    )
-
-  return (
-    (!ofOP("AND").length || ofOP("AND").every(cl => test(cl))) &&
-    (!ofOP("OR").length || ofOP("OR").some(cl => test(cl))) &&
-    (!ofOP("NOT").length || !ofOP("NOT").some(cl => test(cl)))
-  )
+export const convertTag = (tag = {}) => {
+  const grep = tag ? tag.grep : tag
+  if (!grep) return {failed: true, ...tag}
+  let newTerms = []
+  const gs = Object.entries(grep).map(g => {
+    const [name, ops] = g
+    return Object.entries(ops).map(o => {
+      const [op, vs] = o
+      return vs.map(val => {
+        const {trait, subTrait} =
+          advancedFields.filter(a => a.name === name)[0] || {}
+        const id = name + op + val
+        newTerms.push({name, trait, subTrait, op, val, id})
+        return
+      })
+    })
+  })
+  return newTerms
 }
 
-export const filterNumeric = (card, key, op, val) => {
-  const cur = parseInt(card[key])
+export const mapColors = list =>
+  COLORS("symbol").map(s => {
+    const prod = sum(
+      list.map(c =>
+        c.produced_mana ? c.produced_mana.filter(p => p === s).length : 0
+      )
+    )
+    const cost = sum(
+      list.map(c =>
+        c.mana_cost ? c.mana_cost.split("").filter(i => i === s).length : 0
+      )
+    )
+    return prod > 1 && cost > 1 ? prod + cost : 0
+  })
+
+export const filterColors = (c, terms) => {
+  let ors = 0
+  const andNots = terms.every(({trait, op, val}) => {
+    const test = _ =>
+      c[trait] && (c[trait].length ? c[trait].includes(val) : val === "C")
+
+    if (op === "AND") return test()
+    else if (op === "NOT") return !test()
+    else if (op === "OR") {
+      if (test()) ors++
+      return true
+    }
+  })
+  return (!terms.find(t => t.op === "OR") || ors) && andNots
+}
+
+export const numOp = (n, op, m) => {
   return op === ">"
-    ? cur > val
+    ? m > n
     : op === "<"
-    ? cur < val
+    ? m < n
     : op === "="
-    ? cur == val
+    ? m === n
     : op === ">="
-    ? cur >= val
+    ? m >= n
     : op === "<="
-    ? cur <= val
+    ? m <= n
+    : op === "!="
+    ? m !== n
     : true
 }
 
-export const filterAdvanced = (cards, advanced) => {
-  if (!advanced) return cards
-  const {terms} = advanced
-  const fields = advancedFields.map(n => terms.filter(t => t.name === n.name))
-  const filtered = cards.filter((c, ci) => {
-    const fmt = o => terms.filter(f => f.trait === "format" && f.op === o)
-
-    return (
-      isLegal(c) &&
-      (!fmt("AND").length || fmt("AND").every(f => isLegal(c, f.val))) &&
-      (!fmt("OR").length || fmt("OR").some(f => isLegal(c, f.val))) &&
-      (!fmt("NOT").length || !fmt("NOT").some(f => isLegal(c, f.val))) &&
-      fields.every((inField, i) => {
-        const ofOP = op =>
-          inField
-            .filter(f => f.op === op)
-            .map(f => {
-              const val =
-                f.name === "Text" && f.val.includes("[CARDNAME]")
-                  ? c.name
-                  : f.val
-              return val
-            })
-        const cur = advancedFields[i]
-
-        return cur.numeric
-          ? inField.every(({trait, op, val}) =>
-              filterNumeric(c, trait, op, val)
-            )
-          : cur.colored
-          ? filterColors(c, inField)
-          : (!ofOP("AND").length || Q(c, cur.trait, ofOP("AND"), true)) &&
-            (!ofOP("OR").length || Q(c, cur.trait, ofOP("OR"))) &&
-            (!ofOP("NOT").length || Q(c, cur.trait, ofOP("NOT"), false))
-      })
-    )
+export const filterNumeric = (c, terms) =>
+  terms.every(({trait, subTrait, op, val}) => {
+    val =
+      val === "POWER"
+        ? c.power
+        : val === "TOUGHNESS"
+        ? c.toughness
+        : val === "CMC"
+        ? c.cmc
+        : !isNaN(Number(val))
+        ? Number(val)
+        : parseInt(val)
+    const tr = c[trait] && subTrait ? c[trait][subTrait] : c[trait]
+    const cur = Array.isArray(tr) ? tr.length : Number(tr)
+    if (cur) return numOp(val, op, cur)
+    else return false
   })
-  return filtered
+
+export const filterAdvanced = (cards, termSets, some, none) => {
+  return cards.filter(c => {
+    const filt = terms =>
+      advancedFields
+        .map(n => terms.data.filter(t => t.trait === n.trait))
+        .every((termsByField, i) => {
+          const termsByOP = op =>
+            termsByField
+              .filter(f => f.op === op)
+              .map(f => f.val.replace("~", c.name))
+          const {numeric, colored, legality, trait, options} = advancedFields[i]
+
+          return numeric
+            ? filterNumeric(c, termsByField)
+            : colored
+            ? filterColors(c, termsByField)
+            : legality
+            ? termsByField.every(
+                t =>
+                  c.legalities[t.val] === t.op.toLowerCase().replace(" ", "_")
+              )
+            : (!termsByOP("AND").length ||
+                Q(c, trait, termsByOP("AND"), true)) &&
+              (!termsByOP("OR").length || Q(c, trait, termsByOP("OR"))) &&
+              (!termsByOP("NOT").length || !Q(c, trait, termsByOP("NOT")))
+        })
+    return some
+      ? termSets.some(terms => filt(terms))
+      : none
+      ? !termSets.every(terms => filt(terms))
+      : termSets.every(terms => filt(terms))
+  })
 }
 
 export const convertedSymbols = cost => {
@@ -166,10 +250,6 @@ export const convertedSymbols = cost => {
     COLORS("symbol").map(C => symbols.filter(co => co === C).length),
     isNaN(symbols[0]) ? 0 : parseInt(symbols[0]),
   ]
-}
-
-export const optimizePrices = _ => {
-  return null
 }
 
 export const filterCardType = (list, category, val) =>
@@ -197,26 +277,43 @@ export const canPublish = (list, format) => {
   return atLimit && allLegal
 }
 
-export const listDiffs = (pre, post) => {
-  const diffs = (a, b) => {
-    const interp = itemizeDeckList(a, ["id"]).map(acs => {
-      const card = acs[0]
-      const quantity = Math.abs(
-        acs.length - b.filter(({id}) => id === card.id).length
-      )
-      return {card, quantity}
+export const listDiffs = (pre = [], post = [], filter) => {
+  const allNames = pre
+    .concat(post)
+    .unique("name")
+    .map(c => {
+      const tot = o => o.filter(({name}) => name === c.name).length
+      return {
+        quantity: tot(post) - tot(pre),
+        card: c,
+      }
     })
-    let returned = []
-    for (var i = 0; i < interp.length; i++)
-      returned = [
-        ...returned,
-        ...[...Array(interp[i].quantity)].map(_ => interp[i].card),
-      ]
-    return returned
+    .filter(c => c.quantity !== 0)
+  const flatten = arr =>
+    arr.map(c => [...Array(Math.abs(c.quantity))].map(_ => c.card)).flat()
+
+  let added = flatten(allNames.filter(a => a.quantity > 0))
+  let removed = flatten(allNames.filter(a => a.quantity < 0))
+  let changed = []
+  for (var i = 0; i < added.length; i++) {
+    const ch =
+      removed.filter(
+        r => r.name === added[i].name && added[i].set !== r.set
+      )[0] || null
+    if (ch) {
+      changed.push({oldVer: ch, newVer: added[i]})
+      added[i] = null
+      removed = removed.filter(
+        (_, i) => i !== removed.findIndex(r => r.id === ch.id)
+      )
+    }
   }
-  const added = diffs(post, pre)
-  const removed = diffs(pre, post)
-  return {added, removed, changed: !!added.length || !!removed.length}
+
+  return {
+    added: added.filter(a => !!a),
+    removed,
+    changed,
+  }
 }
 
 export async function getArt(terms = {}) {
@@ -227,4 +324,74 @@ export async function getArt(terms = {}) {
       return image_uris.art_crop
     })
   return art
+}
+
+export const getTags = card =>
+  ADVANCED_GREPS.filter(
+    tag =>
+      !!filterAdvanced([card], [{name: tag.name, data: convertTag(tag)}]).length
+  )
+
+export const getSimilarCards = (pool, model, returnNum = 3) => {
+  const ranked = pool
+    .map(card => {
+      const c = getCardFace(card)
+      const m = getCardFace(model)
+      if (c.name === m.name) return null
+      const strip = t =>
+        (t.indexOf("(") < 0
+          ? t
+          : t.slice(0, t.indexOf("(")) + t.slice(t.indexOf(")") + 1)
+        )
+          .replace(c.name, m.name)
+          .toLowerCase()
+
+      const score =
+        (c.color_identity &&
+        ((!c.color_identity.length && !m.color_identity.length) ||
+          c.color_identity.filter(co => m.color_identity.includes(co)).length)
+          ? 2.5
+          : 0) +
+        (c.cmc === m.cmc ? 2.5 : 0) +
+        (c.mana_cost === m.mana_cost ? 5 : 0) +
+        (c.power && `${c.power}/${c.toughness}` === `${m.power}/${m.toughness}`
+          ? 5
+          : 0) +
+        stringSimilarity.compareTwoStrings(c.type_line, m.type_line) * 5 +
+        stringSimilarity.compareTwoStrings(c.name, m.name) * 15 +
+        stringSimilarity.compareTwoStrings(
+          strip(c.oracle_text),
+          strip(m.oracle_text)
+        ) *
+          50 +
+        (c.oracle_text.includes(m.name) ? 100 : 0) +
+        (c.keywords.includes("partner") && m.keywords.includes("partner")) +
+        c.keywords.filter(k => m.keywords.includes(k)).length * 2.5
+      return score < 20 ? null : {card, weight: score}
+    })
+    .filter(c => !!c)
+    .orderBy("weight", true)
+    .slice(0, returnNum)
+  return ranked
+}
+
+export const getTargetable = (select, players, controller) => {
+  // const {select, controller, owner} = script || {}
+  const allCards = players.map(pl => pl.deck).flat()
+  const targetable = allCards.filter(c => {
+    const of = select.of || {}
+    let include = true
+    // if (of.controller === "you") include = c.controller === controller
+    // if (of.owner === "you") include = c.owner === owner
+    // else if (of.controller === "opponent") include = c.controller !== controller
+    // else if (of.owner === "opponent") include = c.owner !== owner
+    if (of.type_line) include = Q(c, "type_line", of.type_line)
+    if (of.colors) include = Q(c, "colors", of.colors)
+    if (of.power) include = numOp(c.power, of.power.op, of.power.val)
+    if (of.toughness)
+      include = numOp(c.toughness, of.toughness.op, of.toughness.val)
+    if (of.cmc) include = numOp(c.cmc, of.cmc.op, of.cmc.val)
+  })
+
+  return targetable
 }

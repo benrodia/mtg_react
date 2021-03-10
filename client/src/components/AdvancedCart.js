@@ -1,137 +1,269 @@
 import React, {useState, useEffect} from "react"
 import {connect} from "react-redux"
+import {NavLink, useLocation, useHistory, Link} from "react-router-dom"
 import actions from "../actions"
-import axios from "axios"
-import matchSorter, {rankings} from "match-sorter"
-import {v4 as uuidv4} from "uuid"
 import utilities from "../utilities"
+import {PieChart} from "react-minimal-pie-chart"
 
-import NewDeck from "./NewDeck"
-import DeckFeed from "./DeckFeed"
-import AdvancedFilters from "./AdvancedFilters"
-import AdvancedField from "./AdvancedField"
-import BoardFilters from "./BoardFilters"
+import Icon from "./Icon"
+import CardTuner from "./CardTuner"
+import Loading from "./Loading"
+import DropSlot from "./DropSlot"
 import BasicSearch from "./BasicSearch"
 import CardControls from "./CardControls"
-import Loading from "./Loading"
-import CounterInput from "./CounterInput"
+import DeckFeed from "./DeckFeed"
+import ContextMenu from "./ContextMenu"
+import ToolTip from "./ToolTip"
+import DeckSearch from "./_Page_Deck_Search"
 
 const {
-	BOARDS,
-	COLORS,
-	ADVANCED_GREPS,
-	OPs,
-	formatManaSymbols,
-	filterColors,
-	formatText,
-	filterAdvanced,
-	audit,
+	HOME_DIR,
 	Q,
-	rnd,
-	sum,
-	titleCaps,
-	paginate,
-	advancedFields,
-	getAllCardTypes,
+	BOARDS,
 	itemizeDeckList,
+	isLegal,
+	titleCaps,
+	pluralize,
+	chooseCommander,
+	legalCommanders,
+	filterCardType,
+	COLORS,
+	ItemTypes,
+	MAIN_BOARD,
+	SINGLETON,
+	canEdit,
+	textList,
+	generateRandomDeck,
+	creator,
+	createSlug,
 } = utilities
+
 export default connect(
-	({main: {cardData, decks}, filters: {board, advanced}, deck}) => {
-		return {cardData, decks, board, advanced, deck}
+	({
+		main: {cardData},
+		filters: {
+			advanced: {cart},
+		},
+		auth: {isAuthenticated},
+		deck: {_id, name, slug, colors, list, format, custom, unsaved},
+	}) => {
+		return {
+			cart,
+			cardData,
+			isAuthenticated,
+			_id,
+			name,
+			slug,
+			colors,
+			list,
+			format,
+			custom,
+			unsaved,
+		}
 	},
 	actions
 )(
 	({
-		deck,
-		decks,
 		cardData,
-		board,
-		advanced,
-		addCard,
+		_id,
+		name,
+		slug,
+		colors,
+		list,
+		format,
+		unsaved,
+		cart,
+		isAuthenticated,
 		changeAdvanced,
+		changeCard,
+		addCart,
+		addCard,
 		openModal,
 		newMsg,
-		getCardData,
+		saveDeck,
+		openDeck,
 	}) => {
-		const {interested} = advanced
+		const param = useLocation().pathname.split("/").slice(-1)[0]
+
+		const [contextLink, setContextLink] = useState(null)
+		const [opened, open] = useState(false)
+		const [tab, setTab] = useState("Cart")
+		const [listed, setListed] = useState([])
+
+		useEffect(
+			_ => {
+				setListed(tab === "Cart" ? cart : list.filter(c => c.board === tab))
+			},
+			[cart, list, tab]
+		)
+
+		if (contextLink) {
+			setContextLink(null)
+			useHistory().push(contextLink)
+		}
+
+		const addC = (c, rm, to) =>
+			to || tab === "Cart" ? addCart(c, rm) : addCard(c, to || tab, rm)
+
+		const Cart = _ => (
+			<div className="sub-cart-head">
+				<DropSlot
+					callBack={c => {
+						if (list.find(_ => _.key === c.key)) addCard(c, null, true)
+						addC(c)
+					}}>
+					<div className={`board-inner ${opened || "hide"}`}>
+						<div className="list-inner">
+							{itemizeDeckList(listed).map(cards => (
+								<div
+									key={cards.length + cards[0].id}
+									className="flex-row mini-spaced-bar">
+									<div className="col quant-tickers">
+										<div
+											className="button icon-plus"
+											onClick={_ => addC(cards[0])}
+										/>
+										<div
+											className="button icon-minus"
+											onClick={_ => addC(cards[0], true)}
+										/>
+									</div>
+									<CardControls
+										card={cards[0]}
+										quant={cards.length}
+										itemType={ItemTypes.CARD}
+										param={param}
+										cardHeadOnly
+										contextMenu={[
+											{
+												label: "Add to Cart",
+												callBack: _ => addCart(cards[0]),
+											},
+											{
+												label: "Remove from Cart",
+												callBack: _ => addCart(cards[0], true),
+												color:
+													cart.find(({name}) => name === cards[0].name) ||
+													"disabled",
+											},
+											...BOARDS.map(B => {
+												return {
+													label: `Add to ${B}board`,
+													callBack: _ => addCard(cards[0], B),
+												}
+											}),
+										]}
+									/>
+								</div>
+							))}
+						</div>
+					</div>
+				</DropSlot>
+			</div>
+		)
+
 		return (
-			<div className="col ">
-				<div className="bar even mini-spaced-bar">
-					<h2>Deck</h2>
-					<button
-						className="icon-folder-open"
-						onClick={_ =>
-							openModal({
-								title: "Open Deck",
-								content: <DeckFeed you context="build" />,
-							})
-						}>
-						Open
+			<div className={`cart ${opened && "open"}`}>
+				<div className="cart-head">
+					<button className={`full-width`} onClick={_ => open(!opened)}>
+						Cart ({cart.length})
 					</button>
-					<button
-						className="icon-plus"
-						onClick={_ =>
-							openModal({
-								title: "New Deck",
-								content: <NewDeck cards={interested} />,
-							})
-						}>
-						New
-					</button>
-				</div>
-				{deck._id ? (
-					<div className="deck-preview">
-						<h3>{deck.name}</h3>
-						<BoardFilters minified />
+					<div className="flex-row">
+						{_id ? (
+							<>
+								<NavLink
+									to={`${HOME_DIR}/deck/${slug}`}
+									className={"icon flex-row even mini-spaced-bar"}>
+									<ToolTip message={`View "${name}"`}>
+										<button className="flex-row even mini-spaced-bar">
+											<PieChart
+												data={COLORS("fill").map((color, i) => {
+													return {value: colors[i], color}
+												})}
+												startAngle={270}
+											/>
+											<h5>
+												{opened
+													? name.length > 20
+														? `${name.slice(0, 23)}...`
+														: name
+													: `(${
+															list.filter(l => l.board === BOARDS[0]).length
+													  })`}
+											</h5>
+										</button>
+									</ToolTip>
+								</NavLink>
+								{canEdit() && unsaved ? (
+									<ToolTip message={`Save Changes to "${name}"`}>
+										<button onClick={saveDeck}>
+											<button className="inverse-small-button icon-unsaved" />
+										</button>
+									</ToolTip>
+								) : (
+									<ToolTip message={`Close "${name}"`}>
+										<button
+											className="small-button warning-button icon-cancel"
+											onClick={openDeck}
+										/>
+									</ToolTip>
+								)}
+							</>
+						) : null}
+
+						<button
+							className={`icon-folder-open small-button`}
+							onClick={_ =>
+								openModal({
+									title: "Add cart to deck",
+									content: <DeckSearch you noLink />,
+								})
+							}
+						/>
 					</div>
-				) : (
-					<Loading
-						anim={"none"}
-						spinner={" "}
-						subMessage={"No Deck Selected"}
-					/>
-				)}
-				<div className="interested block">
-					<div className="bar even mini-spaced-bar">
-						<h2>Interested</h2>
-						{!interested.length || !deck._id ? null : (
+					<div className={opened || "hide"}>
+						<div className="bar even thin-pad">
 							<button
-								className="small-button success-button"
+								className={`small-button `}
 								onClick={_ => {
-									addCard(interested)
-									changeAdvanced({interested: []})
+									newMsg("Copied to clipboard!", "success")
+									navigator.clipboard.writeText(textList(cart))
 								}}>
-								Add All
+								<span className="icon-clipboard" />
+								Copy
 							</button>
-						)}
-						{!interested.length ? null : (
-							<button
-								className="inverse-small-button warning-button"
-								onClick={_ =>
-									window.confirm("Are you sure?") &&
-									changeAdvanced({interested: []})
-								}>
-								Clear
-							</button>
-						)}
-					</div>
-					<div className="inner">
-						{itemizeDeckList(interested).map(c => (
-							<div key={c[0].id} className="mini-block item bar even">
-								<button
-									className="icon-cancel small-button warning-button"
-									onClick={_ =>
-										changeAdvanced({
-											interested: interested.filter(int => int.id !== c[0].id),
-										})
-									}
-								/>
-								<CardControls card={c[0]} cardHeadOnly />
-							</div>
-						))}
+						</div>
+
+						<div className="tab-switch flex-row full-width fill">
+							{(_id ? ["Cart", ...BOARDS] : ["Cart"]).map(t => (
+								<DropSlot callBack={c => addC(c)}>
+									<div
+										className={`tab ${t === tab && "selected"}`}
+										onClick={_ => setTab(t)}>
+										{t}{" "}
+										{
+											(t === "Cart" ? cart : list.filter(c => c.board === t))
+												.length
+										}
+									</div>
+								</DropSlot>
+							))}
+						</div>
 					</div>
 				</div>
+				<Cart />
 			</div>
 		)
 	}
 )
+// <button
+// 	className={`inverse-small-button warning-button ${
+// 		cart.length || "disabled"
+// 	}`}
+// 	onClick={_ => {
+// 		open(false)
+// 		addCart(null)
+// 	}}>
+// 	<span className="icon-cancel" />
+// 	Clear
+// </button>

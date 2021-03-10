@@ -16,15 +16,18 @@ import EditProfile from "./EditProfile"
 
 const {HOME_DIR, formattedDate, canEdit, pluralize, rnd, getArt} = utilities
 
-export default connect(({main: {cardData, decks, users}, auth: {isAuthenticated, user}}) => {
-	return {
-		cardData,
-		decks,
-		users,
-		isAuthenticated,
-		user,
-	}
-}, actions)(
+export default connect(
+	({main: {cardData, decks, users}, auth: {isAuthenticated, user}}) => {
+		return {
+			cardData,
+			decks,
+			users,
+			isAuthenticated,
+			user,
+		}
+	},
+	actions
+)(
 	({
 		cardData,
 		decks,
@@ -39,7 +42,10 @@ export default connect(({main: {cardData, decks, users}, auth: {isAuthenticated,
 		followUser,
 	}) => {
 		const {slug} = useParams()
-		const [{name, image, joined, _id, followed, liked, bio, respins, noUser}, setUser] = useState({})
+		const [
+			{name, image, joined, _id, followed, liked, bio, respins, noUser},
+			setUser,
+		] = useState({})
 		useEffect(
 			_ => {
 				setUser(users.filter(u => u.slug === slug)[0] || {noUser: true})
@@ -50,20 +56,19 @@ export default connect(({main: {cardData, decks, users}, auth: {isAuthenticated,
 		const editOptions = (
 			<div className="big-block center col">
 				<div className="bar even center mini-spaced-bar">
-					<button
-						className="small-button icon-sliders"
-						onClick={_ => openModal({title: "Settings", content: <Settings />})}>
-						Settings
-					</button>
 					<Link to={HOME_DIR}>
-						<button className="icon-logout inverse-small-button" onClick={logout}>
+						<button
+							className="icon-logout inverse-small-button"
+							onClick={logout}>
 							Logout
 						</button>
 					</Link>
 					<button
 						className="icon-trash inverse-small-button warning-button"
 						onClick={_ => {
-							const rusure = window.confirm("Are you super duper sure you want to delete your account??")
+							const rusure = window.confirm(
+								"Are you super duper sure you want to delete your account??"
+							)
 							if (rusure) deleteAccount()
 						}}>
 						Delete Account
@@ -72,9 +77,21 @@ export default connect(({main: {cardData, decks, users}, auth: {isAuthenticated,
 			</div>
 		)
 		const yourDecks = decks.filter(d => d.author === _id)
+		const welcome = (
+			<h2 className="block bar even mini-spaced-bar">
+				<Link to={`${HOME_DIR}/user/${slug}`}>
+					<span className="inverse-button">{name}</span>
+				</Link>
+				{"'s"} Decks
+			</h2>
+		)
 
 		return noUser ? (
-			<Loading spinner={" "} message={"No User Here"} subMessage={<Link to={HOME_DIR}>Return To Home</Link>} />
+			<Loading
+				spinner={" "}
+				message={"No User Here"}
+				subMessage={<Link to={HOME_DIR}>Return To Home</Link>}
+			/>
 		) : (
 			<div className="user">
 				<div className="profile">
@@ -82,11 +99,15 @@ export default connect(({main: {cardData, decks, users}, auth: {isAuthenticated,
 						<span className="avatar icon-user-circle-o"></span>
 						<div className="col">
 							<h1 className={"name"}>{name}</h1>
-							<div className="joined asterisk">Joined {formattedDate(new Date(joined))}</div>
+							<div className="joined asterisk">
+								Joined {formattedDate(new Date(joined))}
+							</div>
 						</div>
 						{isAuthenticated && _id !== user._id ? (
 							<div
-								className={`clicky-icon icon-star${user.followed.includes(_id) ? "" : "-empty"}`}
+								className={`clicky-icon icon-star${
+									user.followed.includes(_id) ? "" : "-empty"
+								}`}
 								onClick={_ => followUser(_id)}
 							/>
 						) : null}
@@ -120,13 +141,8 @@ export default connect(({main: {cardData, decks, users}, auth: {isAuthenticated,
 					</div>
 				</div>
 
-				<DeckFeed direct={yourDecks}>
-					<div className="block">
-						<h2>
-							Created {yourDecks.length} {pluralize("Deck", yourDecks.length)}
-						</h2>
-					</div>
-				</DeckFeed>
+				<DeckFeed who={_id} header={welcome} />
+				<DeckFeed ids={liked} header={<h2>Liked Decks</h2>} />
 			</div>
 		)
 	}
@@ -143,7 +159,9 @@ const EditMarkDown = ({name, text, callBack}) => {
 				renderHTML={md => <Markdown>{md}</Markdown>}
 			/>
 
-			<button className={`mini-block success-button ${t === text && "disabled"}`} onClick={_ => callBack(t)}>
+			<button
+				className={`mini-block success-button ${t === text && "disabled"}`}
+				onClick={_ => callBack(t)}>
 				Apply Changes
 			</button>
 		</div>

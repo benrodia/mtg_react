@@ -1,78 +1,158 @@
-import React, {useState} from "react"
+import React, {useState, useEffect, useRef} from "react"
 import {useDrag} from "react-dnd"
-import {useLocation} from "react-router-dom"
+import {withRouter, useLocation, useHistory, Link} from "react-router-dom"
 import {ItemTypes} from "../constants/data"
 
 import {connect} from "react-redux"
 import actions from "../actions"
+import utilities from "../utilities"
 
-import Inspect from "./Inspect"
 import Card from "./Card"
 
-export default connect(({}) => {
-	return {}
-}, actions)(
-	({
-		card,
-		desc,
-		options,
-		itemType,
-		context,
-		style,
-		faceDown,
-		cardHeadOnly,
-		openModal,
-		illegal,
-		children,
-		cardClick,
-		classes,
-	}) => {
-		const [clicked, clickState] = useState(false)
-		const [timer, setTimer] = useState(null)
-		const [{isDragging}, drag] = useDrag({
-			item: {...card, type: itemType || ItemTypes.CARD},
-			collect: monitor => ({isDragging: !!monitor.isDragging()}),
-		})
-		const inspect = _ =>
-			openModal({
-				title: card.name,
-				content: <Inspect card={card} options={options} />,
+import Icon from "./Icon"
+import ToolTip from "./ToolTip"
+import Loading from "./Loading"
+import ContextMenu from "./ContextMenu"
+
+const {HOME_DIR, getCardFace, createSlug} = utilities
+
+export default withRouter(
+	connect(({main: {pos, sets}}) => {
+		return {pos, sets}
+	}, actions)(
+		({
+			pos,
+			param,
+			sets,
+			card,
+			quant,
+			desc,
+			options,
+			itemType,
+			context,
+			contextMenu,
+			excerpt,
+			style,
+			faceDown,
+			cardHeadOnly,
+			nameOnly,
+			noHover,
+			openModal,
+			illegal,
+			children,
+			cardClick,
+			classes,
+			history,
+			setCardPage,
+		}) => {
+			const [clicked, clickState] = useState(false)
+			const [timer, setTimer] = useState(null)
+			const [held, hold] = useState(false)
+			const [contextLink, setContextLink] = useState(null)
+
+			const [{isDragging}, drag] = useDrag({
+				item: {...card, type: itemType || ItemTypes.CARD},
+				collect: monitor => ({isDragging: !!monitor.isDragging()}),
 			})
 
-		if (isDragging) clearTimeout(timer)
+			if (isDragging) clearTimeout(timer)
+			if (contextLink) {
+				useHistory().push(contextLink)
+				setContextLink(null)
+			}
 
-		const click = _ => {
-			if (context === "playtest") {
-				cardClick(card, clicked)
-				clickState(true)
+			const click = _ => {
+				if (context === "playtest") {
+					cardClick(card, clicked)
+					clickState(true)
+				}
 				setTimeout(_ => clickState(false), 300)
 			}
-			if (context === "builder") inspect()
-		}
 
-		const clickHold = _ => !isDragging && setTimer(setTimeout(inspect, 300))
+			const withDrag = o => (
+				<div
+					key={(card.key || card.id) + "container"}
+					ref={drag}
+					style={style}
+					className={`card-container ${classes}`}>
+					{o}
+				</div>
+			)
 
-		return (
-			<div
-				key={(card.key || card.id) + "container"}
-				ref={drag}
-				style={style}
-				className={`card-container ${classes}`}>
-				<div className="card-controls">{children}</div>
+			const withContextMenu = o => (
+				<ContextMenu
+					options={[
+						...(contextMenu || []),
+						{
+							label: "View Card Page (hold click)",
+							callBack: _ =>
+								setContextLink(
+									`${HOME_DIR}/card/${createSlug(card.name)}/${param || ""}`
+								),
+						},
+					]}>
+					{o}
+				</ContextMenu>
+			)
+
+			held &&
+				useHistory().push(
+					`${HOME_DIR}/card/${createSlug(card.name)}/${param || ""}`
+				)
+
+			const withEvents = o => (
 				<span
 					className="click-events"
 					onClick={click}
-					onMouseDown={clickHold}
+					onMouseDown={_ => setTimer(setTimeout(_ => hold(true), 500))}
 					onMouseUp={_ => clearTimeout(timer)}
 					onMouseOut={_ => clearTimeout(timer)}>
-					<Card
-						faceDown={faceDown}
-						card={card}
-						cardHeadOnly={cardHeadOnly}
-						desc={desc}
-					/>
+					{o}
 				</span>
-			</div>
-		)
-	}
+			)
+
+			const withLink = o => (
+				<Link
+					to={`${HOME_DIR}/card/${createSlug(card.name)}/${param || ""}`}
+					onClick={_ => setCardPage(card)}>
+					{o}
+				</Link>
+			)
+
+			const withHover = o => (
+				<ToolTip card={card} notes>
+					{o}
+				</ToolTip>
+			)
+
+			const obj = (
+				<Card
+					faceDown={faceDown}
+					card={card}
+					quant={quant}
+					cardHeadOnly={cardHeadOnly}
+					nameOnly={nameOnly}
+					desc={desc}
+					excerpt={excerpt}
+				/>
+			)
+
+			return withDrag(
+				withContextMenu(
+					param
+						? withLink(
+								withEvents(noHover || card.face_down ? obj : withHover(obj))
+						  )
+						: withEvents(noHover || card.face_down ? obj : withHover(obj))
+				)
+			)
+		}
+	)
 )
+// ({card.released_at.split("-")[0]})
+// <div className="card-controls">{children}</div>
+// <p className="prices">
+// 		<b>
+// 			${card.prices && card.prices.usd ? `${card.prices.usd}` : "???"}
+// 		</b>
+// 	</p>

@@ -47,10 +47,14 @@ export const SIDE_BOARD = "Side"
 export const MAYBE_BOARD = "Maybe"
 export const BOARDS = [MAIN_BOARD, SIDE_BOARD, MAYBE_BOARD]
 
-const size_mod = 3
+// const size_mod = 3
+// export const CARD_SIZE = {
+// 	w: 16 * 2.5 * size_mod,
+// 	h: 16 * 3.5 * size_mod,
+// }
 export const CARD_SIZE = {
-	w: 16 * 2.5 * size_mod,
-	h: 16 * 3.5 * size_mod,
+	w: 100,
+	h: 140,
 }
 
 export const RARITY_COLOR = {
@@ -84,7 +88,7 @@ export const COLORS = key => {
 			name: "Red",
 			symbol: "R",
 			basic: "Mountain",
-			fill: "#E8795B",
+			fill: "#e34c3b",
 		},
 		{
 			name: "Green",
@@ -103,3 +107,24 @@ export const COLORS = key => {
 		? colors.map(c => c[key])
 		: colors
 }
+
+export const cardScriptTemp = [
+	{
+		cost: [{tap: true, sac: true, mana: "{2}{W}"}],
+		select: {
+			amt: 1,
+			min: 0,
+			of: {
+				zone: ["Battlefield"],
+				type_line: ["creature"],
+				controller: "opponent",
+				owner: null,
+				colors: [],
+				power: {val: 4, op: ">="},
+				toughness: {val: null, op: null},
+				cmc: {val: null, op: null},
+			},
+			and: "exile",
+		},
+	},
+]

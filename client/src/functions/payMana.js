@@ -4,8 +4,10 @@ import {convertedSymbols} from "./cardFunctions"
 import {sum} from "./utility"
 import {MANA, CAN_TAP} from "../constants/greps"
 
-export default function payMana(cost) {
-  const {mana, deck} = store.getState().playtest
+export default function payMana(cost, player) {
+  const {players, active} = store.getState().playtest
+  const {mana, deck} = players[player || active] || players[0]
+  console.log("payMana", cost, player)
 
   let floating = [...mana]
   let [colored, generic] = convertedSymbols(cost)
@@ -14,7 +16,11 @@ export default function payMana(cost) {
 
   for (let i = 0; i < colored.length; i++) {
     for (let j = 0; j < manaCards.length; j++) {
-      if (floating[i] < colored[i] && !manaCards[j].tapped && manaCards[j].mana_source[i]) {
+      if (
+        floating[i] < colored[i] &&
+        !manaCards[j].tapped &&
+        manaCards[j].mana_source[i]
+      ) {
         floating[i] = floating[i] + manaCards[j].mana_source[i]
         manaCards[j] = {...manaCards[j], tapped: true}
       }

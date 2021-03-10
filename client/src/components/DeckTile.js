@@ -1,20 +1,39 @@
-import React, {useEffect} from "react"
-import {Link} from "react-router-dom"
+import React, {useEffect, useState} from "react"
+import {Link, useHistory} from "react-router-dom"
 import {connect} from "react-redux"
+import {v4 as uuid} from "uuid"
 import actions from "../actions"
 import ago from "s-ago"
 import {PieChart} from "react-minimal-pie-chart"
 import utilities from "../utilities"
+import ContextMenu from "./ContextMenu"
 
-const {HOME_DIR, COLORS, sum, canEdit, creator} = utilities
+const {
+	HOME_DIR,
+	CARD_SLEEVES,
+	COLORS,
+	sum,
+	canEdit,
+	creator,
+	textList,
+	snip,
+} = utilities
 
-export default connect(
-	null,
-	actions
-)(
+export default connect(({auth: {user}}) => {
+	return {user}
+}, actions)(
 	({
-		context,
-		deck: {
+		noLink,
+		deck,
+		user,
+		newMsg,
+		openDeck,
+		deleteDeck,
+		addCart,
+		openModal,
+		changeSettings,
+	}) => {
+		const {
 			_id,
 			author,
 			name,
@@ -25,10 +44,12 @@ export default connect(
 			updated,
 			feature,
 			helpWanted,
-		},
-		openDeck,
-		deleteDeck,
-	}) => {
+			views,
+			likes,
+			tags,
+			desc,
+		} = deck
+		const [contextLink, setContextLink] = useState(null)
 		const colorData =
 			colors &&
 			COLORS().map((color, i) => {
@@ -37,54 +58,98 @@ export default connect(
 
 		const deckLink = `${HOME_DIR}/deck/${slug}`
 
-		const full = (
-			<div key={_id} className={"deck-tile bar"}>
-				<div className="bar mini-spaced-bar">
-					<Link to={deckLink}>
-						<span className="feature icon">
+		if (contextLink) {
+			if (noLink) {
+				openDeck(slug, true)
+				openModal(null)
+			} else useHistory().push(contextLink)
+		}
+
+		return (
+			<div key={_id} className={"deck-tile"}>
+				<ContextMenu
+					options={[
+						{
+							label: "Open Deck",
+							callBack: _ => setContextLink(deckLink),
+						},
+						{
+							label: "Playtest Deck",
+							callBack: _ => setContextLink(`${HOME_DIR}/playtest/lobby`),
+						},
+						{
+							label: "Copy List To Clipboard",
+							callBack: _ => {
+								navigator.clipboard.writeText(textList(list, true))
+								newMsg("Copied list to clipboard!", "success")
+							},
+						},
+						{
+							label: "Delete Deck",
+							color: "red",
+							callBack: _ => deleteDeck(_id),
+							auth: _ => canEdit(_id),
+						},
+					]}>
+					<div className="flex-row">
+						<span className="point" onClick={_ => setContextLink(deckLink)}>
+							<img
+								className="feature"
+								src={feature || CARD_SLEEVES["_basic.png"]}
+								alt=""
+							/>
 							<div className="pie">
 								<PieChart data={colorData} startAngle={270} />
 							</div>
-							<img src={feature} alt="" />
 						</span>
-					</Link>
-					<div
-						className="info"
-						title={`${
-							helpWanted >= 3 ? "All Suggestions Welcome! Come on in!" : ""
-						}`}>
-						<Link to={deckLink}>
+						<div className="play-button">
+							<button
+								onClick={_ => {
+									setContextLink(`${HOME_DIR}/playtest/lobby`)
+
+									changeSettings("players", [{type: "HMN", id: uuid(), deck}])
+								}}
+								className={"icon-play"}
+								title="Playtest Deck"
+							/>
+						</div>
+					</div>
+					<div className="info spread col">
+						<div className="mini-spaced-col">
 							<h3
-								className={`deck-title ${
+								onClick={_ => setContextLink(deckLink)}
+								className={`deck-title point ${
 									helpWanted >= 3 && "icon-exclamation attention"
 								}`}>
 								{name}
 							</h3>
-							<span className="updated-at">
-								Updated {ago(new Date(updated))}
-							</span>
-						</Link>
-						<div className="bar even mini-spaced-bar">
-							<Link
-								to={`${HOME_DIR}/user/${
-									creator(author) && creator(author).slug
-								}`}>
-								<button className="inverse-button small-button">
-									{creator(author) && creator(author).name}
-								</button>
-							</Link>
-							<p className="tag">{format}</p>
+							<div className="bar even mini-spaced-bar">
+								<h4 className="">{format}</h4>
+								{tags.map(t => (
+									<div className="tag">{t}</div>
+								))}
+							</div>
+							<p>{snip(desc, 150)}</p>
+						</div>
+						<div className="bar mini-spaced-bar spread">
+							<button
+								onClick={_ => setContextLink(`user/${creator(author).slug}`)}
+								className="user-button">
+								{creator(author).name}
+							</button>
+							<div className="bar mini-spaced-bar">
+								<span className="icon-eye">{views}</span>
+								<span
+									className={`icon-thumbs-up ${
+										user.liked.includes(_id) && "active"
+									}`}>
+									{likes}
+								</span>
+							</div>
 						</div>
 					</div>
-				</div>
-				<div className="links">
-					<Link to={`${HOME_DIR}/deck/${slug}/playtest`}>
-						<button className="small-button icon-play" title="Playtest Deck" />
-					</Link>
-				</div>
+				</ContextMenu>
 			</div>
 		)
-
-		return full
 	}
 )
