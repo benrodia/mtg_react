@@ -4,17 +4,66 @@
 		.fixed-full-page();
 		flex-direction: column;
 		position: relative;
-		height: auto;
+		height: 50vh;
 		background: linear-gradient(rgba(0, 0, 0, 0.3), transparent);
 		.banner {
 			.flex-centered();
 			flex-direction: column;
 			text-align: center;
 			padding: 3rem 1rem;
-			h1 {
-				font-size: 5rem;
+			.title svg {
+				width: 25rem;
+				height: 8rem;
+
+				path {
+					fill: @lightest;
+					transition: 0.2s;
+				}
+				path:hover {
+					fill: @highlight;
+					cursor: pointer;
+					transform: translateY(-@thin);
+				}
 			}
 		}
+		.play-title {
+			width: 30rem;
+			justify-content: start;
+			.letter {
+				width: 3.75rem;
+				height: 5.25rem;
+				background: @lightest;
+				color: @darkest;
+				border-radius: @thinner;
+				transition: all 0.2s;
+				font-size: 3rem;
+				opacity: 0;
+				margin-top: 0;
+				transition: 0s;
+
+				&.anim {
+					transition: 0.3s;
+					opacity: 1;
+					animation-name: flip-in;
+					animation-duration: 0.5s;
+					animation-fill-mode: both;
+					animation-iteration-count: 1;
+					&:hover {
+						cursor: pointer;
+						background: @highlight;
+						// transform: translateY(-@thin) scale(1.1);
+					}
+				}
+				&.spent {
+					transition: all 0.5s 0s, width 0.2s 0.4s;
+					opacity: 0;
+					pointer-events: none;
+					width: 0;
+					margin: -5rem 0 0;
+				}
+			}
+		}
+
 		.log-in-form {
 			padding-top: 1rem;
 			.buttons {
@@ -54,86 +103,105 @@
 		}
 	}
 }
-.browse {
-	.flex-centered();
-	flex-direction: column;
-	width: 100%;
-	margin-top: 1rem;
-	.new-deck {
-		font-size: @big;
-		padding: @thin 1rem;
-		height: auto;
-	}
-	.decks {
-		display: flex;
-		flex-wrap: wrap;
-		width: 100%;
-		padding: 0 2rem;
-		.deck-tile {
-			.flex-centered();
-			justify-content: space-between;
-			padding: @thin;
-			margin-top: 1rem;
-			margin-right: 1rem;
-			min-width: 22rem;
-			flex-shrink: 1;
-			background: rgba(0, 0, 0, 0.3);
-			border-radius: @thinner;
-			.info {
-				.flex-col();
-				align-items: flex-start;
-				justify-content: space-between;
-				flex: 1 1 45%;
-				text-align: left;
-				min-width: 12rem;
-				.tag {
-					margin-top: @thinner;
-				}
-				.updated-at {
-					font-style: italic;
-					margin-top: @thinner;
-				}
+.new-deck {
+	font-size: @big;
+	padding: @thin 1rem;
+	height: auto;
+}
+.decks {
+	display: flex;
+	flex-wrap: wrap;
+	width: 60rem;
+	.deck-tile {
+		margin-top: 1rem;
+		margin-right: 1rem;
+		width: 18rem;
+		height: 22rem;
+		flex-shrink: 1;
+		background: @dark;
+		border-radius: @thinner;
+		.flex-row {
+			height: 12rem;
+			&:hover .feature {
+				filter: brightness(0.6);
+			}
+		}
+		.pie {
+			position: absolute;
+			z-index: 20;
+			margin: -12.5rem 0 0 -@thin;
+			filter: drop-shadow(0 0 @thin @opaque);
+			svg {
+				height: 3.5rem;
+				width: 3.5rem;
+			}
+		}
+
+		.feature {
+			object-fit: cover;
+			width: 18rem;
+			height: 12rem;
+		}
+
+		.play-button {
+			position: absolute;
+			z-index: 100;
+			border-radius: 0;
+			margin: 0 0 0 15rem;
+			button {
+				background: linear-gradient(90deg, transparent, @darkest);
+				color: @lightest;
+				box-shadow: none;
+				height: 12rem;
+				width: 3rem;
+				margin: 0;
 			}
 			&:hover {
-				.deck-title,
-				.updated-at {
-					color: @light;
-				}
-				.feature img {
-					filter: brightness(0.7);
+				button {
+					color: @highlight;
 				}
 			}
-			.links {
-				.flex-col();
-				width: 3rem;
-				* {
-					width: 100%;
-					font-size: 1.1rem;
-				}
+		}
+
+		.new-button {
+			height: 22rem;
+			margin: 0;
+		}
+
+		.info {
+			padding: @thin;
+			height: 10rem;
+			border-radius: 0 0 @thinner @thinner;
+
+			.tag {
+				margin-top: @thinner;
+			}
+			.updated-at {
+				font-style: italic;
+				margin-top: @thinner;
+			}
+		}
+
+		.links {
+			.flex-col();
+			width: 3rem;
+			* {
+				width: 100%;
+				font-size: 1.1rem;
+				height: 100%;
 			}
 		}
 	}
 }
-.feature {
-	display: flex;
-	width: 5rem;
-	height: 5rem;
-	.pie {
-		position: absolute;
-		z-index: 1;
-		filter: drop-shadow(0 0 @thin @opaque);
-		margin: -@thinner 0 0 -@thinner;
-		svg {
-			height: 2rem;
-			width: 2rem;
-		}
-	}
-	img {
+.feature-full {
+	img,
+	button {
+		width: 100%;
+		height: 12rem;
 		background-color: @lighter;
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-		border-radius: @thin;
 	}
 	.change-img {
 		position: absolute;
@@ -147,6 +215,32 @@
 	}
 	&:hover .change-img {
 		opacity: 1;
+	}
+}
+
+.dash-buttons {
+	.dash-button {
+		width: 10rem;
+		height: 14rem;
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
+		border-radius: 1rem;
+		border: 1px solid @lightest;
+		font-size: 2rem;
+		text-align: center;
+		.icon svg {
+			width: auto;
+			height: 5rem;
+		}
+		&:hover {
+			border-color: @highlight;
+			color: @highlight;
+			cursor: pointer;
+			.icon svg path {
+				fill: @highlight;
+			}
+		}
 	}
 }
 

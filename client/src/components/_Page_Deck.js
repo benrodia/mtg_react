@@ -1,95 +1,68 @@
 import React, {useEffect, useRef, useState} from "react"
-import {Link, useParams} from "react-router-dom"
+import {Link, useParams, useLocation} from "react-router-dom"
 import {connect} from "react-redux"
-import ago from "s-ago"
-import {PieChart} from "react-minimal-pie-chart"
 import actions from "../actions"
 import utilities from "../utilities"
+import Markdown from "markdown-to-jsx"
+import "react-markdown-editor-lite/lib/index.css"
 
+import DeckNav from "./DeckNav"
 import Loading from "./Loading"
-import BasicSearch from "./BasicSearch"
-import AdvancedSearch from "./AdvancedSearch"
 import DeckStats from "./DeckStats"
-import BoardFilters from "./BoardFilters"
-import BulkEdit from "./BulkEdit"
-import Board from "./Board"
-import DownloadFile from "./DownloadFile"
-import EditableText from "./EditableText"
-import Card from "./Card"
 import DeckInfo from "./DeckInfo"
-import ManageList from "./ManageList"
+import DeckInfoEdit from "./DeckInfoEdit"
 
-const {HOME_DIR, COLORS, textList, canPublish, sum} = utilities
+import CardTuner from "./CardTuner"
+import BulkEdit from "./BulkEdit"
+import BoardFilters from "./BoardFilters"
+import BoardTabs from "./BoardTabs"
+import Board from "./Board"
 
-export default connect(({main: {decks}, deck}) => {
-	return {decks, deck}
-}, actions)(({deck, decks, openModal, newMsg, openDeck, cloneDeck}) => {
-	const stickyRef = useRef(null)
-	const [offset, setOffset] = useState(0)
-	const {slug} = useParams()
+// const {
+// } = utilities
+
+export default connect(({main: {decks}, deck: {slug, desc}}) => {
+	return {
+		decks,
+		slug,
+		desc,
+	}
+}, actions)(({slug, desc, decks, openDeck}) => {
+	const param = useParams().slug
 
 	useEffect(
 		_ => {
-			if (decks.length && deck.slug !== slug) openDeck(slug)
+			if (decks.length && slug !== param) openDeck(param)
 		},
-		[slug, decks]
+		[param, slug, decks]
 	)
 
-	console.log("openDeck", deck, decks.filter(d => d.slug === slug)[0])
-
-	useEffect(
-		_ => {
-			if (stickyRef.current) setOffset(stickyRef.current.clientHeight)
-		},
-		[stickyRef]
-	)
-
-	return !deck._id ? (
-		<Loading spinner={" "} message={"No Deck Here"} subMessage={<Link to={HOME_DIR}>Return To Home</Link>} />
-	) : (
-		<div className="builder">
-			<section className="deck-area">
-				<div ref={stickyRef}>
-					<DeckInfo />
-					<ManageList />
-				</div>
-				<BoardFilters offset={offset} />
-				<Board />
-			</section>
-			<section className="side-bar">
-				<div className="quick-import">
-					<div className="playtest-button">
-						<Link to={`${HOME_DIR}/deck/${slug}/playtest`}>
-							<button className="success-button icon-play">Playtest Deck</button>
-						</Link>
-					</div>
-					<div className="exports col">
-						<button
-							className="small-button icon-download"
-							onClick={_ => openModal({title: "Download File", content: <DownloadFile />})}>
-							Download File
-						</button>
-						<button
-							className="small-button icon-clipboard"
-							onClick={_ => {
-								navigator.clipboard.writeText(textList(deck.list, true))
-								newMsg("Copied list to clipboard!", "success")
-							}}>
-							Copy to Clipboard
-						</button>
-						{deck.clone ? (
-							<Link to={`${HOME_DIR}/deck/${deck.clone}`}>
-								<button className="small-button success-button fill">Cloned! Open Deck</button>
-							</Link>
-						) : (
-							<button className="small-button icon-clone" onClick={_ => cloneDeck()}>
-								Clone Deck
-							</button>
-						)}
+	return (
+		<>
+			<DeckNav />
+			<div className="deck-details">
+				<div className="flex-row full-width spread mini-spaced-bar">
+					<CardTuner />
+					<div className="deck-area col start max">
+						<BoardFilters />
+						<BoardTabs />
+						<Board />
+						<DeckStats />
+						<div className="block">
+							<Markdown>{desc}</Markdown>
+						</div>
 					</div>
 				</div>
-				<DeckStats offset={offset} />
-			</section>
-		</div>
+			</div>
+		</>
 	)
 })
+// <BulkEdit />
+// {pathname.includes("/build") ?
+
+// <MdEditor
+// 	value={desc}
+// 	style={{height: "20rem"}}
+// 	onChange={md => changeDeck("desc", md.text)}
+// 	renderHTML={md => <Markdown>{md}</Markdown>}
+// />

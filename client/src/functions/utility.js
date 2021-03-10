@@ -1,32 +1,58 @@
 export const cache = (obj, key, val, session) => {
-  let stored = session ? sessionStorage.getItem(obj) : localStorage.getItem(obj)
+  let stored = session
+    ? sessionStorage.getItem(obj)
+    : session === false
+    ? null
+    : localStorage.getItem(obj)
   stored = !stored || stored === "undefined" ? {} : JSON.parse(stored)
   const data = key === "all" ? {...stored, ...val} : {...stored, [key]: val}
-  session ? sessionStorage.setItem(obj, JSON.stringify(data)) : localStorage.setItem(obj, JSON.stringify(data))
+  session
+    ? sessionStorage.setItem(obj, JSON.stringify(data))
+    : localStorage.setItem(obj, JSON.stringify(data))
 }
 
 export const loadCache = (key, init = {}, session, clear) => {
   let data = session ? sessionStorage.getItem(key) : localStorage.getItem(key)
   data = !data || data === "undefined" ? {} : JSON.parse(data)
-  return clear ? init : Object.assign(init, data)
+  return clear ? init : {...init, ...data}
 }
 
-export const sum = nums => (!nums || !nums.length ? 0 : nums.reduce((a, b) => Number(a) + Number(b), 0))
+export const sum = nums =>
+  !nums || !nums.length ? 0 : nums.reduce((a, b) => Number(a) + Number(b), 0)
 
 export const average = nums => nums.reduce((a, b) => a + b, 0) / nums.length
 
 export const rem = (num = 1) =>
-  num * parseFloat(window.getComputedStyle(document.getElementsByTagName("html")[0]).fontSize || 16)
+  num *
+  parseFloat(
+    window.getComputedStyle(document.getElementsByTagName("html")[0])
+      .fontSize || 16
+  )
+export const wrapNum = (d, r) => (d < 0 ? r : d >= r ? 0 : d)
 
-export const rnd = (arr, num) => {
-  if (typeof arr === "number") return Math.floor(Math.random() * arr)
+export const factorial = (x, f = 1) => (x === 0 ? 1 : x * factorial(x - f))
+
+export const rnd = (arr = [], num, unique, from) => {
   const rand = _ => arr[Math.floor(Math.random() * arr.length)]
+
+  if (!isNaN(arr)) return Math.floor(Math.random() * arr)
   if (!num) return rand()
-  else return [...Array(num)].map(_ => rand())
+  else if (unique) {
+    if (from)
+      return arr
+        .filter(
+          ar => !from.find(fr => (fr.id && ar.id ? ar.id === fr.id : fr === ar))
+        )
+        .shuffle()
+        .slice(-num)
+    return arr.shuffle().slice(-num)
+  } else return [...Array(num || 0)].map(rand)
 }
 
 export const paginate = (arr = [], per = 1) =>
-  [...Array(Math.ceil(arr.length / per) || 1)].map((_, i) => arr.slice(per * i, per * i + per))
+  [...Array(Math.ceil(arr.length / per) || 1)].map((_, i) =>
+    [...arr].slice(per * i, per * i + per)
+  )
 
 export const timestamp = _ => {
   const today = new Date()
@@ -52,13 +78,16 @@ export const formattedDate = date => {
   return month + "/" + day + "/" + year
 }
 
-export const matchStr = (text = "", searchWords = [], every = null) => {
-  text = text.toString()
+export const matchStr = (t = "", searchWords = [], every = null) => {
+  t = `${t}`.toLowerCase()
+
+  const test = (text, el) => text.includes(`${el}`.toLowerCase())
+
   return every === true
-    ? searchWords.every(el => text.match(new RegExp(el, "i")))
+    ? searchWords.every(el => test(t, el))
     : every === false
-    ? !searchWords.every(el => text.match(new RegExp(el, "i")))
-    : searchWords.some(el => text.match(new RegExp(el, "i")))
+    ? !searchWords.every(el => test(t, el))
+    : searchWords.some(el => test(t, el))
 }
 
 export const log = objs => {
@@ -85,14 +114,17 @@ Array.prototype.shuffle = function () {
   return cards
 }
 
-Array.prototype.orderBy = function (key) {
-  return this.sort((a, b) => (a[key] > b[key] ? 1 : -1))
+Array.prototype.orderBy = function (key, asc) {
+  if (!this || !this.length) return []
+  return this.sort((a, b) => (a[key] > b[key] ? (asc ? -1 : 1) : asc ? 1 : -1))
 }
 
 Array.prototype.unique = function (key) {
+  if (!this || !this.length) return []
   let b = []
   for (var i = 0; i < this.length; ++i) {
-    if (key && !b.map(b => b[key]).includes(this[i][key])) b.push(this[i])
+    if (!b.find(b => (key ? b[key] === this[i][key] : b === this[i])))
+      b.push(this[i])
   }
   return b
 }

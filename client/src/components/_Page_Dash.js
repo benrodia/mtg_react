@@ -3,17 +3,36 @@ import {Link} from "react-router-dom"
 import {connect} from "react-redux"
 import actions from "../actions"
 import utilities from "../utilities"
+import {PieChart} from "react-minimal-pie-chart"
+import {useDrag} from "react-dnd"
+import Tilt from "react-tilt"
 
+import DropSlot from "./DropSlot"
+import Icon from "./Icon"
 import Login from "./Login"
-import DeckFeed from "./DeckFeed"
-import DeckTile from "./DeckTile"
-import NewDeck from "./NewDeck"
+import CardControls from "./CardControls"
+import ToolTip from "./ToolTip"
+import PlayableTitle from "./PlayableTitle"
+import DeckPreview from "./DeckPreview"
 
-const {HOME_DIR, rnd, SUB_BANNERS, GREETINGS} = utilities
+const logo = require("../imgs/mtggrip-logo-text.svg")
+
+const {
+	Q,
+	HOME_DIR,
+	COLORS,
+	titleCaps,
+	rnd,
+	SUB_BANNERS,
+	GREETINGS,
+	generateRandomDeck,
+	creator,
+	pageButtons,
+} = utilities
 
 export default connect(
 	({
-		main: {users, decks},
+		main: {cardData, cardCombos, users, decks},
 		auth: {
 			user: {_id, slug, name, followed},
 			isAuthenticated,
@@ -24,6 +43,8 @@ export default connect(
 			slug,
 			name,
 			followed,
+			cardData,
+			cardCombos,
 			users,
 			decks,
 			isAuthenticated,
@@ -36,6 +57,8 @@ export default connect(
 		slug,
 		name,
 		followed,
+		cardData,
+		cardCombos,
 		users,
 		decks,
 		setPage,
@@ -43,110 +66,75 @@ export default connect(
 		newDeck,
 		openModal,
 		loadDecks,
+		getUsers,
+		addCart,
+		logout,
 	}) => {
-		const [flags, setFlags] = useState(["others"])
-		const [activeForm, setActiveForm] = useState(null)
+		const [activeForm, setActiveForm] = useState("in")
 		const [subBanner, setSubBanner] = useState(rnd(SUB_BANNERS))
-		const [greeting, setGreeting] = useState(rnd(GREETINGS))
+		const [deckHighlights, setDeckHighlights] = useState([])
 
-		useEffect(_ => {
-			loadDecks()
-		}, [])
-
-		const handleFlags = flag => {
-			setFlags(
-				flags.includes(flag) ? flags.filter(f => f !== flag) : [...flags, flag]
-			)
-		}
+		useEffect(
+			_ => {
+				decks.length &&
+					setDeckHighlights(
+						rnd(
+							decks.filter(d => d.list.length >= 60),
+							3,
+							true
+						)
+					)
+			},
+			[decks]
+		)
 
 		return (
-			<div className="dash">
+			<div className="dash spaced-col">
 				<section className="hero">
-					<div className="banner">
-						<h1>MTG Grip</h1>
-						<p>{subBanner}</p>
+					<div className="banner spaced-col">
+						<PlayableTitle />
 					</div>
-					{isAuthenticated ? null : (
-						<div className="log-in-form">
-							<div className="bar center mini-spaced-bar">
-								<button
-									className={`${activeForm === "in" && "selected"}`}
-									onClick={_ =>
-										setActiveForm(activeForm === "in" ? null : "in")
-									}>
-									Log In
-									<span className="icon-user" />
-								</button>
-								<button
-									className={`${activeForm === "up" && "selected"}`}
-									onClick={_ =>
-										setActiveForm(activeForm === "up" ? null : "up")
-									}>
-									Sign Up
-									<span className="icon-user-plus" />
-								</button>
-							</div>
-							<Login activeForm={activeForm} />
+					<p>{subBanner}</p>
+				</section>
+				<section className="center col mini-spaced-col">
+					{isAuthenticated ? (
+						<div className="bar even spaced-bar">
+							<h1>Welcome, {name}</h1>
+							<button className="smaller-button" onClick={logout}>
+								Logout
+							</button>
+						</div>
+					) : (
+						<div className="bar even spaced-bar">
+							<h1>Hey, Stranger</h1>
+							<Link to={`${HOME_DIR}/login`}>
+								<button>Login</button>
+							</Link>
 						</div>
 					)}
-				</section>
-				{!isAuthenticated ? null : (
-					<DeckFeed direct={decks.filter(d => d.author === _id)}>
-						<div className="block">
-							<div className="bar even spaced-bar">
-								<div className="bar even mini-spaced-bar center">
-									<h2>{greeting},</h2>
-									<Link to={`${HOME_DIR}/user/${slug}`}>
-										<h2 className="inverse-button ">{name}</h2>
+					<div className="bar dash-buttons center spaced-bar">
+						{pageButtons.map(({icon, label, link, auth, desc}) => (
+							<ToolTip message={desc}>
+								<Tilt className={!auth || isAuthenticated || "disabled"}>
+									<Link to={`${HOME_DIR}/${link}`}>
+										<div className="dash-button center col spaced-col thin-pad">
+											<Icon src={icon} />
+											<span className="center">{label}</span>
+										</div>
 									</Link>
-								</div>
-								<button
-									className="success-button new-deck bar even mini-spaced-bar"
-									onClick={_ =>
-										openModal({title: "New Deck", content: <NewDeck />})
-									}>
-									<span className="icon-plus" />
-									<div>New Deck</div>
-								</button>
-							</div>
-						</div>
-					</DeckFeed>
-				)}
-				<DeckFeed flags={flags}>
-					<div className="block">
-						<div className="mini-block">
-							<div className="bar even">
-								<h2>Most Recent Decks</h2>
-							</div>
-							<div className="filter-flags bar even mini-spaced-bar">
-								<h5>Show Only : </h5>
-								<button
-									className={`small-button ${
-										flags.includes("published") && "selected"
-									}`}
-									onClick={_ => handleFlags("published")}>
-									Published
-								</button>
-								{followed && followed.length ? (
-									<button
-										className={`small-button ${
-											flags.includes("followed") && "selected"
-										}`}
-										onClick={_ => handleFlags("followed")}>
-										Followed Users
-									</button>
-								) : null}
-								<button
-									className={`small-button ${
-										flags.includes("helpWanted") && "selected"
-									}`}
-									onClick={_ => handleFlags("helpWanted")}>
-									Help Wanted
-								</button>
-							</div>
-						</div>
+								</Tilt>
+							</ToolTip>
+						))}
 					</div>
-				</DeckFeed>
+				</section>
+				{deckHighlights.length ? (
+					<section className="spaced-col">
+						<h1 className="block center">Some Decks</h1>
+						{deckHighlights.map(deck => (
+							<DeckPreview deck={deck} />
+						))}
+					</section>
+				) : null}
 			</div>
 		)
 	}

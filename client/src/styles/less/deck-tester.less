@@ -1,10 +1,15 @@
+@sideW: calc(@cardW*3 + 1rem);
+
 .tester {
+  overflow: hidden;
+  margin-top: 3rem;
+  min-height: calc(100vh - 3rem - @headerH);
   .zone {
     min-width: @cardW;
     .title {
       font-family: "MTG-head";
-      margin: @thin 0 0;
-      font-size: @small;
+      // margin: @thin 0 0;
+      // font-size: @small;
       color: @lighter;
       padding: @thinnest;
       .custom-select {
@@ -12,12 +17,13 @@
         height: 1rem;
         .select-collapsed {
           color: @lighter;
-          font-size: @small;
+          box-shadow: none;
+          // font-size: @small;
           padding: 0;
         }
-        * {
-          color: @darker;
-        }
+        // * {
+        //   color: @darker;
+        // }
       }
     }
     .row {
@@ -71,23 +77,16 @@
       }
     }
   }
-
   .test-controls {
-    .flex-row();
     position: fixed;
-    top: 2rem;
-    right: 0;
-    z-index: 20;
-    width: calc(100vw - (@cardW + 1rem));
-    height: 1.5rem;
-    justify-content: space-between;
-    height: 1.5rem;
-    color: @lightest;
+    z-index: 2000;
+    top: @headerH;
+  }
+  .test-counters,
+  .test-controls {
     background: @dark;
-    align-items: flex-start;
-    .bar {
-      align-items: flex-start;
-    }
+    width: 100%;
+    padding: @thin;
     p {
       font-family: @header;
       margin-left: @thin;
@@ -114,144 +113,143 @@
         }
       }
     }
-    .game-log {
-      width: 20rem;
-      background: rgba(0, 0, 0, 0.5);
-      max-height: 15rem;
-      overflow-y: auto;
-      align-self: flex-start;
-      border-radius: @thinner;
-      .log {
-        .flex-row();
-        justify-content: space-between;
-        padding: 0 @thin @thin;
-        &:last-child {
-          padding-bottom: 0;
-        }
+  }
+  .game-log {
+    width: 20rem;
+    background: rgba(0, 0, 0, 0.5);
+    max-height: 15rem;
+    overflow-y: auto;
+    align-self: flex-start;
+    border-radius: @thinner;
+    .log {
+      .flex-row();
+      justify-content: space-between;
+      padding: 0 @thin @thin;
+      &:last-child {
+        padding-bottom: 0;
+      }
 
-        .timestamp {
-          font-weight: bold;
-        }
-        .action {
-          font-style: italic;
-        }
-        .arrow {
-          text-decoration: underline;
-          cursor: pointer;
-          &:hover {
-            color: @red;
-          }
-        }
+      .timestamp {
+        font-weight: bold;
+      }
+      .action {
+        font-style: italic;
+      }
+      .arrow {
+        text-decoration: underline;
+        cursor: pointer;
         &:hover {
-          opacity: 1;
-          cursor: pointer;
-          background: rgba(200, 200, 0, 0.3);
+          color: @red;
         }
       }
-      .inactive {
-        opacity: 0.7;
+      &:hover {
+        opacity: 1;
+        cursor: pointer;
+        background: rgba(200, 200, 0, 0.3);
       }
-      .pointer {
-        margin-bottom: @thin;
-        border-bottom: 1px solid @highlight;
-      }
+    }
+    .inactive {
+      opacity: 0.7;
+    }
+    .pointer {
+      margin-bottom: @thin;
+      border-bottom: 1px solid @highlight;
     }
   }
 
   .side-col {
-    position: fixed;
-    top: 2rem;
-    z-index: 40;
-    left: 0;
-    height: calc(100vh - 2rem);
-    max-height: calc(100vh - 2rem);
-    width: calc(@cardW + 1rem);
-    padding: @thinner;
     .flex-col();
     justify-content: space-between;
+    width: @sideW;
+    padding: @thinner;
     background: @darker;
-    .graveyard,
-    .exile {
-      flex: 1 0 10%;
-      position: relative;
-      .row {
-        height: 3rem;
-        flex-flow: column nowrap;
-        overflow-y: scroll;
-        .drop-slot {
-          height: 3rem;
-          // height: auto;
-          .card-container {
-            .card-head {
-              h4 {
-                font-size: @small;
-              }
-              p {
-                font-size: @smaller;
-              }
-            }
-          }
-        }
-      }
-    }
     .library-cont {
       display: flex;
       flex-flow: column-reverse;
+      width: @cardW;
     }
   }
 
   .library,
-  .command {
+  .command,
+  .graveyard,
+  .exile {
     .row {
-      min-height: @cardH;
-      min-width: @cardW;
+      .drop-slot {
+        // min-height: @cardH;
+        // min-width: @cardW;
+      }
     }
     .card-container {
       animation-name: slide-in;
     }
   }
 
-  .hand {
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    z-index: 30;
-    width: calc(100vw - (@cardW + 1rem));
-    transition: 0.3s ease;
-    .row {
-      height: calc(@cardH);
-      box-shadow: none;
-      background: rgba(0, 0, 0, 0.6);
-      .drop-slot {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(@thinnest, max-content));
-        .card-container {
-          animation-name: flip-in;
-          &:hover {
-            transform: scale(1.3) translateY(-1rem);
+  .player-row {
+    width: calc(100vw);
+    .hand {
+      width: 100%;
+      transition: 0.3s ease;
+      .row {
+        height: calc(@cardH);
+        box-shadow: none;
+        background: rgba(0, 0, 0, 0.6);
+        .drop-slot {
+          width: 100%;
+          display: grid;
+          grid-template-columns: repeat(
+            auto-fit,
+            minmax(@thinnest, max-content)
+          );
+          .card-container {
+            animation-name: flip-in;
+            &:hover {
+              transform: scale(1.3) translateY(-1rem);
+            }
           }
         }
       }
     }
   }
+
+  .player-two-row {
+    transform: rotate(180deg);
+    transform-origin: center;
+    * {
+      transform-origin: center;
+    }
+    .context-menu,
+    .title,
+    .test-counters,
+    .tool-tip {
+      transform: rotate(180deg);
+    }
+
+    // flex-direction: column-reverse;
+    // .zones {
+    //   flex-direction: row-reverse;
+    //   .zone {
+    //     flex-direction: column-reverse;
+    //   }
+    //   .hand .row {
+    //     flex-direction: row-reverse;
+    //     justify-content: flex-end;
+    //   }
+    // }
+  }
   .battlefield {
-    position: fixed;
-    top: calc(@headerH + 1.5rem);
-    height: calc(100vh - (@cardH + calc(@headerH + 1.5rem)));
-    left: (@cardW + 1rem);
-    right: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    z-index: 10;
+    width: 100%;
     .inner {
       .flex-col();
       flex-direction: column-reverse;
       .row {
         flex-wrap: nowrap;
         height: @cardH;
-        width: 100%;
         .drop-slot {
           .flex-centered();
+          height: @cardH;
+          width: @cardW;
+          min-width: @cardW;
         }
         .card-container {
           animation-name: flip-in;
@@ -268,29 +266,31 @@
 
   .stack {
     position: fixed;
-    top: 0;
+    left: 0;
     right: 0;
+    top: 0;
     bottom: 0;
     z-index: 100;
     display: flex;
     flex-flow: column-reverse;
     flex-wrap: nowrap;
-    align-items: flex-end;
-    justify-content: center;
-    pointer-events: none;
-    background: linear-gradient(90deg, transparent, @darkest);
+    // align-items: flex-start;
+    // justify-content: center;
+    // pointer-events: none;
+    background: linear-gradient(90deg, @darkest, transparent);
 
     .item {
       .flex-col();
-      align-items: flex-end;
+      align-items: flex-start;
       pointer-events: all;
       filter: drop-shadow(0 0 1rem @darkest);
-      margin-right: @thin;
-      margin-top: 1rem;
-      max-width: 15rem;
+      margin: 1rem @thin 0;
+      p {
+        max-width: 15rem;
+      }
 
       .header {
-        text-align: right;
+        // text-align: right;
         font-weight: bolder;
         font-size: 1.1em;
         padding-bottom: @thin;

@@ -5,7 +5,7 @@
 // STYLES
 
 html {
-	font-size: 100%;
+	font-size: 90%;
 	color: @lightest;
 	background: @darker;
 	font-family: @para;
@@ -43,7 +43,7 @@ html {
 	.fixed-full-page();
 	height: calc(100vh - @headerH);
 	top: @headerH;
-	z-index: -1;
+	z-index: -2;
 
 	.playmat {
 		width: 100%;
@@ -52,81 +52,88 @@ html {
 		background-position: center;
 		background-repeat: no-repeat;
 		background-size: cover;
-		// filter: brightness(30%);
+	}
+	.grad {
+		.fixed-full-page();
+		background: linear-gradient(45deg, fade(@dark, 50%), @darkest);
 	}
 	.darken {
 		.fixed-full-page();
 		position: absolute;
 		z-index: 1;
-		// background: rgba(0,0,0,.8);
 	}
 }
 
 .main-header {
+	.flex-centered();
 	.fixed-full-page();
 	height: @headerH;
 	z-index: 150;
-	.flex-centered();
 	justify-content: space-between;
 	background: @darkest;
 	height: @headerH;
 	padding: @thin;
 	font-size: 120%;
 	font-family: @header;
+	* {
+		white-space: nowrap;
+		flex-wrap: nowrap;
+	}
 	.title {
-		.flex-centered();
-		justify-content: flex-start;
-		font-family: @header;
-
-		a {
-			color: @lightest;
-			width: auto;
-			// padding-right: @thin;
-			&:hover {
-				opacity: 0.8;
+		.icon .logo {
+			width: 8rem;
+			// height: 1rem;
+			path {
+				fill: @lightest;
 			}
 		}
+		&:hover .icon .logo path {
+			fill: @highlight;
+		}
 	}
+
 	.custom-select {
 		background: transparent;
-		height: 1.5rem;
 		&:hover .select-collapsed {
 			filter: brightness(0.8);
 			cursor: text;
 		}
 		.select-collapsed {
-			font-size: @small;
 			color: @light;
-			border-bottom: 1px solid @light;
-			padding: @thinnest;
+			padding: @thin;
+			font-size: 1rem;
 		}
 		.option a {
 			font-size: 1rem;
 			color: @dark;
 		}
 	}
-	.sub-title {
-		.flex-centered();
-	}
-	.nav {
-		.flex-centered();
-		justify-content: flex-end;
 
-		.to-profile a {
-			.bar();
-			.even();
-			.mini-spaced-bar();
-			font-size: @small;
-			.feature {
-				width: 1.5rem;
-				height: 1.5rem;
-				border-radius: @thinner;
-			}
-			&:hover {
-				filter: brightness(0.8);
-			}
-		}
+	.nav-search-bar {
+		max-width: 50%;
 	}
+	// .sub-title {
+	// 	.flex-centered();
+	// }
+	// .nav {
+	// 	.flex-centered();
+	// 	justify-content: flex-end;
+
+	// .to-profile a {
+	// 	.bar();
+	// 	.even();
+	// 	.mini-spaced-bar();
+	// 	font-size: @small;
+	// 	.feature {
+	// 		width: 1.5rem;
+	// 		height: 1.5rem;
+	// 		border-radius: @thinner;
+	// 	}
+	// 	&:hover {
+	// 		filter: brightness(0.8);
+	// 	}
+	// }
+	// }
 }
 
 .notifications {
@@ -134,7 +141,7 @@ html {
 	top: 1rem;
 	left: 25%;
 	width: 50%;
-	z-index: 555;
+	z-index: 5555;
 	pointer-events: none;
 	.notification {
 		.clean-input();
@@ -192,8 +199,35 @@ html {
 		}
 	}
 	.sub-msg {
-		padding-top: 1rem;
 		font-size: 1.5rem;
+	}
+}
+
+.tab-switch {
+	.tab {
+		text-align: center;
+		transition: 0.2s;
+		padding: @thin;
+		flex-grow: 1;
+		background: linear-gradient(transparent, @opaque);
+		&:last-child {
+			border-right: none;
+		}
+		&:hover {
+			color: @highlight;
+			cursor: pointer;
+			border-bottom: 1px solid @highlight;
+		}
+		.warning-button {
+			border: none;
+			font-size: @small;
+			margin: 0;
+			padding: 0;
+		}
+	}
+	.tab.selected {
+		background: linear-gradient(transparent, fade(@highlight, 50%));
+		border-bottom: 1px solid @lightest;
 	}
 }
 
@@ -205,7 +239,7 @@ html {
 }
 
 .drop-slot {
-	flex: 1 0 @cardW;
+	// flex: 1 0 @cardW;
 	position: relative;
 	margin: 0;
 	transition: 0.2s;
@@ -220,80 +254,187 @@ html {
 }
 
 .custom-select {
-	height: 1.5rem;
 	width: 10rem;
+	height: 2rem;
+	margin: @thinnest;
+
 	border-radius: @thinnest;
-	// margin: 0 @thinnest;
 	background: @lightest;
 	cursor: pointer;
-
-	* {
-		box-shadow: none;
-	}
 
 	.set-symbol {
 		width: 1.5rem;
 		height: 1.5rem;
 		object-fit: contain;
 	}
-
-	.select-collapsed {
-		padding: @thinner;
-		white-space: nowrap;
-		overflow: hidden;
-		color: @darkest;
+	input {
+		box-shadow: inset 0 0 @thinner @opaque;
+		margin: 0;
+		font-size: 1rem;
+		padding: @thin;
+		border-radius: 0;
+		width: 100%;
 	}
-	.options {
-		position: absolute;
-		z-index: 30;
-		width: auto;
-		max-height: 10rem;
-		overflow-y: auto;
-		overflow-x: hidden;
-		color: @darkest;
-		background: @lightest;
-		.option {
-			.flex-row();
-			justify-content: space-between;
-			width: 100%;
-			padding: @thinner;
-			background: @lightest;
-			border-left: @thinner solid @highlight;
-			cursor: pointer;
-			transition: 0.2s;
+}
+.select-collapsed {
+	height: 100%;
+	width: 100%;
+	white-space: nowrap;
+	overflow: hidden;
+	color: @darkest;
+}
 
-			&:hover {
-				background: @highlight;
-			}
-		}
-		.option.active {
+.options {
+	position: absolute;
+	z-index: 30;
+	width: 10rem;
+	max-height: 10rem;
+	overflow-y: auto;
+	overflow-x: hidden;
+	color: @darkest;
+	background: @lightest;
+	box-shadow: 0 0 @thinner @opaque;
+	.option {
+		.flex-row();
+		justify-content: space-between;
+		width: 100%;
+		// background: @lightest;
+		// border-left: @thinnest solid @highlight;
+		cursor: pointer;
+		&:hover {
 			background: @highlight;
 		}
-		.search-cards {
-			width: 20rem;
-			display: flex;
-			justify-content: flex-start;
-			.card-head {
-				background: transparent !important;
-			}
+	}
+	.option.selected {
+		background: @highlight;
+	}
+	.search-cards {
+		width: 20rem;
+		display: flex;
+		justify-content: flex-start;
+		.card-head {
+			background: transparent !important;
 		}
 	}
 }
 
-.custom-select.big {
-	.flex-col();
-	height: 3rem;
-	width: 100%;
-	font-size: 1.2rem;
-	.options {
-		max-height: 25rem;
-		input {
-			font-size: 1.2rem;
+.custom-select.searchable {
+	.select-collapsed {
+		box-shadow: inset 0 0 @thinner rgba(0, 0, 0, 0.3);
+		&:hover {
+			cursor: text;
+			color: @dark;
 		}
 	}
+}
+.quick-search {
+	flex: 1 0 50%;
+	border-radius: @thin;
+	.custom-select {
+		flex: 0 0 100%;
+		margin: 0;
+		width: auto;
+		border-radius: @thinner;
+		color: @light;
+		background: @dark;
+		font-size: 1.2rem;
+		.options {
+			max-height: 25rem;
+			width: 100%;
+			max-width: 44rem;
+			background: @lighter;
+			color: @darkest;
+
+			input {
+				width: 44rem;
+				font-size: 1.5rem;
+			}
+			.option {
+				width: 100%;
+				margin: 0;
+				padding: 0;
+				font-size: 1.25rem;
+				.card-container {
+					width: 100%;
+				}
+				.mini-icon {
+					width: 7rem;
+				}
+				.card-text,
+				.col {
+					width: 100%;
+					margin: 0;
+					background: transparent;
+				}
+				&:hover .col {
+					background: transparent;
+				}
+				.name {
+					font-size: 1.5rem;
+				}
+				.types {
+					font-size: 1rem;
+				}
+			}
+		}
+		.select-collapsed:hover {
+			color: @light;
+		}
+	}
+}
+
+.card-search .quick-search .custom-select {
+	color: @lighter;
+	background: @opaque;
+
 	.select-collapsed {
-		padding: 1rem;
-		color: #888;
+		color: @lighter;
+		&:hover {
+			color: @light;
+		}
+	}
+}
+
+.custom-select.small {
+	width: 3rem;
+	min-height: 1.5rem;
+	.select-collapsed {
+		padding: @thinnest;
+	}
+	.options {
+		width: 3rem;
+		height: auto;
+	}
+	.options input {
+		padding: @thinnest;
+	}
+}
+
+.basic-search {
+	.drop-slot {
+		margin: 0;
+	}
+	.search-bar {
+		flex-flow: row-reverse;
+		input {
+			width: 100%;
+			font-size: 1.2rem;
+			padding: 1.5rem 1rem;
+		}
+		.exit {
+			position: absolute;
+			z-index: 2;
+		}
+	}
+	.results {
+		transition: 0.4s;
+		position: absolute;
+		z-index: 1;
+		max-height: 25rem;
+		overflow-y: auto;
+		background: @lighter;
+		width: auto;
+		padding: @thinner @thin;
 	}
 }
 
@@ -302,7 +443,6 @@ html {
 	justify-content: space-between;
 	width: 100%;
 	padding: 1rem;
-	margin-top: 2rem;
 	background: @darkest;
 	& > * {
 		margin-right: 1rem;
@@ -311,4 +451,121 @@ html {
 		font-weight: normal;
 		margin-bottom: @thin;
 	}
+}
+
+.hamburger-cont {
+	.toggle {
+		cursor: pointer;
+		&:hover {
+			filter: brightness(0.7);
+		}
+	}
+	.inner {
+		.flex-col();
+		min-width: 12rem;
+		padding: @thinner;
+		position: absolute;
+		background: @dark;
+		opacity: 1;
+		transform: scale(1);
+		& > * {
+			width: 100%;
+		}
+	}
+	.inner:not(.open) {
+		opacity: 0;
+		transform: scale(0);
+		padding: 0;
+	}
+}
+
+.user-button {
+	.small-button();
+	.inverse-button();
+	height: auto;
+	margin: 0;
+	// padding: 0;
+}
+
+// button.ms {
+// 	&:not(.selected):not(:hover) {
+// 		background: transparent;
+// 		box-shadow: none;
+// 	}
+// }
+
+.tool-tip {
+	position: fixed;
+	z-index: 1000;
+	opacity: 0;
+	transform-origin: 0% 0%;
+	transition: opacity 0.3s;
+	pointer-events: none;
+	box-shadow: 0 0 @thin @opaque;
+	&.message {
+		background: @lightest;
+		color: @darkest;
+		padding: @thin;
+		border-radius: @thin;
+		margin-left: 1rem;
+		margin-top: -2rem;
+	}
+	&.hover-card {
+		background: black;
+		color: @lightest;
+		transition: opacity 0.3s;
+
+		margin-top: -@cardH;
+		margin-left: 1rem;
+		border-radius: @thin;
+		width: @cardW*2;
+		img {
+			border-radius: 1rem;
+			height: @cardH*2;
+		}
+		.prices {
+			padding: @thinner;
+		}
+	}
+}
+.tool-tip-container:hover .tool-tip {
+	opacity: 1;
+	transition-delay: 1s;
+	&.hover-card {
+		opacity: 1;
+		transition-delay: 1s;
+	}
+}
+
+.context-menu {
+	position: fixed;
+	z-index: 1010;
+	transform-origin: 0% 0%;
+	padding: @thin;
+	background: @darker;
+	color: @lighter;
+	border-radius: @thinner;
+	box-shadow: 0 0 @thin @opaque;
+	.context-option {
+		padding: @thinner;
+		cursor: pointer;
+		&:hover {
+			color: @highlight;
+		}
+	}
+}
+
+.section {
+	margin: 1rem auto;
+	width: 46rem;
+	padding: 1rem;
+	background: @darker;
+	box-shadow: 0 0 1rem @opaque;
+	p {
+		max-width: 25rem;
+	}
+}
+
+.point {
+	cursor: pointer;
 }

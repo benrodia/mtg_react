@@ -1,112 +1,237 @@
 import React, {useState, useRef, useEffect} from "react"
 import matchSorter, {rankings} from "match-sorter"
+import {v4 as uuid} from "uuid"
 
 import utilities from "../utilities"
 
-export default function BasicSelect({
+const {titleCaps, pluralize, wrapNum} = utilities
+export default ({
   img,
   self,
   className,
   searchBy,
-  string,
-  orderBy,
+  sort,
   labelBy,
   renderAs,
   unique,
   options,
+  separate,
   defImg,
   placeholder,
   callBack,
   searchable,
+  addable,
   isHeader,
   limit,
   preview,
-}) {
-  const {titleCaps} = utilities
+}) => {
+  const outer = useRef(null)
+  const objects =
+    options && separate ? options.unique(separate).map(o => o[separate]) : []
 
-  const label = item => (typeof labelBy === "function" ? labelBy(item) : item["name"]) || item.toString()
-
+  const label = item =>
+    (typeof labelBy === "function" && labelBy(item)) ||
+    item["name"] ||
+    item + ""
+  const [id, setId] = useState(uuid())
   const [open, setOpen] = useState(false)
+  const [keyStroke, setKeystroke] = useState(null)
   const [search, setSearch] = useState("")
   const [choices, setChoices] = useState([])
+  const [cursor, setCursor] = useState(-1)
+  const [filtered, setFiltered] = useState("all")
+
+  const reduce = (ops, s) => {
+    if ((searchable && !s.length && !preview) || (separate && !filtered.length))
+      return []
+    else {
+      let reduced = ops.slice(0, limit || 100)
+      if (unique) reduced = reduced.unique("name")
+      if (
+        addable &&
+        s.length &&
+        !ops.some(ch => ch.toLowerCase() === s.toLowerCase())
+      )
+        reduced = [s, ...reduced]
+      if (!search.length && sort === true) reduced.sort()
+      else if (!search.length && sort) reduced.orderBy(sort)
+      return reduced
+    }
+  }
+
   const reset = _ => {
     setOpen(false)
     setSearch("")
-    setChoices(orderBy ? options.orderBy(orderBy) : options)
+    setChoices(reduce(options, ""))
+    setCursor(-1)
   }
+
+  const handleKey = _ => {
+    let newC = 0
+    if (keyStroke === 27) reset()
+    else if (keyStroke === 13) {
+      callBack(choices[cursor] || search)
+      reset()
+    } else if (keyStroke === 37 || keyStroke === 38)
+      newC = wrapNum(cursor - 1, choices.length)
+    else if (keyStroke === 39 || keyStroke === 40)
+      newC = wrapNum(cursor + 1, choices.length)
+    setCursor(newC)
+    setKeystroke(null)
+  }
+
+  if (keyStroke && open && callBack) handleKey()
+
   useEffect(
     _ => {
-      setChoices(orderBy ? options.orderBy(orderBy) : options)
-      return reset()
+      const keyEvent = e => {
+        if ([37, 38, 39, 40].includes(e.keyCode) && open) e.preventDefault()
+        setKeystroke(e.keyCode)
+      }
+      const click = e =>
+        (outer.current && outer.current.contains(e.target)) || reset()
+
+      window.addEventListener("keydown", keyEvent, false)
+      window.addEventListener("mousedown", click, false)
+      reset()
+      return _ => {
+        reset()
+        window.removeEventListener("keydown", keyEvent, false)
+        window.removeEventListener("mousedown", click, false)
+      }
     },
     [options]
   )
 
-  const reduced =
-    searchable && !search.length && !preview
-      ? []
-      : unique
-      ? choices.slice(0, limit || 100).unique("name")
-      : choices.slice(0, limit || 100)
-  const optionDivs = reduced.map((o, i) => (
-    <div
-      className={`option`}
-      key={`option_${i}_${label(o)}`}
-      onClick={_ => {
-        callBack && callBack(o)
-        reset()
-      }}>
-      {renderAs ? renderAs(o, i) : titleCaps(label(o))}
-    </div>
+  useEffect(
+    _ => {
+      let ops = options.filter(
+        o => !separate || filtered === "all" || filtered === o[separate]
+      )
+
+      ops = search.length
+        ? matchSorter(
+            ops.map(o => {
+              return typeof o === "string"
+                ? {label: label(o)}
+                : {...o, label: label(o)}
+            }),
+            search,
+            {keys: searchBy || ["label"]}
+          ).map(o => (typeof ops[0] === "string" ? o.label : o))
+        : ops
+      setChoices(reduce(ops, search))
+    },
+    [search, filtered]
+  )
+
+  const optionDivs = choices.map((o, i) => (
+    <Option
+      key={o + i}
+      o={o}
+      i={i}
+      callBack={callBack}
+      label={label}
+      cursor={cursor}
+      setCursor={setCursor}
+      renderAs={renderAs}
+      reset={reset}
+    />
   ))
 
-  const searchBox = (
+  const searchInput = (
     <input
       type="text"
       placeholder={placeholder || ""}
       autoFocus
       onFocus={_ => setOpen(true)}
-      onBlur={_ => setTimeout(_ => reset(), 200)}
       value={search}
-      id={`basicsearch${options.map(op => label(op))}`}
-      onChange={e => {
-        const sorted = !e.target.value.length
-          ? options
-          : matchSorter(
-              options.map(o => {
-                return {...o, label: label(o)}
-              }),
-              e.target.value,
-              {keys: searchBy || ["label"]}
-            ).map(o => (string ? o.label : o))
-        setSearch(e.target.value)
-        setChoices(sorted)
-      }}
+      id={id}
+      onChange={e => setSearch(e.target.value)}
     />
   )
 
   return (
     <div
-      style={{display: !options || (!options.length && !isHeader && "none")}}
+      ref={outer}
       tabIndex={"0"}
-      onBlur={_ => {
-        if (!searchable) setTimeout(_ => reset(), 100)
-      }}
       className={`custom-select 
       ${open ? "open" : ""} 
       ${className || ""}
-      ${img ? "icon" : ""}
+      ${searchable && "searchable"}
     `}>
       {open ? (
-        <div className="options">
-          {searchable ? searchBox : null}
-          {optionDivs}
-        </div>
+        <>
+          {separate ? (
+            <div className="bar even thin-pad mini-spaced-bar">
+              <span>Include: </span>
+              <button
+                onClick={_ => setFiltered("all")}
+                className={`smaller-button ${
+                  filtered === "all" && "selected"
+                }`}>
+                All
+              </button>
+              {objects.map(obj => (
+                <button
+                  onClick={_ => setFiltered(obj)}
+                  className={`smaller-button ${
+                    filtered === obj && "selected"
+                  }`}>
+                  {titleCaps(pluralize(obj, 2))}
+                </button>
+              ))}
+            </div>
+          ) : null}
+          {searchable ? searchInput : null}
+          <div className="options">{optionDivs}</div>
+        </>
       ) : (
-        <div onClick={_ => setOpen(true)} className="select-collapsed">
-          {defImg ? defImg : null}
-          {placeholder ? placeholder : titleCaps(self !== undefined ? label(self) : "")}
+        <div
+          onClick={_ => setOpen(true)}
+          className={`select-collapsed bar even thinner-pad`}>
+          <span>
+            {placeholder ? placeholder : self !== undefined ? label(self) : ""}
+          </span>
         </div>
+      )}
+    </div>
+  )
+}
+
+const Option = ({
+  o,
+  i,
+  callBack,
+  label,
+  cursor,
+  setCursor,
+  renderAs,
+  reset,
+}) => {
+  const ref = useRef(null)
+  useEffect(
+    _ => {
+      cursor === i &&
+        ref.current &&
+        ref.current.scrollIntoView({block: "nearest"})
+    },
+    [cursor]
+  )
+  return (
+    <div
+      ref={ref}
+      className={`option ${cursor === i && "selected"}`}
+      key={`option_${i}_${label(o)}`}
+      onMouseOver={_ => setCursor(i)}
+      onClick={_ => {
+        callBack && callBack(o)
+        reset()
+      }}>
+      {renderAs ? (
+        renderAs(o, i)
+      ) : (
+        <span className="thinner-pad">{label(o)}</span>
       )}
     </div>
   )

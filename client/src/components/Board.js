@@ -1,19 +1,20 @@
-import React from "react"
+import React, {useState} from "react"
 import {connect} from "react-redux"
+import {useHistory} from "react-router-dom"
 import actions from "../actions"
 import utilities from "../utilities"
 
+import CardTuner from "./CardTuner"
 import Loading from "./Loading"
 import DropSlot from "./DropSlot"
 import BasicSearch from "./BasicSearch"
 import CardControls from "./CardControls"
-import PrintSelector from "./PrintSelector"
-import Card from "./Card"
-import Icon from "./Icon"
-import EditableText from "./EditableText"
+import ContextMenu from "./ContextMenu"
 
 const {
 	Q,
+	HOME_DIR,
+	BOARDS,
 	itemizeDeckList,
 	isLegal,
 	titleCaps,
@@ -23,203 +24,270 @@ const {
 	filterCardType,
 	COLORS,
 	FILTER_TERMS,
+	THEN_FILTERS,
 	ItemTypes,
 	MAIN_BOARD,
 	SINGLETON,
-	log,
 	canEdit,
+	createSlug,
 } = utilities
 
 export default connect(
-	({
-		auth: {
-			user: {_id},
-			isAuthenticated,
-		},
-		filters,
-		main: {sets, legalCards},
-		deck: {list, format, author},
-	}) => {
-		return {sets, legalCards, ...filters, list, format, _id, isAuthenticated, author}
+	({main: {cardData}, filters, deck: {loading, list, format, custom}}) => {
+		return {
+			cardData,
+			...filters,
+			loading,
+			list,
+			format,
+			custom,
+		}
 	},
 	actions
 )(
 	({
-		header,
-		customFields,
-		legalCards,
-		sets,
+		cardData,
+		loading,
 		list,
 		format,
-		author,
-		_id,
-		isAuthenticated,
+		custom,
 		view,
 		sortBy,
+		thenSortBy,
 		focus,
+		tune,
 		board,
-		openModal,
-		addCard,
-		changeCard,
-		changeDeck,
 		changeFilters,
+		changeCustom,
+		addCard,
+		changeDeck,
+		changeCard,
 	}) => {
-		let inBoard = list.filter(c => c.board === board && !c.commander)
-		const commanders = list.filter(c => board === MAIN_BOARD && !!c.commander)
+		const [contextLink, setContextLink] = useState(null)
 
-		const boardInner = _ => {
-			const Filter_By = FILTER_TERMS.filter(t => t.name === sortBy)[0] || {}
+		if (contextLink) {
+			setContextLink(null)
+			useHistory().push(contextLink)
+		}
+
+		let inBoard = list.filter(c => c.board === board && !c.commander)
+		if (sortBy === "Custom") {
+			inBoard = inBoard.map(c => {
+				return {
+					...c,
+					custom: (custom.filter(cu => cu.name === c.name)[0] || {}).category,
+				}
+			})
+		}
+
+		const CommandHeader = _ => {
+			const commanders = list.filter(c => board === MAIN_BOARD && c.commander)
+			return board === MAIN_BOARD ? (
+				<div className={` ${view}-view`}>
+					<DropSlot
+						field={"Command"}
+						accept={ItemTypes.CARD}
+						callBack={c => changeDeck("list", chooseCommander(c, list))}>
+						<h2 className="label">
+							Commander{commanders.length > 1 ? "s" : ""}
+						</h2>
+						<div className={`grid-inner`}>
+							{commanders.length ? (
+								commanders.map(c => renderCardStack([c], true))
+							) : canEdit() ? (
+								<BasicSearch
+									searchable
+									placeholder="Choose a Commander"
+									options={legalCommanders(format, cardData)}
+									renderAs={c => <CardControls card={c} cardHeadOnly />}
+									callBack={c => changeDeck("list", chooseCommander(c, list))}
+								/>
+							) : (
+								<Loading
+									anim={"none"}
+									spinner={" "}
+									subMessage={"No Commander Chosen"}
+								/>
+							)}
+						</div>
+					</DropSlot>
+				</div>
+			) : null
+		}
+
+		const BoardInner = _ => {
+			const F = FILTER_TERMS.filter(t => t.name === sortBy)[0] || {}
 			const category = {
-				...Filter_By,
+				...F,
 				vals:
 					sortBy === "Custom"
-						? customFields.map(f => f.key)
-						: Filter_By.vals || inBoard.map(c => c[Filter_By.key]).sort(),
-				valNames: sortBy === "Custom" ? customFields.map(f => f.name) : Filter_By.valNames,
-				other: Filter_By.other || `Missing ${Filter_By.name}`,
+						? custom
+								.unique("category")
+								.map(cu => cu.category)
+								.filter(cu => !!cu && cu !== "uncategorized")
+						: F.vals || inBoard.map(c => c[F.key]).sort(),
+				other: F.other || `Missing ${F.name}`,
 			}
 
 			const sorted = (val = "", ind = null) => {
-				const filteredCards = ind === null ? inBoard : filterCardType(inBoard, category, val)
-				inBoard = inBoard.filter(b => !filteredCards.filter(c => c.key === b.key).length)
+				const filteredCards =
+					ind === null ? inBoard : filterCardType(inBoard, category, val)
+				inBoard = inBoard.filter(
+					b => !filteredCards.filter(c => c.key === b.key).length
+				)
 
-				const cardStacks = itemizeDeckList(filteredCards, ["name"]).orderBy("name")
-				const valName = (category.valNames && category.valNames[ind]) || val.toString()
+				const cardStacks = itemizeDeckList(
+					filteredCards.orderBy(
+						(THEN_FILTERS.filter(t => t.name === thenSortBy)[0] || {}).key
+					)
+				)
+				const valName =
+					(category.valNames && category.valNames[ind]) || val.toString()
 
-				if (category.name === "Custom") {
-					return (
+				return !cardStacks.length ? null : (
+					<div
+						key={board + "_" + category.key + "_" + valName}
+						className={`list ${view}-view`}>
 						<DropSlot
-							key={"custom" + valName}
+							accept={sortBy === "Custom" ? ItemTypes.CARD : "N/A"}
 							field={val}
-							accept={[ItemTypes.CARD, ItemTypes.COMMANDER]}
-							callBack={c => changeCard(c, {customField: val})}>
-							<div key={board + "_" + category.key + "_" + valName} className={`${valName}-list list ${view}-view`}>
-								<h3>
-									<EditableText
-										changeable
-										removable
-										value={{name: titleCaps(valName), key: val}}
-										list={customFields}
-										callBack={n => changeFilters("customFields", n)}
-									/>{" "}
-									({filteredCards.length})
-								</h3>
-								<div className={`${view}-inner`}>{cardStacks.map(c => renderCardStack(c, valName))}</div>
+							callBack={c => changeCustom(c.name, {category: val})}>
+							<h2 className="label mini-spaced-bar">
+								<span
+									className={`icon ms ms-${
+										category.icon && val.toString().toLowerCase()
+									}`}
+								/>
+								<span>
+									{titleCaps(valName)} ({filteredCards.length})
+								</span>
+							</h2>
+							<div className={`${view}-inner thinner-pad`}>
+								{cardStacks.map(c => renderCardStack(c))}
 							</div>
 						</DropSlot>
-					)
-				} else
-					return !cardStacks.length ? null : (
-						<div key={board + "_" + category.key + "_" + valName} className={`${valName}-list list ${view}-view`}>
-							<h3>
-								<div className={`icon ms ms-${category.icon && val.toString().toLowerCase()}`} /> {titleCaps(valName)} (
-								{filteredCards.length})
-							</h3>
-							<div className={`${view}-inner`}>{cardStacks.map(c => renderCardStack(c, valName))}</div>
-						</div>
-					)
+					</div>
+				)
 			}
-			const commandHeader = (
-				<div className={`Commander-list list grid-view`}>
-					<h3>
-						<div className={`icon`} /> {pluralize("Commander", commanders.length)}
-					</h3>
-					{canEdit() ? (
-						<BasicSearch
-							searchable
-							limit={20}
-							options={legalCommanders(format, legalCards)}
-							label={"name"}
-							callBack={c => changeDeck("list", chooseCommander(c, list, legalCards, true))}
-							placeholder="Choose a Commander"
-						/>
-					) : null}
-					<div className={`grid-inner`}>{renderCardStack(commanders, "Commander")}</div>
-				</div>
-			)
 
 			return (
-				<div className={`board-inner ${view}`}>
-					{SINGLETON(format) ? commandHeader : null}
+				<div className={`board-inner ${view} spaced-col`}>
+					{SINGLETON(format) ? <CommandHeader /> : null}
 					{category.vals.map((val, ind) => sorted(val, ind))}
 					{sorted(category.other)}
 				</div>
 			)
 		}
 
-		const renderCardStack = (cards = []) => {
-			if (!cards[0]) return null
+		const renderCardStack = (cards = [], noQuant) => {
+			if (!cards.length) return null
 			const legal = isLegal(cards[0], format)
-			const numOfSets = itemizeDeckList(cards, ["set_name"])
-			return (
-				<div key={board + cards[0].key} className={`of-name`}>
-					{numOfSets.map(cardsOfSet =>
-						cardsOfSet.map((card, cardInd) => {
-							const setLogo = (
-								<Icon
-									name={card.set_name}
-									className={`${card.rarity} ${canEdit() ? "clicky-icon" : ""}`}
-									loader={card.set}
-									src={!sets.length ? null : (sets.filter(s => s.name === card.set_name)[0] || {}).icon_svg_uri}
+
+			const renderedCard = ({card, cardInd}) => {
+				const imageStyle = {
+					position: !!cardInd && "absolute",
+					marginTop: !!cardInd && cardInd - cards.length - 10 + "rem",
+					marginBottom: cards.length > 1 && !cardInd && cards.length + "rem",
+				}
+				return (
+					<div className="flex-row mini-spaced-bar board-card">
+						{!canEdit() || cardInd ? null : (
+							<div className="col quant-tickers">
+								<div
+									className="button icon-plus"
+									onClick={_ => addCard(card)}
 								/>
-							)
-							const controls = (
-								<>
-									<div className={`quantity ${view === "list" && cardInd !== 0 ? "hide" : ""}`}>
-										<span
-											className={`icon-plus ${cards.length >= legal ? "disabled" : ""}`}
-											onClick={_ => addCard(card, board)}
-										/>
-										/<span className="icon-minus" onClick={_ => addCard(card, board, true)} />
-									</div>
-									<span
-										onClick={_ => openModal({title: "Change Printing", content: <PrintSelector change card={card} />})}>
-										{view === "list" || card.commander ? (
-											setLogo
-										) : (
-											<button>
-												{setLogo} {card.set_name}
-											</button>
-										)}
-									</span>
-								</>
-							)
-							return (
+								<div
+									className="button icon-minus"
+									onClick={_ => addCard(card, null, true)}
+								/>
+							</div>
+						)}
+						<span onClick={_ => changeFilters("tune", card)} key={card.key}>
+							<ContextMenu
+								options={[
+									{
+										label: "View Card Page",
+										callBack: _ =>
+											setContextLink(
+												`${HOME_DIR}/card/${createSlug(card.name)}/info`
+											),
+									},
+									...BOARDS.filter(B => B !== board).map(B => {
+										return {
+											label: `Move to ${B}board`,
+											callBack: _ => changeCard(card, {board: B}),
+										}
+									}),
+									{
+										label: "Add a Copy",
+										callBack: _ => addCard(card, board),
+									},
+									{
+										label: "Remove a Copy",
+										callBack: _ => addCard(card, null, true),
+									},
+									{
+										label: "Remove All",
+										color: "red",
+										callBack: _ =>
+											addCard(
+												list.filter(l => l.name === card.name),
+												null,
+												true
+											),
+									},
+								]}>
 								<CardControls
-									options={"Move"}
-									inArea={inBoard}
-									key={card.key}
 									card={card}
-									itemType={card.commander ? ItemTypes.COMMANDER : ItemTypes.CARD}
+									quant={noQuant ? null : cards.length}
+									itemType={ItemTypes.CARD}
 									imgSize="small"
 									classes={`
 										${cards.length > legal && cardInd >= legal && "illegal "} 
-										${Q(card, focus.key, focus.val) && "highlighted"}
+										${(Q(card, focus.key, focus.val) || tune.name === card.name) && "selected"}
 									`}
-									cardHeadOnly={view === "list" && !card.commander}
-									style={{
-										position: cardInd > 0 && view === "grid" && "absolute",
-										marginTop: cardInd > 0 && view === "grid" && cardInd - cardsOfSet.length - 10 + "rem",
-										pointerEvents: cardInd !== cardsOfSet.length - 1 && view === "grid" && "none",
-										marginBottom: cardsOfSet.length > 1 && !cardInd && view === "grid" && cardsOfSet.length + "rem",
-									}}>
-									{canEdit() ? controls : view === "list" ? setLogo : null}
-								</CardControls>
-							)
-						})
-					)}
+									cardHeadOnly={view === "list"}
+									nameOnly={view === "text"}
+									style={view === "grid" ? imageStyle : {}}
+								/>
+							</ContextMenu>
+						</span>
+					</div>
+				)
+			}
+
+			return (
+				<div key={board + cards[0].key} className={`of-name`}>
+					{view !== "grid"
+						? renderedCard({
+								card: cards[0],
+								cardInd: 0,
+						  })
+						: cards.map((card, cardInd) => renderedCard({card, cardInd}))}
 				</div>
 			)
 		}
 
 		return (
-			<div className={`board ${board}-board`}>
-				{inBoard.length || commanders.length ? (
-					boardInner()
-				) : (
-					<Loading spinner={" "} anim="none" message={`No Cards in ${board}board`} />
-				)}
-			</div>
+			<DropSlot
+				accept={ItemTypes.CARD}
+				field={board}
+				callBack={c => (c.key ? changeCard(c, {board}) : addCard(c, board))}>
+				<div className={`board ${board}-board flex-row`}>
+					{loading ? (
+						<Loading message={"Fetching Decklist"} />
+					) : inBoard.length ? (
+						<BoardInner />
+					) : (
+						<Loading
+							spinner={" "}
+							anim="none"
+							message={`No Cards in ${board}board`}
+						/>
+					)}
+				</div>
+			</DropSlot>
 		)
 	}
 )

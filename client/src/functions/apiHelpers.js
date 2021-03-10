@@ -2,7 +2,7 @@ import store from "../store"
 import axios from "axios"
 import slugify from "slugify"
 import uniqueSlug from "unique-slug"
-
+import * as A from "../actions/types"
 import {INIT_DECK_STATE, INIT_SETTINGS_STATE} from "../constants/initialState"
 import {expandDeckData, collapseDeckData} from "./receiveCards"
 
@@ -22,10 +22,13 @@ export const canEdit = _id => {
 
 export const canSuggest = _ => {
 	const {
-		deck: {author, helpWanted},
+		deck: {author, allow_suggestions},
 		auth: {user, isAuthenticated},
 	} = store.getState()
-	return (isAuthenticated && user._id !== author && helpWanted > 1) || (helpWanted === 1 && areFriends(author))
+	return (
+		(isAuthenticated && user._id !== author && allow_suggestions > 1) ||
+		(allow_suggestions === 1 && areFriends(author))
+	)
 }
 export const areFriends = _id => {
 	const {
@@ -41,7 +44,11 @@ export const creator = _id => {
 		main: {users},
 	} = store.getState()
 
-	return _id ? users.filter(u => u._id === _id)[0] : users.filter(u => u._id === author)[0] || {}
+	return (
+		(_id
+			? users.filter(u => u._id === _id)[0]
+			: users.filter(u => u._id === author)[0]) || {}
+	)
 }
 
 export const config = getState => {
@@ -60,6 +67,7 @@ export const createSlug = (name = "", from) => {
 		const named = slugify(name, {
 			replacement: "-",
 			strict: true,
+			lower: true,
 			locale: "en",
 		})
 		const existing = from ? from.filter(f => f.slug === named).length : 0
@@ -69,9 +77,12 @@ export const createSlug = (name = "", from) => {
 
 export const resetCache = _ => {
 	console.log("resetCache")
-	localStorage.removeItem("settings")
-	localStorage.removeItem("deck")
-	localStorage.removeItem("user")
+	localStorage.removeItem(A.SETTINGS)
+	sessionStorage.removeItem(A.SETTINGS)
+	localStorage.removeItem(A.FILTERS)
+	sessionStorage.removeItem(A.FILTERS)
+	localStorage.removeItem(A.DECK)
+	sessionStorage.removeItem(A.DECK)
 	setTimeout(_ => window.location.reload(), 500)
 }
 
@@ -95,5 +106,7 @@ export const badPassword = (password = "") => {
 		? "Needs a special character"
 		: false
 
-	RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*d)(?=.*[$@$!%*?&])[A-Za-zd$@$!%*?&]{8,}").test(password)
+	RegExp(
+		"^(?=.*[a-z])(?=.*[A-Z])(?=.*d)(?=.*[$@$!%*?&])[A-Za-zd$@$!%*?&]{8,}"
+	).test(password)
 }

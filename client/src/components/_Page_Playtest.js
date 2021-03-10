@@ -5,77 +5,64 @@ import {connect} from "react-redux"
 import actions from "../actions"
 
 //Components
+import TestCounters from "./TestCounters"
 import Zone from "./Zone"
 import TestControls from "./TestControls"
 import TesterShortcuts from "./TesterShortcuts"
 import TheStack from "./TheStack"
 import BasicSearch from "./BasicSearch"
 
-import {TOKEN_NAME} from "../constants/greps"
+import utilities from "../utilities"
+const {TOKEN_NAME, NUMBER_WORDS} = utilities
 
-export default connect(({main: {tokens, decks, cardData}, playtest: {look}, deck: {list}}) => {
-  return {tokens, look, list, decks, cardData}
-}, actions)(
-  ({list, tokens, decks, cardData, look, startTest, spawnToken, handleShuffle, gameState, setPage, openDeck}) => {
-    const {slug} = useParams()
+export default connect(
+  ({main: {tokens, decks}, settings: {players}, deck: {list}}) => {
+    return {tokens, players, list, decks}
+  },
+  actions
+)(
+  ({
+    list,
+    tokens,
+    decks,
+    players,
+    startTest,
+    spawnToken,
+    handleShuffle,
+    gameState,
+    setPage,
+    openDeck,
+  }) => {
     useEffect(
       _ => {
-        if (decks.length) openDeck(slug)
+        players.length && startTest()
       },
-      [slug, decks]
-    )
-    useEffect(
-      _ => {
-        if (list.length && cardData) startTest()
-      },
-      [list, cardData]
+      [players]
     )
 
-    const zone = (name, {context, header, cardHeadOnly}) => (
-      <Zone zone={name} key={name} context={context} header={header} cardHeadOnly={cardHeadOnly} />
+    const PlayerRow = ({seat}) => (
+      <div className={`player-row col player-${NUMBER_WORDS[seat + 1]}-row`}>
+        <Zone P2={seat > 0} zone={"Battlefield"} context={"grid"} />
+        <TestCounters P2={seat > 0} />
+        <div className="zones flex-row ">
+          {!list.filter(c => c.commander).length ? null : (
+            <Zone P2={seat > 0} zone={"Command"} context="single" />
+          )}
+          <Zone P2={seat > 0} zone={"Exile"} context="single" header />
+          <Zone P2={seat > 0} zone={"Graveyard"} context="single" header />
+          <Zone P2={seat > 0} zone={"Library"} context="single" header={true} />
+          <Zone P2={seat > 0} zone={"Hand"} context="list" header />
+        </div>
+      </div>
     )
 
     return (
-      <div className="tester">
+      <div className="tester ">
         <TesterShortcuts />
-        <TheStack />
-        <div className="side-col">
-          {!list.filter(c => c.commander).length ? null : <Zone zone="Command" key="Command_ZONE" context="single" />}
-          <BasicSearch
-            searchable
-            placeholder="Create Token"
-            options={tokens}
-            labelBy={t => TOKEN_NAME(t)}
-            valueBy={"id"}
-            callBack={spawnToken}
-          />
-          <div>
-            <Zone zone="Exile" key="Exile_ZONE" context="list" header cardHeadOnly />
-            <Zone zone="Graveyard" key="Graveyard_ZONE" context="list" header cardHeadOnly />
-            <div className="library-cont">
-              {zone("Library", {context: "single", header: true})}
-              <div className="library-controls">
-                <button className={"smaller-button"} onClick={_ => handleShuffle(false)}>
-                  Shuffle
-                </button>
-                <div className="lookBtn">
-                  <button
-                    className={"smaller-button warning-button"}
-                    onClick={_ => gameState("look", 0)}
-                    style={{display: !look && "none"}}>
-                    X
-                  </button>
-                  <button className={"smaller-button"} onClick={_ => gameState("look", 1, true)}>
-                    Reveal Top {look ? look : ""}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
         <TestControls />
-        <Zone zone="Battlefield" key="Battlefield_ZONE" context="grid" />
-        <Zone zone="Hand" key="Hand_ZONE" context="list" header />
+        <TheStack />
+        {players.length > 1 ? <PlayerRow seat={1} /> : null}
+        <PlayerRow seat={0} />
       </div>
     )
   }
