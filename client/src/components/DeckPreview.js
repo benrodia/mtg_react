@@ -5,6 +5,7 @@ import actions from "../actions"
 import utilities from "../utilities"
 import {PieChart} from "react-minimal-pie-chart"
 import {useDrag} from "react-dnd"
+import {v4 as uuid} from "uuid"
 import Tilt from "react-tilt"
 
 import DropSlot from "./DropSlot"
@@ -20,23 +21,21 @@ const {Q, HOME_DIR, COLORS, titleCaps, rnd, creator} = utilities
 
 export default connect(({main: {cardData}}) => {
 	return {cardData}
-}, actions)(({deck, cardData}) => {
+}, actions)(({deck, cardData, changeSettings}) => {
 	const [seedCards, setSeedCards] = useState([])
 
+	const newSeed = _ =>
+		setSeedCards(
+			rnd(deck.list, 7, true).map(l => cardData.find(c => c.name === l.name))
+		)
 	useEffect(
 		_ => {
-			if (cardData.length && deck) {
-				setSeedCards(
-					rnd(deck.list, 7, true).map(l =>
-						cardData.find(c => c.name === l.name)
-					)
-				)
-			}
+			if (cardData.length && deck) newSeed()
 		},
 		[cardData, deck]
 	)
 
-	if (!(deck && seedCards.length)) return null
+	if (!deck) return null
 
 	const {name, list, format, author, slug, feature, colors} = deck
 
@@ -71,11 +70,21 @@ export default connect(({main: {cardData}}) => {
 					</Link>
 				</div>
 				<div className="play-button">
-					<Link to={`${HOME_DIR}/deck/${slug}/playtest`}>
-						<ToolTip message="Play This Hand">
-							<button className="icon-play" />
-						</ToolTip>
-					</Link>
+					<ToolTip message="Playtest this hand">
+						<Link to={`${HOME_DIR}/playtest/lobby`}>
+							<button
+								onClick={_ =>
+									changeSettings("players", [
+										{type: "HMN", id: uuid(), deck, hand: seedCards},
+									])
+								}
+								className="icon-play"
+							/>
+						</Link>
+					</ToolTip>
+				</div>
+				<div className="play-button">
+					<button onClick={newSeed} className="icon-shuffle" />
 				</div>
 			</div>
 			<div className="bar">

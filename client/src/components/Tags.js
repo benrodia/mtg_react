@@ -44,7 +44,7 @@ const Tag = ({t, deletable, termSets, children, changeAdvanced}) => {
 	const [tip, setTip] = useState(null)
 	const converted = convertTag(t)
 
-	console.log("converted", converted)
+	// console.log("converted", converted)
 	useEffect(_ => {
 		if (converted.failed) setTip("")
 		else

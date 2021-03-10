@@ -127,27 +127,15 @@ export default connect(
 						))}
 					</div>
 				</section>
-
-				<section className="spaced-col">
-					<h1 className="block center">Some Decks</h1>
-					{deckHighlights.map(deck => (
-						<DeckPreview deck={deck} />
-					))}
-				</section>
+				{deckHighlights.length ? (
+					<section className="spaced-col">
+						<h1 className="block center">Some Decks</h1>
+						{deckHighlights.map(deck => (
+							<DeckPreview deck={deck} />
+						))}
+					</section>
+				) : null}
 			</div>
 		)
 	}
 )
-
-// <div>
-// 	<h2>Hot Combos!</h2>
-// 	<div className="bar spaced-grid">
-// 		{cardCombos.map(cc => (
-// 			<div className="bar">
-// 				{cc.map(n => (
-// 					<CardControls card={Q(cardData, "name", n)[0] || {}} />
-// 				))}
-// 			</div>
-// 		))}
-// 	</div>
-// </div>

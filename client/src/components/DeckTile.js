@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react"
 import {Link, useHistory} from "react-router-dom"
 import {connect} from "react-redux"
+import {v4 as uuid} from "uuid"
 import actions from "../actions"
 import ago from "s-ago"
 import {PieChart} from "react-minimal-pie-chart"
@@ -15,6 +16,7 @@ const {
 	canEdit,
 	creator,
 	textList,
+	snip,
 } = utilities
 
 export default connect(
@@ -23,7 +25,15 @@ export default connect(
 )(
 	({
 		noLink,
-		deck: {
+		deck,
+		newMsg,
+		openDeck,
+		deleteDeck,
+		addCart,
+		openModal,
+		changeSettings,
+	}) => {
+		const {
 			_id,
 			author,
 			name,
@@ -34,13 +44,11 @@ export default connect(
 			updated,
 			feature,
 			helpWanted,
-		},
-		newMsg,
-		openDeck,
-		deleteDeck,
-		addCart,
-		openModal,
-	}) => {
+			views,
+			likes,
+			tags,
+			desc,
+		} = deck
 		const [contextLink, setContextLink] = useState(null)
 		const colorData =
 			colors &&
@@ -67,7 +75,7 @@ export default connect(
 						},
 						{
 							label: "Playtest Deck",
-							callBack: _ => setContextLink(`${deckLink}/playtest`),
+							callBack: _ => setContextLink(`${HOME_DIR}/playtest/lobby`),
 						},
 						{
 							label: "Copy List To Clipboard",
@@ -84,7 +92,7 @@ export default connect(
 						},
 					]}>
 					<div className="flex-row">
-						<span onClick={_ => setContextLink(deckLink)}>
+						<span className="point" onClick={_ => setContextLink(deckLink)}>
 							<img
 								className="feature"
 								src={feature || CARD_SLEEVES["_basic.png"]}
@@ -94,31 +102,45 @@ export default connect(
 								<PieChart data={colorData} startAngle={270} />
 							</div>
 						</span>
-						<div
-							onClick={_ => setContextLink(`${deckLink}/playtest`)}
-							className="play-button">
-							<button className=" icon-play" title="Playtest Deck" />
+						<div className="play-button">
+							<button
+								onClick={_ => {
+									setContextLink(`${HOME_DIR}/playtest/lobby`)
+
+									changeSettings("players", [{type: "HMN", id: uuid(), deck}])
+								}}
+								className={"icon-play"}
+								title="Playtest Deck"
+							/>
 						</div>
 					</div>
-					<div className="info mini-spaced-col">
-						<h3
-							onClick={_ => setContextLink(deckLink)}
-							className={`deck-title ${
-								helpWanted >= 3 && "icon-exclamation attention"
-							}`}>
-							{name}
-						</h3>
-						<div className="bar even mini-spaced-bar">
-							<p className="tag">{format}</p>
+					<div className="info spread col">
+						<div className="mini-spaced-col">
+							<h3
+								onClick={_ => setContextLink(deckLink)}
+								className={`deck-title point ${
+									helpWanted >= 3 && "icon-exclamation attention"
+								}`}>
+								{name}
+							</h3>
+							<div className="bar even mini-spaced-bar">
+								<h4 className="">{format}</h4>
+								{tags.map(t => (
+									<div className="tag">{t}</div>
+								))}
+							</div>
+							<p>{snip(desc, 150)}</p>
 						</div>
-						<div className="bar even mini-spaced-bar">
-							<span
-								onClick={_ =>
-									setContextLink(`${HOME_DIR}/user/${creator(author).slug}`)
-								}>
-								<button className="user-button">{creator(author).name}</button>
-							</span>
-							<p className="asterisk">Updated {ago(new Date(updated))}</p>
+						<div className="bar mini-spaced-bar spread">
+							<button
+								onClick={_ => setContextLink(`user/${creator(author).slug}`)}
+								className="user-button">
+								{creator(author).name}
+							</button>
+							<div className="bar mini-spaced-bar">
+								<span className="icon-eye">{views}</span>
+								<span className="icon-thumbs-up">{likes}</span>
+							</div>
 						</div>
 					</div>
 				</ContextMenu>

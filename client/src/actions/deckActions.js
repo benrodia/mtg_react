@@ -30,13 +30,12 @@ const {
   mapColors,
 } = utilities
 
-export const newDeck = (author, {name, format, list, desc}) => (
-  dispatch,
-  getState
-) => {
+export const newDeck = (
+  author,
+  {name, format, list, desc, feature, colors}
+) => (dispatch, getState) => {
   if (author) {
     const slug = createSlug(name, getState().main.decks)
-    const colors = mapColors(list)
 
     axios
       .post(`/api/decks`, {
@@ -46,8 +45,7 @@ export const newDeck = (author, {name, format, list, desc}) => (
         list,
         slug,
         colors,
-        feature:
-          (list[0] && list[0].image_uris && list[0].image_uris.art_crop) || "",
+        feature,
       })
       .then(res => {
         dispatch(newMsg("CREATED DECK", "success"))
@@ -59,11 +57,16 @@ export const newDeck = (author, {name, format, list, desc}) => (
 }
 
 export const openDeck = (slug, noView) => (dispatch, getState) => {
-  const {decks} = getState().main
+  const {
+    main: {decks},
+    auth: {
+      user: {_id},
+    },
+  } = getState()
   const deck = decks.filter(d => d.slug === slug)[0]
   if (deck) {
     const recent = sessionStorage.getItem("viewed-recently") || ""
-    if (!recent.includes(deck._id) && !noView) {
+    if (!recent.includes(deck._id) && !noView && deck.author !== _id) {
       axios.patch(`/api/decks/${deck._id}`, {views: deck.views + 1})
       sessionStorage.setItem("viewed-recently", recent + "_" + deck._id)
       deck.views += 1
@@ -136,19 +139,9 @@ export const saveDeck = _ => (dispatch, getState) => {
     allow_suggestions,
     privacy,
     custom,
+    colors,
     preferences,
   } = getState().deck
-
-  const colors = COLORS("symbol").map(s =>
-    sum(
-      list.map(
-        c =>
-          audit(c)
-            .mana_cost.split("")
-            .filter(i => i === s).length
-      )
-    )
-  )
 
   if (!canPublish(list, format)) published = false
   if (canEdit()) {
@@ -157,10 +150,6 @@ export const saveDeck = _ => (dispatch, getState) => {
       .patch(`/api/decks/${_id}`, {
         published,
         suggestions,
-        feature: feature.length
-          ? feature
-          : (list[0] && list[0].image_uris && list[0].image_uris.art_crop) ||
-            "",
         colors,
         list: collapseDeckData(list),
         updated,
@@ -169,6 +158,7 @@ export const saveDeck = _ => (dispatch, getState) => {
         allow_suggestions,
         privacy,
         custom,
+        feature,
         preferences,
       })
       .then(res => {

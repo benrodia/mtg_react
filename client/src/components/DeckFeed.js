@@ -24,12 +24,9 @@ export default connect(
 		filters: {
 			advanced: {cart},
 		},
-		auth: {
-			isAuthenticated,
-			user: {_id, followed, name, slug},
-		},
+		auth: {isAuthenticated, user},
 	}) => {
-		return {decks, cart, cardData, refresh, _id, followed, name, slug}
+		return {decks, cart, cardData, refresh, user}
 	},
 	actions
 )(
@@ -37,19 +34,16 @@ export default connect(
 		addCards,
 		noLink,
 		crumbs,
-		direct,
+		who,
 		decks,
 		params,
 		you,
+		user,
 		hasHeader,
 		cart,
 		cardData,
 		children,
 		refresh,
-		_id,
-		followed,
-		name,
-		slug,
 		isAuthenticated,
 		newDeck,
 		openModal,
@@ -60,6 +54,8 @@ export default connect(
 		newMsg,
 	}) => {
 		const [greeting, setGreeting] = useState(rnd(GREETINGS))
+
+		const {_id, followed, name, slug} = who ? creator(who) : user
 
 		const sorts = [
 			{name: "Recent", key: "updated"},
@@ -76,12 +72,12 @@ export default connect(
 		)
 
 		const Welcome = _ => (
-			<div className="block bar even center mini-spaced-bar">
-				<h2>{greeting},</h2>
+			<h2 className="block bar even mini-spaced-bar">
 				<Link to={`${HOME_DIR}/user/${slug}`}>
-					<h2 className="inverse-button">{name}</h2>
+					<span className="inverse-button">{name}</span>
 				</Link>
-			</div>
+				{"'s"} Decks
+			</h2>
 		)
 		return (
 			<div className="browse">
@@ -89,7 +85,7 @@ export default connect(
 				<div className="decks full-width">
 					{you ? <NewButton /> : null}
 					{decks
-						.filter(d => d.author === _id)
+						.filter(d => d.author === (who || _id))
 						.map(d => (
 							<span
 								onClick={_ => {

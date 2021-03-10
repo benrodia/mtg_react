@@ -1184,6 +1184,9 @@ html {
 .section p {
   max-width: 25rem;
 }
+.point {
+  cursor: pointer;
+}
 .dash .hero {
   display: flex;
   flex-flow: row nowrap;
@@ -1322,7 +1325,7 @@ html {
   width: 18rem;
   height: 22rem;
   flex-shrink: 1;
-  background: rgba(0, 0, 0, 0.3);
+  background: #4e4352;
   border-radius: 0.25rem;
 }
 .browse .decks .deck-tile .flex-row {
@@ -1369,7 +1372,6 @@ html {
 }
 .browse .decks .deck-tile .info {
   padding: 0.5rem;
-  background: #4e4352;
   height: 10rem;
   border-radius: 0 0 0.25rem 0.25rem;
 }
@@ -1868,6 +1870,16 @@ html {
 }
 .more-less .more-less-button:hover {
   color: #fff4eb;
+}
+.new-deck .list-inner {
+  max-height: 50vh;
+  overflow-y: auto;
+}
+.new-deck .feature-full {
+  background-color: #020817;
+}
+.new-deck .feature-full img {
+  background-color: transparent;
 }
 .card-container {
   transition: 0.2s;

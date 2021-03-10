@@ -56,9 +56,6 @@ export default connect(
 		const editOptions = (
 			<div className="big-block center col">
 				<div className="bar even center mini-spaced-bar">
-					<Link to={`${HOME_DIR}/settings`}>
-						<button className="small-button icon-sliders">Settings</button>
-					</Link>
 					<Link to={HOME_DIR}>
 						<button
 							className="icon-logout inverse-small-button"
@@ -136,13 +133,7 @@ export default connect(
 					</div>
 				</div>
 
-				<DeckFeed direct={yourDecks}>
-					<div className="block">
-						<h2>
-							Created {yourDecks.length} {pluralize("Deck", yourDecks.length)}
-						</h2>
-					</div>
-				</DeckFeed>
+				<DeckFeed who={_id} />
 			</div>
 		)
 	}

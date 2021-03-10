@@ -30,7 +30,7 @@ export const INIT_SETTINGS_STATE = {
 	random_playmat: true,
 	use_stack: ["Action", "Spell", "Activated Ability", "Triggered Ability"],
 	mana_tolerance: 3,
-	players: [{type: "HMN", id: uuidv4(), deck: {}}],
+	players: [{type: "HMN", id: uuidv4(), deck: {}, hand: []}],
 }
 
 export const INIT_AUTH_STATE = {

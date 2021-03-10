@@ -7,9 +7,13 @@ import utilities from "../utilities"
 import ImportFile from "./ImportFile"
 import BasicSearch from "./BasicSearch"
 import GenerateDeck from "./GenerateDeck"
+import ToolTip from "./ToolTip"
+import CardControls from "./CardControls"
 
 const {
 	HOME_DIR,
+	ItemTypes,
+	BOARDS,
 	FORMATS,
 	EXAMPLE_DECK_NAMES,
 	rnd,
@@ -19,6 +23,9 @@ const {
 	pluralize,
 	textList,
 	titleCaps,
+	itemizeDeckList,
+	getCardFace,
+	mapColors,
 } = utilities
 
 export default connect(
@@ -56,8 +63,9 @@ export default connect(
 	}) => {
 		const [name, setName] = useState("")
 		const [slug, setSlug] = useState("")
-		const [format, setFormat] = useState("commander")
+		const [format, setFormat] = useState("casual")
 		const [desc, setDesc] = useState("")
+		const [feature, setFeature] = useState("")
 		const [list, setList] = useState(cards || cart || [])
 		const [listForm, setListForm] = useState(textList(cards || cart) || "")
 
@@ -66,7 +74,6 @@ export default connect(
 
 		useEffect(
 			_ => {
-				setSlug(createSlug(name, decks))
 				cardData.length &&
 					setExList(
 						[...Array(7)]
@@ -77,15 +84,36 @@ export default connect(
 							.join("\n")
 					)
 			},
-			[name, cardData.length]
+			[cardData.length]
 		)
+
+		useEffect(
+			_ => {
+				setSlug(createSlug(name, decks))
+			},
+			[name]
+		)
+		useEffect(
+			_ => {
+				if (list.length) {
+					const feat = list.find(li => getCardFace(li).image_uris.art_crop)
+					setFeature(feat ? getCardFace(feat).image_uris.art_crop : "")
+				}
+			},
+			[list]
+		)
+
 		const pageHistory = useHistory()
 		return (
 			<div className="new-deck section">
 				<h1 className="block">New Deck</h1>
-				<div className="block bar">
+				<div className="block flex-row mini-spaced-bar">
 					<div>
-						<h4>Create From File</h4>
+						<h2>Create From File</h2>
+						<p className="asterisk mini-block">
+							Import a .txt, .dek, or .mwDeck file. Please remember to credit
+							the creator in the description below.
+						</p>
 						<ImportFile
 							accept=".txt,.dek,.mwDeck"
 							callBack={({meta: {name, format, creator}, cards, text, err}) => {
@@ -99,10 +127,18 @@ export default connect(
 							}}
 						/>
 					</div>
+					<GenerateDeck
+						setName={n => setName(n)}
+						callBack={d => {
+							setFormat("commander")
+							setList(d)
+							setListForm(textList(d))
+						}}
+					/>
 				</div>
 
 				<div className="block col">
-					<h4>Name *</h4>
+					<h3>Name</h3>
 					<input
 						type="text"
 						value={name}
@@ -114,7 +150,7 @@ export default connect(
 					</span>
 				</div>
 				<div className="block">
-					<h4>Format</h4>
+					<h3>Format</h3>
 					<BasicSearch
 						options={FORMATS}
 						self={titleCaps(format)}
@@ -122,26 +158,107 @@ export default connect(
 						callBack={f => setFormat(f)}
 					/>
 				</div>
-				{format === "commander" ? (
-					<GenerateDeck
-						setName={n => setName(n)}
-						callBack={d => {
-							setList(d)
-							setListForm(textList(d))
-						}}
-					/>
-				) : null}
 				<div className="block col">
-					<h4>Deck List ({list.length})</h4>
-					<textarea
-						value={listForm}
-						rows={"15"}
-						onChange={e => {
-							setListForm(e.target.value)
-							setList(interpretForm(e.target.value, cardData))
-						}}
-						placeholder={exList}
-					/>
+					<span className="bar start">
+						<h3>List</h3>
+						<ToolTip
+							message={
+								"You can add cards later if you want. Check out the card search to find and add a variety of cards easily."
+							}>
+							<span className="asterisk icon-help-circled" />
+						</ToolTip>
+					</span>
+					<span className="quick-search">
+						<BasicSearch
+							options={cardData}
+							searchable
+							placeholder={"Enter card names"}
+							renderAs={c => <CardControls card={c} cardHeadOnly />}
+							callBack={c => {
+								const newD = [...list, c]
+								setList(newD)
+								setListForm(textList(newD))
+							}}
+						/>
+					</span>
+					<div className="flex-row mini-spaced-bar">
+						<textarea
+							className="full-width"
+							value={listForm}
+							rows={"15"}
+							// cols={"50"}
+							onChange={e => {
+								const val = e.target.value
+								setListForm(val)
+								setList(interpretForm(val, cardData))
+							}}
+							placeholder={exList}
+						/>
+						<div className={`board-inner `}>
+							<h2>Cards ({list.length})</h2>
+							<div className="list-inner">
+								{itemizeDeckList(list).map(cards => (
+									<div
+										key={cards.length + cards[0].id}
+										className="flex-row mini-spaced-bar">
+										<div className="col quant-tickers">
+											<div
+												className="button icon-plus"
+												onClick={_ => {
+													const newD = [...list, cards[0]]
+													setList(newD)
+													setListForm(textList(newD))
+												}}
+											/>
+											<div
+												className="button icon-minus"
+												onClick={_ => {
+													const removed = list.findIndex(
+														li => li.name === cards[0].name
+													)
+													const newD = list.filter((c, i) => i !== removed)
+													setList(newD)
+													setListForm(textList(newD))
+												}}
+											/>
+										</div>
+										<CardControls
+											card={cards[0]}
+											quant={cards.length}
+											itemType={ItemTypes.CARD}
+											cardHeadOnly
+										/>
+									</div>
+								))}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div className="block">
+					<h3>Featured Card</h3>
+					<div
+						className={`feature-full ${list.length || "disabled"}`}
+						onClick={_ =>
+							openModal({
+								title: "Choose Featured Card",
+								content: (
+									<div className="bar">
+										{list.unique("id").map(c => (
+											<span
+												key={c.id}
+												onClick={_ => {
+													setFeature(getCardFace(c).image_uris.art_crop)
+													openModal(null)
+												}}>
+												<CardControls card={c} />
+											</span>
+										))}
+									</div>
+								),
+							})
+						}>
+						<img src={feature} alt={"featured image"} className="icon" />
+					</div>
 				</div>
 				<button
 					className={`success-button block ${name.length || "disabled"}`}
@@ -153,7 +270,8 @@ export default connect(
 								format,
 								desc,
 								list: collapseDeckData(list),
-								feature: list[0] && list[0].image_uris.art_crop,
+								feature,
+								colors: mapColors(list),
 							})
 							openDeck(slug)
 							pageHistory.push(`${HOME_DIR}/deck/${slug}`)

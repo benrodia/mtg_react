@@ -11,6 +11,7 @@ import BasicSearch from "./BasicSearch"
 import Loading from "./Loading"
 import CardControls from "./CardControls"
 import Tags from "./Tags"
+import ToolTip from "./ToolTip"
 
 const {
 	COLORS,
@@ -46,7 +47,7 @@ export default connect(({main: {cardData, fieldData}, filters: {advanced}}) => {
 		addCart,
 		getCardData,
 	}) => {
-		// const [seedCommanders, setSeedCommanders] = useState([])
+		const [loading, setLoading] = useState(false)
 		const [seedTags, setSeedTags] = useState([])
 		const [seedDeck, setSeedDeck] = useState([])
 		const seedCommanders = seedDeck.filter(c => c.commander)
@@ -60,9 +61,13 @@ export default connect(({main: {cardData, fieldData}, filters: {advanced}}) => {
 		// 	[seedCommanders]
 		// )
 		return (
-			<div className="">
-				<h2>Create Seeded EDH Deck</h2>
-				<div className="bar spaced-bar">
+			<div className="mini-spaced-col">
+				<h2>Generate EDH Deck</h2>
+				<p className="asterisk mini-block">
+					Try this experimental new feature to instantly create a basic
+					Commander deck.
+				</p>
+				<div className="bar spaced-bar ">
 					<div>
 						<h4>1: Choose a Commander</h4>
 						<div>
@@ -96,7 +101,15 @@ export default connect(({main: {cardData, fieldData}, filters: {advanced}}) => {
 						))}
 					</div>
 					<div className={seedCommanders.length || "disabled"}>
-						<h4>2: Choose Tags to Include</h4>
+						<span className="bar">
+							<h4>2: Choose Tags to Include</h4>
+							<ToolTip
+								message={
+									"Pick around 3-5 tags relevant to your gameplan. Some deck slots are already dedicated to the manabase, ramp, removal, and draw/tutor effects."
+								}>
+								<p className="asterisk icon-help-circled" />
+							</ToolTip>
+						</span>
 						<BasicSearch
 							searchable
 							preview
@@ -129,17 +142,23 @@ export default connect(({main: {cardData, fieldData}, filters: {advanced}}) => {
 						<h4>Generate List</h4>
 						<button
 							onClick={_ => {
-								seedCommanders.length &&
+								if (seedCommanders.length) {
+									setLoading(true)
 									generateRandomDeck({
 										seedCommanders,
 										seedTags,
 										cardData,
-									}).then(d => callBack(d))
+									}).then(d => {
+										callBack(d)
+										setLoading(false)
+									})
+								}
 							}}>
 							Go!
 						</button>
 					</div>
 				</div>
+				{loading ? <Loading message="Making a deck..." /> : null}
 			</div>
 		)
 	}

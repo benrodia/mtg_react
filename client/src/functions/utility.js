@@ -32,12 +32,21 @@ export const wrapNum = (d, r) => (d < 0 ? r : d >= r ? 0 : d)
 
 export const factorial = (x, f = 1) => (x === 0 ? 1 : x * factorial(x - f))
 
-export const rnd = (arr = [], num, unique) => {
-  if (!isNaN(arr)) return Math.floor(Math.random() * arr)
+export const rnd = (arr = [], num, unique, from) => {
   const rand = _ => arr[Math.floor(Math.random() * arr.length)]
+
+  if (!isNaN(arr)) return Math.floor(Math.random() * arr)
   if (!num) return rand()
-  else if (unique) return arr.shuffle().slice(-num)
-  else return [...Array(num || 0)].map(rand)
+  else if (unique) {
+    if (from)
+      return arr
+        .filter(
+          ar => !from.find(fr => (fr.id && ar.id ? ar.id === fr.id : fr === ar))
+        )
+        .shuffle()
+        .slice(-num)
+    return arr.shuffle().slice(-num)
+  } else return [...Array(num || 0)].map(rand)
 }
 
 export const paginate = (arr = [], per = 1) =>

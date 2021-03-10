@@ -145,16 +145,19 @@ export const convertTag = (tag = {}) => {
 }
 
 export const mapColors = list =>
-  COLORS("symbol").map(s =>
-    sum(
-      list.map(
-        c =>
-          audit(c)
-            .mana_cost.split("")
-            .filter(i => i === s).length
+  COLORS("symbol").map(s => {
+    const prod = sum(
+      list.map(c =>
+        c.produced_mana ? c.produced_mana.filter(p => p === s).length : 0
       )
     )
-  )
+    const cost = sum(
+      list.map(c =>
+        c.mana_cost ? c.mana_cost.split("").filter(i => i === s).length : 0
+      )
+    )
+    return prod > 1 && cost > 1 ? prod + cost : 0
+  })
 
 export const filterColors = (c, terms) => {
   let ors = 0
@@ -172,7 +175,7 @@ export const filterColors = (c, terms) => {
   return (!terms.find(t => t.op === "OR") || ors) && andNots
 }
 
-export const numOp = (n, m, op) => {
+export const numOp = (n, op, m) => {
   return op === ">"
     ? m > n
     : op === "<"
@@ -202,7 +205,7 @@ export const filterNumeric = (c, terms) =>
         : parseInt(val)
     const tr = c[trait] && subTrait ? c[trait][subTrait] : c[trait]
     const cur = Array.isArray(tr) ? tr.length : Number(tr)
-    if (cur) return numOp(cur, val, op)
+    if (cur) return numOp(val, op, cur)
     else return false
   })
 
@@ -384,10 +387,10 @@ export const getTargetable = (select, players, controller) => {
     // else if (of.owner === "opponent") include = c.owner !== owner
     if (of.type_line) include = Q(c, "type_line", of.type_line)
     if (of.colors) include = Q(c, "colors", of.colors)
-    if (of.power) include = numOp(c.power, of.power.val, of.power.op)
+    if (of.power) include = numOp(c.power, of.power.op, of.power.val)
     if (of.toughness)
-      include = numOp(c.toughness, of.toughness.val, of.toughness.op)
-    if (of.cmc) include = numOp(c.cmc, of.cmc.val, of.cmc.op)
+      include = numOp(c.toughness, of.toughness.op, of.toughness.val)
+    if (of.cmc) include = numOp(c.cmc, of.cmc.op, of.cmc.val)
   })
 
   return targetable

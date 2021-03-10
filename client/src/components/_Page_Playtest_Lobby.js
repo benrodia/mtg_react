@@ -15,6 +15,7 @@ import TesterShortcuts from "./TesterShortcuts"
 import TheStack from "./TheStack"
 import BasicSearch from "./BasicSearch"
 import Loading from "./Loading"
+import CardControls from "./CardControls"
 import utilities from "../utilities"
 
 const {
@@ -63,7 +64,7 @@ export default connect(
 
     useEffect(
       _ => {
-        changePlayer(choosing, {deck})
+        changePlayer(choosing, {deck, hand: []})
       },
       [deck]
     )
@@ -73,7 +74,10 @@ export default connect(
         <h1 className="block">Mtg Grip Playtester</h1>
         <div className="dash-buttons bar mini-spaced-bar">
           {players.map(
-            ({type, id, deck: {_id, name, feature, list, loading}}, i) => (
+            (
+              {type, id, deck: {_id, name, feature, list, loading}, hand},
+              i
+            ) => (
               <div className="mini-spaced-col">
                 <div className="flex-row mini-spaced-bar even">
                   <h2>P{i + 1}</h2>
@@ -125,6 +129,33 @@ export default connect(
                     )}
                   </div>
                 </Tilt>
+                {_id && !loading ? (
+                  <div className="block">
+                    <BasicSearch
+                      className={hand.length < 7 || "disabled"}
+                      searchable
+                      preview
+                      placeholder="Opening Hand Includes"
+                      options={list
+                        .filter(li => !hand.find(c => c.key === li.key))
+                        .orderBy("name")}
+                      callBack={c => changePlayer(id, {hand: [...hand, c]})}
+                    />
+                    {hand.map(c => (
+                      <span className="flex-row">
+                        <button
+                          className="icon-cancel smaller-button warning-button"
+                          onClick={_ =>
+                            changePlayer(id, {
+                              hand: hand.filter(h => h.key !== c.key),
+                            })
+                          }
+                        />
+                        <CardControls card={c} nameOnly />
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             )
           )}
@@ -133,7 +164,7 @@ export default connect(
               onClick={_ =>
                 changeSettings("players", [
                   ...players,
-                  {type: "HMN", id: uuid(), deck: {}},
+                  {type: "HMN", id: uuid(), deck: {}, hand: []},
                 ])
               }>
               Add Player

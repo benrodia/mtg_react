@@ -174,7 +174,8 @@ export async function generateRandomDeck({
   seedTags,
 }) {
   const commanders =
-    seedCommanders || rnd(legalCommanders("commander", cardData, colors), 2)
+    seedCommanders ||
+    rnd(legalCommanders("commander", cardData, colors), 2, true)
   const colorI = seedCommanders.length
     ? seedCommanders
         .map(c => c.color_identity)

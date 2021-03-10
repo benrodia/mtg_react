@@ -1,5 +1,6 @@
 import * as A from "../actions/types"
 import {INIT_DECK_STATE} from "../constants/initialState"
+import {mapColors} from "../functions/cardFunctions"
 
 export default function deck(deck = INIT_DECK_STATE, {type, val, clear}) {
 	switch (type) {
@@ -12,6 +13,7 @@ export default function deck(deck = INIT_DECK_STATE, {type, val, clear}) {
 				unsaved: false,
 				preChanges: deck.list,
 				updated: val,
+				colors: mapColors(deck.list),
 			}
 		default:
 			return deck

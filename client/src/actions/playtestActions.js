@@ -90,13 +90,16 @@ export const switchSeats = (first, second) => (dispatch, getState) => {
 let canRestart = true
 
 const drawHands = player => (dispatch, getState) => {
-  let {players} = getState().playtest
+  const {players} = getState().settings
   canRestart = true
 
   let kept = 0
   const deal = (num = 7, to = player) => {
     const shuffled = [...getState().playtest.players[to].deck].shuffle()
-    const hand = rnd(shuffled, num, true)
+    const seed = (players[to].hand || []).slice(0, num)
+    const rand =
+      num - seed.length > 0 ? rnd(shuffled, num - seed.length, true, seed) : []
+    const hand = [...seed, ...rand]
 
     const keep = _ => {
       for (var i = 0; i < hand.length; i++)
