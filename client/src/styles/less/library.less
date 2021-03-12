@@ -29,6 +29,7 @@
 
 // @highlight: #fcd303;
 @highlight: #e6c46e;
+@lowlight: #dba15e;
 @red: #ff4466;
 @green: #7be8c0;
 
@@ -160,9 +161,15 @@
 
 .selected {
 	background: @highlight;
+	&:hover {
+		background: @lowlight;
+	}
 }
 .active {
 	color: @highlight;
+	// &:hover {
+	// 	color: @lowlight;
+	// }
 }
 
 .warning-button {
@@ -506,6 +513,9 @@
 .dark-text {
 	color: @darkest;
 	text-shadow: none;
+}
+.break {
+	word-break: break-all;
 }
 
 // GENERAL RULES

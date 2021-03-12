@@ -7,6 +7,7 @@ import ago from "s-ago"
 import {PieChart} from "react-minimal-pie-chart"
 import utilities from "../utilities"
 import ContextMenu from "./ContextMenu"
+import ToolTip from "./ToolTip"
 
 const {
 	HOME_DIR,
@@ -17,15 +18,17 @@ const {
 	creator,
 	textList,
 	snip,
+	pluralize,
 } = utilities
 
-export default connect(({auth: {user}}) => {
-	return {user}
+export default connect(({settings: {player}, auth: {user}}) => {
+	return {user, player}
 }, actions)(
 	({
 		noLink,
 		deck,
 		user,
+		player,
 		newMsg,
 		openDeck,
 		deleteDeck,
@@ -44,6 +47,7 @@ export default connect(({auth: {user}}) => {
 			updated,
 			feature,
 			helpWanted,
+			complete,
 			views,
 			likes,
 			tags,
@@ -60,9 +64,10 @@ export default connect(({auth: {user}}) => {
 
 		if (contextLink) {
 			if (noLink) {
-				openDeck(slug, true)
+				openDeck(slug, true, player)
 				openModal(null)
 			} else useHistory().push(contextLink)
+			setContextLink(null)
 		}
 
 		return (
@@ -88,7 +93,7 @@ export default connect(({auth: {user}}) => {
 							label: "Delete Deck",
 							color: "red",
 							callBack: _ => deleteDeck(_id),
-							auth: _ => canEdit(_id),
+							auth: _ => canEdit(author),
 						},
 					]}>
 					<div className="flex-row">
@@ -106,8 +111,10 @@ export default connect(({auth: {user}}) => {
 							<button
 								onClick={_ => {
 									setContextLink(`${HOME_DIR}/playtest/lobby`)
-
-									changeSettings("players", [{type: "HMN", id: uuid(), deck}])
+									openDeck(slug)
+									// changeSettings("players", [
+									// 	{type: "HMN", id: uuid(), deck, hand: []},
+									// ])
 								}}
 								className={"icon-play"}
 								title="Playtest Deck"
@@ -124,27 +131,40 @@ export default connect(({auth: {user}}) => {
 								{name}
 							</h3>
 							<div className="bar even mini-spaced-bar">
-								<h4 className="">{format}</h4>
+								<h5 className="">{format}</h5>
 								{tags.map(t => (
 									<div className="tag">{t}</div>
 								))}
 							</div>
-							<p>{snip(desc, 150)}</p>
+							<p className="asterisk break">{snip(desc, 100)}</p>
 						</div>
 						<div className="bar mini-spaced-bar spread">
 							<button
-								onClick={_ => setContextLink(`user/${creator(author).slug}`)}
+								onClick={_ =>
+									setContextLink(`${HOME_DIR}/user/${creator(author).slug}`)
+								}
 								className="user-button">
 								{creator(author).name}
 							</button>
 							<div className="bar mini-spaced-bar">
-								<span className="icon-eye">{views}</span>
-								<span
-									className={`icon-thumbs-up ${
-										user.liked.includes(_id) && "active"
+								<ToolTip
+									message={complete ? "Completed deck" : "Incomplete deck"}>
+									<span className={`icon-${complete ? "ok" : "attention"}`} />
+								</ToolTip>
+								<ToolTip message={`${views} ${pluralize("view", views)}`}>
+									<span className="icon-eye">{views}</span>
+								</ToolTip>
+								<ToolTip
+									message={`${likes} ${pluralize("like", likes)}${
+										(user.liked || []).includes(_id) ? ", including you" : ""
 									}`}>
-									{likes}
-								</span>
+									<span
+										className={`icon-thumbs-up ${
+											(user.liked || []).includes(_id) && "active"
+										}`}>
+										{likes}
+									</span>
+								</ToolTip>
 							</div>
 						</div>
 					</div>

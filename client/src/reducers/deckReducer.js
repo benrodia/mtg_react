@@ -10,9 +10,7 @@ export default function deck(deck = INIT_DECK_STATE, {type, val, clear}) {
 			return {
 				...deck,
 				...val,
-				unsaved: false,
-				preChanges: deck.list,
-				updated: val,
+				unsaved: {},
 				colors: mapColors(deck.list),
 			}
 		default:

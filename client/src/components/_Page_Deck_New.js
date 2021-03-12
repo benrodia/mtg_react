@@ -173,6 +173,7 @@ export default connect(
 						<BasicSearch
 							options={cardData}
 							searchable
+							limit={10}
 							placeholder={"Enter card names"}
 							renderAs={c => <CardControls card={c} cardHeadOnly />}
 							callBack={c => {

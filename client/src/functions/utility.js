@@ -32,11 +32,12 @@ export const wrapNum = (d, r) => (d < 0 ? r : d >= r ? 0 : d)
 
 export const factorial = (x, f = 1) => (x === 0 ? 1 : x * factorial(x - f))
 
-export const rnd = (arr = [], num, unique, from) => {
+export const rnd = (arr = [], num = null, unique, from) => {
   const rand = _ => arr[Math.floor(Math.random() * arr.length)]
 
   if (!isNaN(arr)) return Math.floor(Math.random() * arr)
-  if (!num) return rand()
+  if (num === null) return rand()
+  else if (num <= 0) return []
   else if (unique) {
     if (from)
       return arr

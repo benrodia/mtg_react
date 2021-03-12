@@ -327,6 +327,16 @@ html {
 		}
 	}
 }
+
+.nav {
+	.quick-search {
+		color: @light;
+		background: @dark;
+		.select-collapsed:hover {
+			color: @light;
+		}
+	}
+}
 .quick-search {
 	flex: 1 0 50%;
 	border-radius: @thin;
@@ -335,8 +345,6 @@ html {
 		margin: 0;
 		width: auto;
 		border-radius: @thinner;
-		color: @light;
-		background: @dark;
 		font-size: 1.2rem;
 		.options {
 			max-height: 25rem;
@@ -376,9 +384,6 @@ html {
 					font-size: 1rem;
 				}
 			}
-		}
-		.select-collapsed:hover {
-			color: @light;
 		}
 	}
 }
@@ -506,6 +511,7 @@ html {
 		background: @lightest;
 		color: @darkest;
 		padding: @thin;
+		max-width: 15rem;
 		border-radius: @thin;
 		margin-left: 1rem;
 		margin-top: -2rem;
@@ -563,6 +569,13 @@ html {
 	box-shadow: 0 0 1rem @opaque;
 	p {
 		max-width: 25rem;
+	}
+	&.sec-html {
+		background: @lightest;
+	}
+	&.fill {
+		margin: 1rem 0;
+		width: 100%;
 	}
 }
 

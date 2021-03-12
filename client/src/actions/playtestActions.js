@@ -34,6 +34,7 @@ const {
   NUMBER_WORDS,
   wrapNum,
   rnd,
+  prepForPlaytest,
 } = utilities
 
 // PLAYTESTER
@@ -95,15 +96,24 @@ const drawHands = player => (dispatch, getState) => {
 
   let kept = 0
   const deal = (num = 7, to = player) => {
-    const shuffled = [...getState().playtest.players[to].deck].shuffle()
-    const seed = (players[to].hand || []).slice(0, num)
-    const rand =
-      num - seed.length > 0 ? rnd(shuffled, num - seed.length, true, seed) : []
-    const hand = [...seed, ...rand]
+    const {deck} = getState().playtest.players[to]
+    const rand = [...deck]
+      .filter(c => !c.commander)
+      .shuffle()
+      .slice(-num)
+
+    const seed = (players[to].hand || [])
+      .map(h => deck.find(s => s.key === h.key))
+      .filter(c => !!c)
+
+    const hand = num < 7 ? rand : [...seed, ...rand.slice(0, num - seed.length)]
+
+    console.log("deal", seed, hand)
 
     const keep = _ => {
       for (var i = 0; i < hand.length; i++)
         dispatch(moveCard({card: hand[i], player: to}, true))
+
       dispatch(addHistory(`P${to + 1} Draw Opening Hand (${num})`))
 
       if (++kept < players.length) deal(7, wrapNum(to + 1, players.length))
@@ -122,14 +132,17 @@ const drawHands = player => (dispatch, getState) => {
             effect: `Keep Hand`,
             res: _ => {
               if (num < 7) {
-                const top = shuffled.slice(-1)[0]
+                const top = [...deck].shuffle()[0]
                 dispatch(
                   addStack({
                     text: "Resolve Scry",
                     options: [
                       {
                         effect: "Top",
-                        res: keep,
+                        res: _ => {
+                          dispatch(moveCard({card: top, dest: "Library"}))
+                          keep()
+                        },
                       },
                       {
                         effect: "Bottom",

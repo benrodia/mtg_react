@@ -42,7 +42,7 @@ export default withRouter(
 						top: t,
 					}}>
 					{options.map(({label, callBack, color, auth}) =>
-						auth && auth() ? null : (
+						auth && !auth() ? null : (
 							<div
 								className={`context-option ${color}`}
 								key={`option_${label}`}

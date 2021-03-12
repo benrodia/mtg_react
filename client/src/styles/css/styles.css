@@ -149,6 +149,9 @@
 .selected {
   background: #e6c46e;
 }
+.selected:hover {
+  background: #dba15e;
+}
 .active {
   color: #e6c46e;
 }
@@ -473,6 +476,9 @@
 .dark-text {
   color: #020817;
   text-shadow: none;
+}
+.break {
+  word-break: break-all;
 }
 * {
   box-sizing: border-box !important;
@@ -941,6 +947,13 @@ html {
   cursor: text;
   color: #4e4352;
 }
+.nav .quick-search {
+  color: #d6c2c8;
+  background: #4e4352;
+}
+.nav .quick-search .select-collapsed:hover {
+  color: #d6c2c8;
+}
 .quick-search {
   flex: 1 0 50%;
   border-radius: 0.5rem;
@@ -950,8 +963,6 @@ html {
   margin: 0;
   width: auto;
   border-radius: 0.25rem;
-  color: #d6c2c8;
-  background: #4e4352;
   font-size: 1.2rem;
 }
 .quick-search .custom-select .options {
@@ -991,9 +1002,6 @@ html {
 }
 .quick-search .custom-select .options .option .types {
   font-size: 1rem;
-}
-.quick-search .custom-select .select-collapsed:hover {
-  color: #d6c2c8;
 }
 .card-search .quick-search .custom-select {
   color: #fff4eb;
@@ -1132,6 +1140,7 @@ html {
   background: #eff5ff;
   color: #020817;
   padding: 0.5rem;
+  max-width: 15rem;
   border-radius: 0.5rem;
   margin-left: 1rem;
   margin-top: -2rem;
@@ -1186,6 +1195,13 @@ html {
 }
 .section p {
   max-width: 25rem;
+}
+.section.sec-html {
+  background: #eff5ff;
+}
+.section.fill {
+  margin: 1rem 0;
+  width: 100%;
 }
 .point {
   cursor: pointer;
@@ -1389,17 +1405,16 @@ html {
 }
 .feature-full img,
 .feature-full button {
+  width: 18rem;
   height: 12rem;
   background-color: #fff4eb;
-  width: 100%;
-  height: 100%;
   object-fit: cover;
 }
 .feature-full .change-img {
   position: absolute;
   z-index: 1;
-  height: 5rem;
-  width: 5rem;
+  width: 18rem;
+  height: 12rem;
   border-radius: 0.5rem;
   background: rgba(0, 0, 0, 0.5);
   opacity: 0;
@@ -1528,14 +1543,6 @@ html {
   height: 8rem;
   margin: 0;
   border-radius: 0;
-}
-.feature-full {
-  width: 18rem;
-  height: 10rem;
-}
-.feature-full .change-img {
-  width: 18rem;
-  height: 10rem;
 }
 .add-search {
   display: flex;
@@ -1866,14 +1873,14 @@ html {
 .more-less .more-less-button:hover {
   color: #fff4eb;
 }
-.new-deck .list-inner {
+.new-deck-page .list-inner {
   max-height: 50vh;
   overflow-y: auto;
 }
-.new-deck .feature-full {
+.new-deck-page .feature-full {
   background-color: #020817;
 }
-.new-deck .feature-full img {
+.new-deck-page .feature-full img {
   background-color: transparent;
 }
 .card-container {

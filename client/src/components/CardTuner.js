@@ -27,17 +27,18 @@ const {
 
 export default connect(
 	({
-		filters,
+		filters: {tune, board, editing},
 		main: {sets},
-		deck: {list, format, author, editing, unsaved, custom},
+		deck: {list, format, author, unsaved, custom},
 	}) => {
 		return {
+			tune,
+			board,
+			editing,
 			sets,
-			...filters,
 			list,
 			format,
 			author,
-			editing,
 			unsaved,
 			custom,
 		}
@@ -46,23 +47,26 @@ export default connect(
 )(
 	({
 		tune,
+		board,
+		editing,
 		sets,
 		list,
 		custom,
-		board,
 		addCard,
 		changeCard,
 		changeDeck,
 		changeCustom,
 		changeFilters,
 	}) => {
-		const tuneSet = !list.length ? [] : Q(list, "name", tune.name)
+		const tuneSet = Q(list, "name", tune.name)
+		const edit = canEdit() && editing
 		const getCustom = _ =>
 			(tune && tune.name && custom.find(cu => cu.name === tune.name)) || {}
 
 		const [active, setActive] = useState(getCardFace(tuneSet[0] || {}))
 		const [notes, setNotes] = useState(getCustom().notes || "")
 		const [prints, setPrints] = useState([])
+
 		useEffect(
 			_ => {
 				setActive(tuneSet[0])
@@ -114,7 +118,7 @@ export default connect(
 							}`}
 							onClick={_ => setActive(copy)}>
 							<span onClick={e => e.stopPropagation()}>
-								{canEdit() ? (
+								{edit ? (
 									<BasicSearch
 										options={prints}
 										labelBy={setLine}
@@ -138,7 +142,7 @@ export default connect(
 									active.id === copy.id && "dark-text"
 								}`}>
 								<h3 className="thin-pad">{ofSet.length}</h3>
-								{canEdit() ? (
+								{edit ? (
 									<div className="bar">
 										<button
 											className="small-button icon-plus"
@@ -177,7 +181,7 @@ export default connect(
 			)
 		}
 
-		console.log("canEdit", canEdit())
+		console.log("canEdit", edit)
 
 		return (
 			<div className="card-tuner">
@@ -199,7 +203,7 @@ export default connect(
 							<Prints />
 							<div className="bar mini-spaced-bar even">
 								<h4 className="light-text">Category: </h4>
-								{canEdit() ? (
+								{edit ? (
 									<BasicSearch
 										options={[
 											...custom
@@ -223,7 +227,7 @@ export default connect(
 							</div>
 							<div className="bar mini-spaced-bar">
 								<h4 className="light-text">Notes: </h4>
-								{canEdit() ? (
+								{edit ? (
 									<textarea
 										cols="30"
 										rows="10"

@@ -25,7 +25,7 @@ module.exports = Deck = mongoose.model(
 			required: true,
 			unique: true,
 		},
-		published: {
+		complete: {
 			type: Boolean,
 			default: false,
 		},
@@ -60,7 +60,7 @@ module.exports = Deck = mongoose.model(
 		},
 		desc: {
 			type: String,
-			default: "No Description",
+			default: "",
 		},
 		format: {
 			type: String,

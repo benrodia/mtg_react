@@ -64,7 +64,7 @@ export default connect(
 
 							const inc = inc => included && flags.includes(inc)
 							if (inc("followed")) included = followed.includes(d._id)
-							if (inc("published")) included = d.published
+							if (inc("complete")) included = d.complete
 							if (inc("helpWanted")) included = d.helpWanted >= 3
 							return included
 						}),
@@ -84,13 +84,12 @@ export default connect(
 			})
 		}
 
-		const authors = _id
-			? [
-					{name: "---", _id: "---"},
-					users.find(u => u._id === _id),
-					...users.filter(u => u._id !== _id).orderBy("name"),
-			  ]
-			: [{name: "---", _id: "---"}, ...users.orderBy("name")]
+		const authors = [
+			{name: "---", _id: "---"},
+			...(_id
+				? [users.find(u => u._id === _id), ...users.filter(u => u._id !== _id)]
+				: users),
+		].orderBy("name")
 
 		return (
 			<div className="decks section">
@@ -111,12 +110,15 @@ export default connect(
 						<BasicSearch
 							searchable
 							preview
-							self={`${creator(author).name || "---"}${
-								author === _id ? " (you)" : ""
-							}`}
+							limit={20}
+							self={creator(author)}
 							options={authors}
-							labelBy={a => (a._id === _id ? `${a.name} (you)` : a.name)}
-							callBack={f => changeDeckSearch({author: f._id})}
+							labelBy={a =>
+								`${a && a.name ? a.name : "---"} ${
+									a && a._id === _id ? "(you)" : ""
+								}`
+							}
+							callBack={a => changeDeckSearch({author: a._id})}
 						/>
 					</div>
 					<div className="mini-block">
@@ -152,10 +154,10 @@ export default connect(
 						<div className="bar even">
 							<button
 								className={`small-button ${
-									flags.includes("published") && "selected"
+									flags.includes("complete") && "selected"
 								}`}
-								onClick={_ => handleFlags("published")}>
-								Published
+								onClick={_ => handleFlags("complete")}>
+								Complete Decks
 							</button>
 							{followed && followed.length ? (
 								<button

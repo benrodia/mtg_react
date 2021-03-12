@@ -11,16 +11,16 @@ export const pageButtons = [
 		auth: true,
 	},
 	{
-		label: "Decks",
-		icon: require("../imgs/icon-deck-search.svg"),
-		link: `deck/search`,
-		desc: `Browse all user-submitted decklists.`,
-	},
-	{
 		label: "Cards",
 		icon: require("../imgs/icon-card-search.svg"),
 		link: `card/search`,
 		desc: `Find any MTG card using a tag-search system. Also add cards to your cart and export without signing in.`,
+	},
+	{
+		label: "Decks",
+		icon: require("../imgs/icon-deck-search.svg"),
+		link: `deck/search`,
+		desc: `Browse all user-submitted decklists.`,
 	},
 	{
 		label: "Playtest",
@@ -67,7 +67,7 @@ export const illegalLayouts = [
 	"art_series",
 ]
 
-export const helpTiers = ["No", "From Friends", "Yes", "Wanted"]
+export const helpTiers = ["No", "Strict", "Yes", "Wanted"]
 
 export const STACKTIONS = [
 	"Action",

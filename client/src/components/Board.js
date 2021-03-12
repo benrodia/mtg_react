@@ -57,6 +57,7 @@ export default connect(
 		focus,
 		tune,
 		board,
+		editing,
 		changeFilters,
 		changeCustom,
 		addCard,
@@ -64,6 +65,8 @@ export default connect(
 		changeCard,
 	}) => {
 		const [contextLink, setContextLink] = useState(null)
+
+		const edit = canEdit() && editing
 
 		if (contextLink) {
 			setContextLink(null)
@@ -86,7 +89,7 @@ export default connect(
 				<div className={` ${view}-view`}>
 					<DropSlot
 						field={"Command"}
-						accept={ItemTypes.CARD}
+						accept={edit ? ItemTypes.CARD : "N/A"}
 						callBack={c => changeDeck("list", chooseCommander(c, list))}>
 						<h2 className="label">
 							Commander{commanders.length > 1 ? "s" : ""}
@@ -94,9 +97,10 @@ export default connect(
 						<div className={`grid-inner`}>
 							{commanders.length ? (
 								commanders.map(c => renderCardStack([c], true))
-							) : canEdit() ? (
+							) : edit ? (
 								<BasicSearch
 									searchable
+									limit={5}
 									placeholder="Choose a Commander"
 									options={legalCommanders(format, cardData)}
 									renderAs={c => <CardControls card={c} cardHeadOnly />}
@@ -149,7 +153,7 @@ export default connect(
 						key={board + "_" + category.key + "_" + valName}
 						className={`list ${view}-view`}>
 						<DropSlot
-							accept={sortBy === "Custom" ? ItemTypes.CARD : "N/A"}
+							accept={sortBy === "Custom" && edit ? ItemTypes.CARD : "N/A"}
 							field={val}
 							callBack={c => changeCustom(c.name, {category: val})}>
 							<h2 className="label mini-spaced-bar">
@@ -191,7 +195,7 @@ export default connect(
 				}
 				return (
 					<div className="flex-row mini-spaced-bar board-card">
-						{!canEdit() || cardInd ? null : (
+						{!edit || cardInd ? null : (
 							<div className="col quant-tickers">
 								<div
 									className="button icon-plus"
@@ -271,7 +275,7 @@ export default connect(
 
 		return (
 			<DropSlot
-				accept={ItemTypes.CARD}
+				accept={edit ? ItemTypes.CARD : "N/A"}
 				field={board}
 				callBack={c => (c.key ? changeCard(c, {board}) : addCard(c, board))}>
 				<div className={`board ${board}-board flex-row`}>

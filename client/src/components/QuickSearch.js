@@ -14,7 +14,7 @@ import ToolTip from "./ToolTip"
 
 import utilities from "../utilities"
 
-const {HOME_DIR, legalCommanders, createSlug} = utilities
+const {HOME_DIR, legalCommanders, createSlug, creator} = utilities
 
 export default connect(
   ({
@@ -73,7 +73,12 @@ export default connect(
           </Link>
         </ToolTip>
       ) : (
-        <ToolTip message={`User: ${o.name}`}>
+        <ToolTip
+          message={
+            <div>
+              <p>Deck: {o.name}</p> <p>Created by {creator(o.author).name}</p>
+            </div>
+          }>
           <Link
             to={`${HOME_DIR}/deck/${o.slug}`}
             className="bar even mini-spaced-bar">

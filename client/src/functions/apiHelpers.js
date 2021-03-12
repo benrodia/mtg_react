@@ -4,20 +4,23 @@ import slugify from "slugify"
 import uniqueSlug from "unique-slug"
 import * as A from "../actions/types"
 import {INIT_DECK_STATE, INIT_SETTINGS_STATE} from "../constants/initialState"
-import {expandDeckData, collapseDeckData} from "./receiveCards"
+import {SINGLETON} from "../constants/greps"
+import {isLegal} from "./cardFunctions"
+import {itemizeDeckList} from "./receiveCards"
+import {titleCaps} from "./text"
 
 export async function getDecks(flags = [], params = {}) {
 	const decks = await axios.get("/api/decks", {params}).then(res => res.data)
 	return decks
 }
 
-export const canEdit = _id => {
+export const canEdit = owner => {
 	const {
 		auth: {user, isAuthenticated},
 		deck: {author},
 	} = store.getState()
 
-	return isAuthenticated && _id ? user._id === _id : user._id === author
+	return isAuthenticated && owner ? user._id === owner : user._id === author
 }
 
 export const canSuggest = _ => {
@@ -46,8 +49,8 @@ export const creator = _id => {
 
 	return (
 		(_id
-			? users.filter(u => u._id === _id)[0]
-			: users.filter(u => u._id === author)[0]) || {}
+			? users.find(u => u._id === _id)
+			: users.find(u => u._id === author)) || {failed: true}
 	)
 }
 
@@ -109,4 +112,58 @@ export const badPassword = (password = "") => {
 	RegExp(
 		"^(?=.*[a-z])(?=.*[A-Z])(?=.*d)(?=.*[$@$!%*?&])[A-Za-zd$@$!%*?&]{8,}"
 	).test(password)
+}
+
+export const completeness = ({list, format, name, desc}) => {
+	const main = list.filter(c => c.board === "Main")
+	const coms = list.filter(c => c.commander)
+	const iden = coms.length
+		? coms
+				.unique("color_identity")
+				.map(c => c.color_identity)
+				.flat()
+		: null
+	console.log("iden", iden)
+	const legalled = itemizeDeckList(list)
+		.map(it => {
+			const num = isLegal(it[0], format, iden && !iden.length ? ["C"] : iden)
+			if (num < it.length) return `${it.length - num} ${it[0].name}`
+			return null
+		})
+		.filter(l => !!l)
+
+	const checklist = [
+		{
+			l: "Named deck",
+			v: name.length > 3,
+			f: "Name too short",
+		},
+		{
+			l: "Chose commander(s)",
+			v: coms.length,
+			f: "Pick a commander!",
+			s: !SINGLETON(format),
+		},
+		{
+			l: "Legal number of cards",
+			v:
+				main.length >= (SINGLETON(format) ? 100 : 60) &&
+				main.length <= (SINGLETON(format) ? 100 : 999),
+			f: `${titleCaps(format)} decks must have ${
+				SINGLETON(format) ? "exactly" : "at least"
+			} ${SINGLETON(format) ? 100 : 60} cards, you have ${main.length}`,
+		},
+		{
+			l: "All cards legal",
+			v: !legalled.length,
+			f: `Contains illegal cards/quantities, remove:
+          ${legalled}`,
+		},
+		{
+			l: "Added description",
+			v: `${desc}`.trim().split(" ").length >= 10,
+			f: "C'mon, be a little more descriptive! (10+ words)",
+		},
+	]
+	return checklist
 }

@@ -31,6 +31,7 @@ export const INIT_SETTINGS_STATE = {
 	use_stack: ["Action", "Spell", "Activated Ability", "Triggered Ability"],
 	mana_tolerance: 3,
 	players: [{type: "HMN", id: uuidv4(), deck: {}, hand: []}],
+	player: 0,
 }
 
 export const INIT_AUTH_STATE = {
@@ -55,7 +56,7 @@ export const INIT_DECK_STATE = {
 	preChanges: [],
 	colors: [0, 0, 0, 0, 0, 1],
 	custom: [],
-	unsaved: false,
+	unsaved: {},
 }
 
 // console.log("INIT_DECK_STATE", INIT_DECK_STATE)

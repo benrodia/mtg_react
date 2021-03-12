@@ -121,6 +121,11 @@ export function isLegal(card = {legalities: {}}, format = "", deckIdentity) {
 
   if (NO_QUANT_LIMIT(card)) allowed = 1000
   else if (card.name === "Seven Dwarves") allowed = 7
+  if (
+    deckIdentity &&
+    card.color_identity.find(coi => !deckIdentity.includes(coi))
+  )
+    allowed = 0
   return allowed
 }
 

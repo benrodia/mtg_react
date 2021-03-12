@@ -79,7 +79,7 @@ export default connect(
 				decks.length &&
 					setDeckHighlights(
 						rnd(
-							decks.filter(d => d.list.length >= 60),
+							decks.filter(d => d.complete && d.privacy === "Public"),
 							3,
 							true
 						)
@@ -97,21 +97,6 @@ export default connect(
 					<p>{subBanner}</p>
 				</section>
 				<section className="center col mini-spaced-col">
-					{isAuthenticated ? (
-						<div className="bar even spaced-bar">
-							<h1>Welcome, {name}</h1>
-							<button className="smaller-button" onClick={logout}>
-								Logout
-							</button>
-						</div>
-					) : (
-						<div className="bar even spaced-bar">
-							<h1>Hey, Stranger</h1>
-							<Link to={`${HOME_DIR}/login`}>
-								<button>Login</button>
-							</Link>
-						</div>
-					)}
 					<div className="bar dash-buttons center spaced-bar">
 						{pageButtons.map(({icon, label, link, auth, desc}) => (
 							<ToolTip message={desc}>
@@ -139,3 +124,19 @@ export default connect(
 		)
 	}
 )
+
+// {isAuthenticated ? (
+// 	<div className="bar even spaced-bar">
+// 		<h1>Welcome, {name}</h1>
+// 		<button className="smaller-button" onClick={logout}>
+// 			Logout
+// 		</button>
+// 	</div>
+// ) : (
+// 	<div className="bar even spaced-bar">
+// 		<h1>Hey, Stranger</h1>
+// 		<Link to={`${HOME_DIR}/login`}>
+// 			<button>Login</button>
+// 		</Link>
+// 	</div>
+// )}

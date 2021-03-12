@@ -53,7 +53,7 @@ export default connect(
     const types = ["HMN", "---"]
     const {slug} = useParams()
 
-    const [choosing, setChoosing] = useState(null)
+    const [choosing, setChoosing] = useState(0)
     const [mode, setMode] = useState(modes[0])
 
     const changePlayer = (p_id, val) =>
@@ -62,12 +62,12 @@ export default connect(
         players.map(p => (p.id === p_id ? {...p, ...val} : p))
       )
 
-    useEffect(
-      _ => {
-        changePlayer(choosing, {deck, hand: []})
-      },
-      [deck]
-    )
+    // useEffect(
+    //   _ => {
+    //     changePlayer(choosing, {deck, hand: []})
+    //   },
+    //   [deck]
+    // )
 
     return (
       <div className="playtest-lobby section spaced-col">
@@ -113,7 +113,7 @@ export default connect(
                       type === "---" && "disabled"
                     }`}
                     onClick={_ => {
-                      setChoosing(id)
+                      changeSettings("player", i)
                       openModal({
                         title: "Choose deck to play",
                         content: <DeckSearch noLink />,

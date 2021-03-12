@@ -26,7 +26,11 @@ export default connect(({main: {cardData}}) => {
 
 	const newSeed = _ =>
 		setSeedCards(
-			rnd(deck.list, 7, true).map(l => cardData.find(c => c.name === l.name))
+			rnd(
+				deck.list.filter(c => !c.commander),
+				7,
+				true
+			).map(l => cardData.find(c => c.name === l.name))
 		)
 	useEffect(
 		_ => {
@@ -73,13 +77,8 @@ export default connect(({main: {cardData}}) => {
 					<ToolTip message="Playtest this hand">
 						<Link to={`${HOME_DIR}/playtest/lobby`}>
 							<button
-								onClick={_ => {
-									openDeck(slug)
-									changeSettings("players", [
-										{type: "HMN", id: uuid(), deck: {...deck}, hand: seedCards},
-									])
-								}}
-								className="icon-play"
+								onClick={_ => openDeck(slug, false, 0, seedCards)}
+								className={"icon-play"}
 							/>
 						</Link>
 					</ToolTip>

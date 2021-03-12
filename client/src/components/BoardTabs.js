@@ -43,6 +43,7 @@ export default connect(
 		sortBy,
 		view,
 		board,
+		editing,
 		showPrice,
 		showTypes,
 		customFields,
@@ -67,7 +68,7 @@ export default connect(
 								<DropSlot
 									key={"board_header_" + B}
 									field={B}
-									accept={canEdit() ? ItemTypes.CARD : "NULL"}
+									accept={canEdit() && editing ? ItemTypes.CARD : "NULL"}
 									callBack={c => changeCard(c, {board: B})}>
 									{B}
 									{"board "}

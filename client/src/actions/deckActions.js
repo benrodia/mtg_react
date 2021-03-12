@@ -5,13 +5,17 @@ import * as A from "./types"
 import {getLegalCards, newMsg, loadDecks} from "./mainActions"
 import {updateUser} from "./authActions"
 import {changeFilters} from "./filtersActions"
+import {changeSettings} from "./settingsActions"
 import utilities from "../utilities"
 const {
   INIT_DECK_STATE,
   HOME_DIR,
   MAIN_BOARD,
   MAYBE_BOARD,
+  SINGLETON,
   COLORS,
+  isLegal,
+  itemizeDeckList,
   sum,
   audit,
   cache,
@@ -29,6 +33,7 @@ const {
   fetchCollection,
   keyInCards,
   mapColors,
+  completeness,
 } = utilities
 
 export const newDeck = (
@@ -57,15 +62,19 @@ export const newDeck = (
   }
 }
 
-export const openDeck = (slug, noView) => (dispatch, getState) => {
+export const openDeck = (slug, noView, player = 0, hand = []) => (
+  dispatch,
+  getState
+) => {
   const {
     main: {decks},
+    settings: {players},
     auth: {
       user: {_id},
     },
   } = getState()
-  const deck = decks.filter(d => d.slug === slug)[0]
-  if (deck) {
+  const deck = decks.find(d => d.slug === slug)
+  if (deck && (canEdit(deck.author) || deck.privacy !== "Private")) {
     const recent = sessionStorage.getItem("viewed-recently") || ""
     if (!recent.includes(deck._id) && !noView && deck.author !== _id) {
       axios.patch(`/api/decks/${deck._id}`, {views: deck.views + 1})
@@ -75,15 +84,23 @@ export const openDeck = (slug, noView) => (dispatch, getState) => {
 
     dispatch({
       type: A.DECK,
-      val: {...deck, unsaved: false, loading: true, list: []},
+      val: {...deck, unsaved: {}, loading: true, list: []},
     })
     fetchCollection(deck.list).then(list => {
-      cache(A.DECK, "all", {...deck, list})
+      const val = {...deck, list, loading: false}
+      cache(A.DECK, "all", val)
       dispatch({
         type: A.DECK,
-        val: {...deck, list, loading: false},
+        val,
       })
       dispatch(changeFilters("tune", list.find(c => c.commander) || list[0]))
+      console.log("OPEN", players, player)
+      dispatch(
+        changeSettings(
+          "players",
+          players.map((pl, i) => (i === player ? {...pl, deck: val, hand} : pl))
+        )
+      )
     })
   } else {
     cache(A.DECK, "all", INIT_DECK_STATE, false)
@@ -93,47 +110,32 @@ export const openDeck = (slug, noView) => (dispatch, getState) => {
 
 export const changeDeck = (key, val) => (dispatch, getState) => {
   let deck = {...getState().deck}
-  deck[key] = val
-  cache(A.DECK, "all", deck)
   if (
     [
       "name",
+      "feature",
       "format",
       "desc",
       "list",
       "privacy",
       "allow_suggestions",
-      "published",
       "custom",
-    ].includes(key)
+    ].includes(key) &&
+    deck[key] !== val
   )
-    deck.unsaved = true
+    deck.unsaved[key] = deck[key]
+
+  deck[key] = val
+  cache(A.DECK, "all", deck)
   dispatch({type: A.DECK, val: deck})
 }
 
-// if (
-//   key === "format" &&
-//   val !== deck.format &&
-//   deck.published &&
-//   !canPublish(deck.list, key)
-// ) {
-//   if (
-//     !window.confirm(
-//       `Heads up! Your deck has cards/quantities not legal in "${titleCaps(
-//         val
-//       )}". It will be un-published if you change formats.`
-//     )
-//   )
-//     return
-//   deck.published = false
-// }
-
-export const saveDeck = _ => (dispatch, getState) => {
+export const saveDeck = revert => (dispatch, getState) => {
   let {
     _id,
+    name,
     format,
     list,
-    published,
     suggestions,
     feature,
     desc,
@@ -141,33 +143,41 @@ export const saveDeck = _ => (dispatch, getState) => {
     privacy,
     custom,
     colors,
+    unsaved,
     preferences,
   } = getState().deck
 
-  if (!canPublish(list, format)) published = false
+  const complete = completeness({name, list, desc, format}).every(
+    ({v, s}) => v || s
+  )
+
   if (canEdit()) {
-    const updated = new Date()
-    axios
-      .patch(`/api/decks/${_id}`, {
-        published,
-        suggestions,
-        colors,
-        list: collapseDeckData(list),
-        updated,
-        format,
-        desc,
-        allow_suggestions,
-        privacy,
-        custom,
-        feature,
-        preferences,
-      })
-      .then(res => {
-        dispatch(newMsg("SAVED DECK", "success"))
-        dispatch({type: A.SAVE_DECK, val: updated})
-        dispatch(loadDecks())
-      })
-      .catch(err => console.error(err))
+    if (revert === true) dispatch({type: A.SAVE_DECK, val: unsaved})
+    else {
+      const updated = new Date()
+      axios
+        .patch(`/api/decks/${_id}`, {
+          name,
+          complete,
+          suggestions,
+          colors,
+          list: collapseDeckData(list),
+          updated,
+          format,
+          desc,
+          allow_suggestions,
+          privacy,
+          custom,
+          feature,
+          preferences,
+        })
+        .then(res => {
+          dispatch(newMsg("SAVED DECK", "success"))
+          dispatch({type: A.SAVE_DECK, val: {updated, complete}})
+          dispatch(loadDecks())
+        })
+        .catch(err => console.error(err))
+    }
   }
 }
 
@@ -200,15 +210,16 @@ export const cloneDeck = _ => (dispatch, getState) => {
 }
 
 export const deleteDeck = _id => (dispatch, getState) => {
-  axios
-    .delete(`/api/decks/${_id}`, config(getState))
-    .then(res => {
-      dispatch(loadDecks())
-      cache(A.DECK, "all", INIT_DECK_STATE)
-      dispatch(openDeck(null))
-      dispatch(newMsg("DELETED DECK"))
-    })
-    .catch(err => dispatch(newMsg("Problem deleting deck.", "error")))
+  if (canEdit(_id))
+    axios
+      .delete(`/api/decks/${_id}`, config(getState))
+      .then(res => {
+        dispatch(loadDecks())
+        cache(A.DECK, "all", INIT_DECK_STATE)
+        dispatch(openDeck(null))
+        dispatch(newMsg("DELETED DECK"))
+      })
+      .catch(err => dispatch(newMsg("Problem deleting deck.", "error")))
 }
 
 export const changeCard = (card = {}, assign = {}) => (dispatch, getState) =>
@@ -318,9 +329,9 @@ export const giveLike = _ => (dispatch, getState) => {
     if (!user.liked.includes(deck._id)) {
       likes = deck.likes + 1
       liked = [...user.liked, deck._id]
-      dispatch(newMsg(`Liked ${deck.name}`, "success"))
+      dispatch(newMsg(`Added ${deck.name} to "Liked Decks"`, "success"))
     } else {
-      likes = deck.likes - 1
+      likes = Math.max(deck.likes - 1, 0)
       liked = user.liked.filter(l => l !== deck._id)
     }
     axios
