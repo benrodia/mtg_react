@@ -45,7 +45,7 @@ module.exports = Deck = mongoose.model(
 			type: Array,
 			default: [0, 0, 0, 0, 0, 1],
 		},
-		suggestions: Array,
+		suggestions: {type: Array, default: []},
 		likes: {
 			type: Number,
 			default: 0,

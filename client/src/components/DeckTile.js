@@ -19,6 +19,7 @@ const {
 	textList,
 	snip,
 	pluralize,
+	itemizeDeckList,
 } = utilities
 
 export default connect(({settings: {player}, auth: {user}}) => {
@@ -46,12 +47,13 @@ export default connect(({settings: {player}, auth: {user}}) => {
 			slug,
 			updated,
 			feature,
-			helpWanted,
 			complete,
 			views,
 			likes,
 			tags,
 			desc,
+			suggestions,
+			allow_suggestions,
 		} = deck
 		const [contextLink, setContextLink] = useState(null)
 		const colorData =
@@ -80,12 +82,15 @@ export default connect(({settings: {player}, auth: {user}}) => {
 						},
 						{
 							label: "Playtest Deck",
-							callBack: _ => setContextLink(`${HOME_DIR}/playtest/lobby`),
+							callBack: _ =>
+								setContextLink(`${HOME_DIR}/playtest/lobby`),
 						},
 						{
 							label: "Copy List To Clipboard",
 							callBack: _ => {
-								navigator.clipboard.writeText(textList(list, true))
+								navigator.clipboard.writeText(
+									textList(list, true)
+								)
 								newMsg("Copied list to clipboard!", "success")
 							},
 						},
@@ -95,9 +100,13 @@ export default connect(({settings: {player}, auth: {user}}) => {
 							callBack: _ => deleteDeck(_id),
 							auth: _ => canEdit(author),
 						},
-					]}>
+					]}
+				>
 					<div className="flex-row">
-						<span className="point" onClick={_ => setContextLink(deckLink)}>
+						<span
+							className="point"
+							onClick={_ => setContextLink(deckLink)}
+						>
 							<img
 								className="feature"
 								src={feature || CARD_SLEEVES["_basic.png"]}
@@ -125,9 +134,8 @@ export default connect(({settings: {player}, auth: {user}}) => {
 						<div className="mini-spaced-col">
 							<h3
 								onClick={_ => setContextLink(deckLink)}
-								className={`deck-title point ${
-									helpWanted >= 3 && "icon-exclamation attention"
-								}`}>
+								className={`deck-title point`}
+							>
 								{name}
 							</h3>
 							<div className="bar even mini-spaced-bar">
@@ -141,28 +149,92 @@ export default connect(({settings: {player}, auth: {user}}) => {
 						<div className="bar mini-spaced-bar spread">
 							<button
 								onClick={_ =>
-									setContextLink(`${HOME_DIR}/user/${creator(author).slug}`)
+									setContextLink(
+										`${HOME_DIR}/user/${
+											creator(author).slug
+										}`
+									)
 								}
-								className="user-button">
+								className="user-button"
+							>
 								{creator(author).name}
 							</button>
 							<div className="bar mini-spaced-bar">
 								<ToolTip
-									message={complete ? "Completed deck" : "Incomplete deck"}>
-									<span className={`icon-${complete ? "ok" : "attention"}`} />
+									message={
+										complete
+											? "Completed deck"
+											: "Incomplete deck"
+									}
+								>
+									<span
+										className={`icon-${
+											complete ? "ok" : "attention"
+										}`}
+									/>
 								</ToolTip>
-								<ToolTip message={`${views} ${pluralize("view", views)}`}>
+								<ToolTip
+									message={`${views} ${pluralize(
+										"view",
+										views
+									)}`}
+								>
 									<span className="icon-eye">{views}</span>
 								</ToolTip>
 								<ToolTip
-									message={`${likes} ${pluralize("like", likes)}${
-										(user.liked || []).includes(_id) ? ", including you" : ""
-									}`}>
+									message={`${likes} ${pluralize(
+										"like",
+										likes
+									)}${
+										(user.liked || []).includes(_id)
+											? ", including you"
+											: ""
+									}`}
+								>
 									<span
 										className={`icon-thumbs-up ${
-											(user.liked || []).includes(_id) && "active"
-										}`}>
+											(user.liked || []).includes(_id) &&
+											"active"
+										}`}
+									>
 										{likes}
+									</span>
+								</ToolTip>
+								<ToolTip
+									message={`${
+										allow_suggestions >= 3
+											? "Help Wanted! "
+											: ""
+									} ${suggestions.length} pending ${
+										allow_suggestions >= 3
+											? ""
+											: pluralize(
+													"suggestion",
+													suggestions.length
+											  )
+									}`}
+								>
+									<span
+										className={`icon-${
+											allow_suggestions > 2
+												? "exclamation"
+												: "comment"
+										} ${
+											canEdit(_id) &&
+											suggestions.find(
+												s => !s.resolved
+											) &&
+											"active"
+										} ${
+											allow_suggestions === 0 &&
+											"disabled"
+										}
+											`}
+									>
+										{
+											suggestions.filter(s => !s.resolved)
+												.length
+										}
 									</span>
 								</ToolTip>
 							</div>
@@ -173,3 +245,20 @@ export default connect(({settings: {player}, auth: {user}}) => {
 		)
 	}
 )
+// <ToolTip
+// 	message={
+// 		<div>
+// 			{itemizeDeckList(list.orderBy("name"))
+// 				.slice(0, 15)
+// 				.map(l => (
+// 					<p>
+// 						{l.length} {l[0].name}
+// 					</p>
+// 				))}
+// 			...{itemizeDeckList(list).length - 16} more
+// 			lines
+// 		</div>
+// 	}
+// >
+
+// </ToolTip>

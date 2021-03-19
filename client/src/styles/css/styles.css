@@ -1554,10 +1554,12 @@ html {
   padding: 0.5rem 1rem;
   border-bottom: 1px solid #fff4eb;
 }
+.side-bar {
+  width: 21rem;
+  min-width: 21rem;
+}
 .card-tuner {
   border-radius: 1rem 1rem 0 0;
-  min-width: 21rem;
-  width: 21rem;
   background: #020817;
 }
 .card-tuner .tune-card .card-img {

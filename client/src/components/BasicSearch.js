@@ -159,7 +159,8 @@ export default ({
       ${open ? "open" : ""} 
       ${className || ""}
       ${searchable && "searchable"}
-    `}>
+    `}
+    >
       {open ? (
         <>
           {separate ? (
@@ -167,17 +168,15 @@ export default ({
               <span>Include: </span>
               <button
                 onClick={_ => setFiltered("all")}
-                className={`smaller-button ${
-                  filtered === "all" && "selected"
-                }`}>
+                className={`smaller-button ${filtered === "all" && "selected"}`}
+              >
                 All
               </button>
               {objects.map(obj => (
                 <button
                   onClick={_ => setFiltered(obj)}
-                  className={`smaller-button ${
-                    filtered === obj && "selected"
-                  }`}>
+                  className={`smaller-button ${filtered === obj && "selected"}`}
+                >
                   {titleCaps(pluralize(obj, 2))}
                 </button>
               ))}
@@ -189,7 +188,8 @@ export default ({
       ) : (
         <div
           onClick={_ => setOpen(true)}
-          className={`select-collapsed bar even thinner-pad`}>
+          className={`select-collapsed bar even thinner-pad`}
+        >
           <span>
             {placeholder ? placeholder : self !== undefined ? label(self) : ""}
           </span>
@@ -225,9 +225,10 @@ const Option = ({
       key={`option_${i}_${label(o)}`}
       onMouseOver={_ => setCursor(i)}
       onClick={_ => {
-        callBack && callBack(o)
+        callBack && o && callBack(o)
         reset()
-      }}>
+      }}
+    >
       {renderAs ? (
         renderAs(o, i)
       ) : (

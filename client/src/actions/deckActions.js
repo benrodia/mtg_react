@@ -86,6 +86,7 @@ export const openDeck = (slug, noView, player = 0, hand = []) => (
       type: A.DECK,
       val: {...deck, unsaved: {}, loading: true, list: []},
     })
+    dispatch({type: A.SETTINGS, key: "editing", val: false})
     fetchCollection(deck.list).then(list => {
       const val = {...deck, list, loading: false}
       cache(A.DECK, "all", val)
@@ -120,6 +121,7 @@ export const changeDeck = (key, val) => (dispatch, getState) => {
       "privacy",
       "allow_suggestions",
       "custom",
+      "suggestions",
     ].includes(key) &&
     deck[key] !== val
   )
@@ -276,15 +278,11 @@ export const submitSuggestion = changes => (dispatch, getState) => {
         suggestions: [
           ...suggestions,
           {
+            ...changes,
             author: user._id,
             date: new Date(),
-            changes: changes.map(c => {
-              return {
-                ...c,
-                added: collapseDeckData([c.added])[0],
-                removed: collapseDeckData([c.removed])[0],
-              }
-            }),
+            added: collapseDeckData(changes.added),
+            removed: collapseDeckData(changes.removed),
           },
         ],
       })
@@ -294,28 +292,32 @@ export const submitSuggestion = changes => (dispatch, getState) => {
 
 export const resolveSuggestion = (id, as) => (dispatch, getState) => {
   const {
-    deck: {suggestions, list},
+    main: {cardData},
+    deck: {suggestions, list, allow_suggestions},
   } = getState()
-  const {added, removed} = suggestions
-    .map(({changes}) => changes.filter(c => c.id === id)[0])
-    .filter(s => !!s)[0]
 
-  if (as === "keep") {
-    dispatch(addCard(removed, null, true))
-    dispatch(addCard(added))
-  }
-  if (as === "maybe") dispatch(addCard(added, MAYBE_BOARD))
+  console.log("resolveSuggestion", suggestions)
+  const {added, removed} = suggestions.find(ch => ch.id === id)
 
-  dispatch(
-    changeDeck(
-      "suggestions",
-      suggestions
-        .map(s => {
-          return {...s, changes: s.changes.filter(c => c.id !== id)}
-        })
-        .filter(s => s.changes.length)
-    )
+  const toAdd = added.map(add => cardData.find(c => c.name === add.name))
+  const toRemove = removed.map(remove =>
+    cardData.find(c => c.name === remove.name)
   )
+
+  if (toAdd.length || toRemove.length) {
+    if (as === "keep") {
+      dispatch(addCard(toRemove, null, true))
+      dispatch(addCard(toAdd))
+    }
+    if (as === "maybe") dispatch(addCard(toAdd, MAYBE_BOARD))
+
+    dispatch(
+      changeDeck(
+        "suggestions",
+        suggestions.map(s => (s.id !== id ? s : {...s, resolved: as}))
+      )
+    )
+  }
 }
 
 export const giveLike = _ => (dispatch, getState) => {

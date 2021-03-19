@@ -83,7 +83,8 @@ export default connect(
 						style={{
 							background: `url(${feature}) no-repeat center center`,
 							backgroundSize: "cover",
-						}}>
+						}}
+					>
 						<span className="grad" />
 					</div>
 					<div className=" icon flex-row even mini-spaced-bar">
@@ -115,16 +116,25 @@ export default connect(
 						<div className="bar even spaced-bar max">
 							<div className="col">
 								<div className="mini-block bar even mini-spaced-bar">
-									<Link to={`${HOME_DIR}/user/${creator().slug}`}>
-										<h4 className="inverse-button ">{creator().name}</h4>
+									<Link
+										to={`${HOME_DIR}/user/${
+											creator().slug
+										}`}
+									>
+										<h4 className="inverse-button ">
+											{creator().name}
+										</h4>
 									</Link>
 									<p className="asterisk">
-										Created {formattedDate(new Date(created))} - Updated{" "}
-										{ago(new Date(updated))}
+										Created{" "}
+										{formattedDate(new Date(created))} -
+										Updated {ago(new Date(updated))}
 									</p>
 								</div>
 								<div className="meta bar even mini-spaced-bar">
-									<h4>{complete ? "Complete" : "Incomplete"}</h4>
+									<h4>
+										{complete ? "Complete" : "Incomplete"}
+									</h4>
 
 									<div
 										className={`icon-${
@@ -133,11 +143,22 @@ export default connect(
 												: privacy === "Unlisted"
 												? "link"
 												: "globe"
-										}`}>
+										}`}
+									>
 										{privacy}
 									</div>
-									<div className="even bar icon-eye views">{views}</div>
-									<div className="icon-thumbs-up">{likes}</div>
+									<div className="even bar icon-eye views">
+										{views}
+									</div>
+									<div className="icon-thumbs-up">
+										{likes}
+									</div>
+									<div className="icon-comment">
+										{
+											suggestions.filter(s => !s.resolved)
+												.length
+										}
+									</div>
 								</div>
 							</div>
 						</div>
@@ -147,14 +168,24 @@ export default connect(
 						{canEdit() && !editing ? (
 							<button
 								className="icon-pencil"
-								onClick={_ => changeFilters("editing", true)}></button>
+								onClick={_ => changeFilters("editing", true)}
+							></button>
 						) : (
 							<ToolTip
-								message={canLike ? 'Add to "Liked Decks"' : "Sign in to like"}>
+								message={
+									canLike
+										? 'Add to "Liked Decks"'
+										: "Sign in to like"
+								}
+							>
 								<button
 									className={`likes even bar icon-thumbs-up ${
 										canLike || "disabled"
-									} ${user.liked && user.liked.includes(_id) && "selected"}`}
+									} ${
+										user.liked &&
+										user.liked.includes(_id) &&
+										"selected"
+									}`}
 									onClick={giveLike}
 								/>
 							</ToolTip>
@@ -167,9 +198,12 @@ export default connect(
 										: !canSuggest() && !canEdit()
 										? "Log in to like and suggest changes"
 										: "Leave a suggestion"
-								}>
+								}
+							>
 								<button
-									className={`icon-comment ${canSuggest() || "disabled"}`}
+									className={`icon-comment ${
+										canSuggest() || "disabled"
+									}`}
 									onClick={_ =>
 										openModal({
 											title: "Leave a Suggestion",
@@ -183,7 +217,10 @@ export default connect(
 							<button
 								className="icon-download"
 								onClick={_ =>
-									openModal({title: "Download File", content: <DownloadFile />})
+									openModal({
+										title: "Download File",
+										content: <DownloadFile />,
+									})
 								}
 							/>
 						</ToolTip>
@@ -192,7 +229,8 @@ export default connect(
 							<ToolTip message="Delete deck">
 								<button
 									className="inverse-button warning-button icon-trash"
-									onClick={_ => deleteDeck(_id)}></button>
+									onClick={_ => deleteDeck(_id)}
+								></button>
 							</ToolTip>
 						) : null}
 					</div>

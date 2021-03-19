@@ -85,7 +85,8 @@ export default connect(
 		const [open, setOpen] = useState(false)
 		const [listed, setListed] = useState([])
 		const featureImg =
-			feature || (list[0] && list[0].image_uris && list[0].image_uris.art_crop)
+			feature ||
+			(list[0] && list[0].image_uris && list[0].image_uris.art_crop)
 
 		useEffect(
 			_ => {
@@ -105,15 +106,15 @@ export default connect(
 							onClick={_ => {
 								openModal(null)
 								changeDeck("feature", c.image_uris.art_crop)
-							}}>
+							}}
+						>
 							<CardControls card={c} />
 						</div>
 					))}
 			</div>
 		)
-		const comp = completeness({list, format, name, desc}).every(
-			ch => ch.v || ch.s
-		)
+		const comp = completeness({list, format, name, desc})
+		const comped = comp.every(ch => ch.v || ch.s)
 
 		const needsSave = Object.keys(unsaved).length
 
@@ -124,26 +125,30 @@ export default connect(
 					<div className="bar mini-spaced-bar even">
 						{needsSave ? (
 							<p className="asterisk">
-								{needsSave} unsaved {pluralize("change", needsSave)}
+								{needsSave} unsaved{" "}
+								{pluralize("change", needsSave)}
 							</p>
 						) : (
 							<button
 								className="small-button"
-								onClick={_ => changeFilters("editing", false)}>
+								onClick={_ => changeFilters("editing", false)}
+							>
 								Stop Editing
 							</button>
 						)}
 						<ToolTip
 							message={
-								comp
+								comped
 									? ""
 									: "If you save while some conditions are unmet, deck will be marked incomplete."
-							}>
+							}
+						>
 							<button
-								className={`small-button icon-${comp ? "ok" : "attention"} ${
-									needsSave || "disabled"
-								}`}
-								onClick={saveDeck}>
+								className={`small-button icon-${
+									comped ? "ok" : "attention"
+								} ${needsSave || "disabled"}`}
+								onClick={saveDeck}
+							>
 								Save
 							</button>
 						</ToolTip>
@@ -151,7 +156,8 @@ export default connect(
 							className={`warning-button inverse-small-button icon-trash ${
 								needsSave || "disabled"
 							}`}
-							onClick={_ => saveDeck(true)}>
+							onClick={_ => saveDeck(true)}
+						>
 							Discard
 						</button>
 					</div>
@@ -166,8 +172,12 @@ export default connect(
 										style={{display: canEdit() || "none"}}
 										className={`change-img flex-centered`}
 										onClick={_ =>
-											openModal({title: "Featured Card", content: pickFeatured})
-										}>
+											openModal({
+												title: "Featured Card",
+												content: pickFeatured,
+											})
+										}
+									>
 										<span>Change</span>
 									</div>
 									<img src={featureImg} alt="" />
@@ -179,7 +189,9 @@ export default connect(
 								<input
 									type="text"
 									value={name}
-									onChange={e => changeDeck("name", e.target.value)}
+									onChange={e =>
+										changeDeck("name", e.target.value)
+									}
 								/>
 							</div>
 
@@ -206,18 +218,29 @@ export default connect(
 									self={helpTiers[allow_suggestions || 0]}
 									options={helpTiers}
 									callBack={p =>
-										changeDeck("allow_suggestions", helpTiers.indexOf(p))
+										changeDeck(
+											"allow_suggestions",
+											helpTiers.indexOf(p)
+										)
 									}
 								/>
 								<button
-									className={`${suggestions.length || "disabled"}`}
+									className={`${
+										suggestions.length || "disabled"
+									}`}
 									onClick={_ =>
 										openModal({
 											title: "Resolve Suggestions",
 											content: <ResolveSuggestions />,
 										})
-									}>
-									Pending ({suggestions.length})
+									}
+								>
+									Pending (
+									{
+										suggestions.filter(s => !s.resolved)
+											.length
+									}
+									)
 								</button>
 							</div>
 						</div>
@@ -229,9 +252,12 @@ export default connect(
 									onClick={_ =>
 										openModal({
 											title: "Preview Description",
-											content: <Markdown>{desc}</Markdown>,
+											content: (
+												<Markdown>{desc}</Markdown>
+											),
 										})
-									}>
+									}
+								>
 									Preview
 								</button>
 							</span>
@@ -239,8 +265,12 @@ export default connect(
 								rows={15}
 								className="full-width"
 								value={desc}
-								placeholder={"A good description is worth 100 images"}
-								onChange={t => changeDeck("desc", t.target.value)}
+								placeholder={
+									"A good description is worth 100 images"
+								}
+								onChange={t =>
+									changeDeck("desc", t.target.value)
+								}
 							/>
 						</div>
 
@@ -250,9 +280,13 @@ export default connect(
 								<button
 									className="smaller-button"
 									onClick={_ => {
-										const {found, notFound} = interpretForm(listed, cardData)
+										const {found, notFound} = interpretForm(
+											listed,
+											cardData
+										)
 										addCard(found, null, null, true)
-									}}>
+									}}
+								>
 									Apply to list
 								</button>
 							</span>
@@ -266,12 +300,18 @@ export default connect(
 						</div>
 					</div>
 					<div>
-						<h4>Completeness</h4>
-						{completeness({list, format, name, desc}).map(({l, v, f, s}) =>
+						<h4>
+							Completeness ({comp.filter(c => c.v || c.s).length}/
+							{comp.filter(c => !c.s).length})
+						</h4>
+						{comp.map(({l, v, f, s}) =>
 							s ? null : (
 								<ToolTip message={!v ? f : null}>
 									<div
-										className={`asterisk icon-${v ? "ok" : "cancel disabled"}`}>
+										className={`asterisk icon-${
+											v ? "ok" : "cancel disabled"
+										}`}
+									>
 										{l}
 									</div>
 								</ToolTip>
@@ -284,7 +324,7 @@ export default connect(
 	}
 )
 // 		<button
-// 	className={`small-button mini-block ${comp && "icon-ok"} ${
+// 	className={`small-button mini-block ${comped && "icon-ok"} ${
 // 		(comp && !complete) || "disabled"
 // 	}`}
 // 	onClick={_ => comp && changeDeck("complete", true)}>

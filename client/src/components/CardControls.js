@@ -55,6 +55,7 @@ export default withRouter(
 				collect: monitor => ({isDragging: !!monitor.isDragging()}),
 			})
 
+			if (!card) return null
 			if (isDragging) clearTimeout(timer)
 			if (contextLink) {
 				useHistory().push(contextLink)
@@ -74,7 +75,8 @@ export default withRouter(
 					key={(card.key || card.id) + "container"}
 					ref={drag}
 					style={style}
-					className={`card-container ${classes}`}>
+					className={`card-container ${classes}`}
+				>
 					{o}
 				</div>
 			)
@@ -87,10 +89,13 @@ export default withRouter(
 							label: "View Card Page (hold click)",
 							callBack: _ =>
 								setContextLink(
-									`${HOME_DIR}/card/${createSlug(card.name)}/${param || ""}`
+									`${HOME_DIR}/card/${createSlug(
+										card.name
+									)}/${param || ""}`
 								),
 						},
-					]}>
+					]}
+				>
 					{o}
 				</ContextMenu>
 			)
@@ -104,17 +109,23 @@ export default withRouter(
 				<span
 					className="click-events"
 					onClick={click}
-					onMouseDown={_ => setTimer(setTimeout(_ => hold(true), 500))}
+					onMouseDown={_ =>
+						setTimer(setTimeout(_ => hold(true), 500))
+					}
 					onMouseUp={_ => clearTimeout(timer)}
-					onMouseOut={_ => clearTimeout(timer)}>
+					onMouseOut={_ => clearTimeout(timer)}
+				>
 					{o}
 				</span>
 			)
 
 			const withLink = o => (
 				<Link
-					to={`${HOME_DIR}/card/${createSlug(card.name)}/${param || ""}`}
-					onClick={_ => setCardPage(card)}>
+					to={`${HOME_DIR}/card/${createSlug(card.name)}/${
+						param || ""
+					}`}
+					onClick={_ => setCardPage(card)}
+				>
 					{o}
 				</Link>
 			)
@@ -141,9 +152,15 @@ export default withRouter(
 				withContextMenu(
 					param
 						? withLink(
-								withEvents(noHover || card.face_down ? obj : withHover(obj))
+								withEvents(
+									noHover || card.face_down
+										? obj
+										: withHover(obj)
+								)
 						  )
-						: withEvents(noHover || card.face_down ? obj : withHover(obj))
+						: withEvents(
+								noHover || card.face_down ? obj : withHover(obj)
+						  )
 				)
 			)
 		}

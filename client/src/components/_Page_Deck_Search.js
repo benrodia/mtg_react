@@ -59,13 +59,17 @@ export default connect(
 							if (author !== "---") included = d.author === author
 							if (colors.length)
 								included = colors.every(
-									co => d.colors[COLORS("symbol").indexOf(co)] > 0
+									co =>
+										d.colors[COLORS("symbol").indexOf(co)] >
+										0
 								)
 
 							const inc = inc => included && flags.includes(inc)
-							if (inc("followed")) included = followed.includes(d._id)
+							if (inc("followed"))
+								included = followed.includes(d._id)
 							if (inc("complete")) included = d.complete
-							if (inc("helpWanted")) included = d.helpWanted >= 3
+							if (inc("helpWanted"))
+								included = d.allow_suggestions >= 3
 							return included
 						}),
 						name,
@@ -87,7 +91,10 @@ export default connect(
 		const authors = [
 			{name: "---", _id: "---"},
 			...(_id
-				? [users.find(u => u._id === _id), ...users.filter(u => u._id !== _id)]
+				? [
+						users.find(u => u._id === _id),
+						...users.filter(u => u._id !== _id),
+				  ]
 				: users),
 		].orderBy("name")
 
@@ -102,7 +109,9 @@ export default connect(
 							id="deck-name-search"
 							value={name}
 							placeholder={"Search Decks by Name"}
-							onChange={e => changeDeckSearch({name: e.target.value})}
+							onChange={e =>
+								changeDeckSearch({name: e.target.value})
+							}
 						/>
 					</div>
 					<div className="mini-block">
@@ -136,14 +145,17 @@ export default connect(
 							{COLORS("symbol").map((co, i) => (
 								<span
 									key={"color_filter_" + co}
-									className={`mana-button ${colors.includes(co) && "selected"}`}
+									className={`mana-button ${
+										colors.includes(co) && "selected"
+									}`}
 									onClick={_ =>
 										changeDeckSearch({
 											colors: colors.includes(co)
 												? colors.filter(c => c !== co)
 												: [...colors, co],
 										})
-									}>
+									}
+								>
 									{formatManaSymbols(`{${co}}`)}
 								</span>
 							))}
@@ -156,7 +168,8 @@ export default connect(
 								className={`small-button ${
 									flags.includes("complete") && "selected"
 								}`}
-								onClick={_ => handleFlags("complete")}>
+								onClick={_ => handleFlags("complete")}
+							>
 								Complete Decks
 							</button>
 							{followed && followed.length ? (
@@ -164,7 +177,8 @@ export default connect(
 									className={`small-button ${
 										flags.includes("followed") && "selected"
 									}`}
-									onClick={_ => handleFlags("followed")}>
+									onClick={_ => handleFlags("followed")}
+								>
 									Followed Users
 								</button>
 							) : null}
@@ -172,7 +186,8 @@ export default connect(
 								className={`small-button ${
 									flags.includes("helpWanted") && "selected"
 								}`}
-								onClick={_ => handleFlags("helpWanted")}>
+								onClick={_ => handleFlags("helpWanted")}
+							>
 								Help Wanted
 							</button>
 						</div>
@@ -199,7 +214,10 @@ export default connect(
 								]}
 							/>
 						) : (
-							<Loading spinner={null} message="No Decks Found :(" />
+							<Loading
+								spinner={null}
+								message="No Decks Found :("
+							/>
 						)
 					) : (
 						<Loading message="Loading Decks" />

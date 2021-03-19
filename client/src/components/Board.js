@@ -78,19 +78,23 @@ export default connect(
 			inBoard = inBoard.map(c => {
 				return {
 					...c,
-					custom: (custom.filter(cu => cu.name === c.name)[0] || {}).category,
+					custom: (custom.filter(cu => cu.name === c.name)[0] || {})
+						.category,
 				}
 			})
 		}
+		const commanders = list.filter(c => board === MAIN_BOARD && c.commander)
 
 		const CommandHeader = _ => {
-			const commanders = list.filter(c => board === MAIN_BOARD && c.commander)
 			return board === MAIN_BOARD ? (
 				<div className={` ${view}-view`}>
 					<DropSlot
 						field={"Command"}
 						accept={edit ? ItemTypes.CARD : "N/A"}
-						callBack={c => changeDeck("list", chooseCommander(c, list))}>
+						callBack={c =>
+							changeDeck("list", chooseCommander(c, list))
+						}
+					>
 						<h2 className="label">
 							Commander{commanders.length > 1 ? "s" : ""}
 						</h2>
@@ -103,8 +107,15 @@ export default connect(
 									limit={5}
 									placeholder="Choose a Commander"
 									options={legalCommanders(format, cardData)}
-									renderAs={c => <CardControls card={c} cardHeadOnly />}
-									callBack={c => changeDeck("list", chooseCommander(c, list))}
+									renderAs={c => (
+										<CardControls card={c} cardHeadOnly />
+									)}
+									callBack={c =>
+										changeDeck(
+											"list",
+											chooseCommander(c, list)
+										)
+									}
 								/>
 							) : (
 								<Loading
@@ -135,35 +146,52 @@ export default connect(
 
 			const sorted = (val = "", ind = null) => {
 				const filteredCards =
-					ind === null ? inBoard : filterCardType(inBoard, category, val)
+					ind === null
+						? inBoard
+						: filterCardType(inBoard, category, val)
 				inBoard = inBoard.filter(
 					b => !filteredCards.filter(c => c.key === b.key).length
 				)
 
 				const cardStacks = itemizeDeckList(
 					filteredCards.orderBy(
-						(THEN_FILTERS.filter(t => t.name === thenSortBy)[0] || {}).key
+						(
+							THEN_FILTERS.filter(
+								t => t.name === thenSortBy
+							)[0] || {}
+						).key
 					)
 				)
 				const valName =
-					(category.valNames && category.valNames[ind]) || val.toString()
+					(category.valNames && category.valNames[ind]) ||
+					val.toString()
 
 				return !cardStacks.length ? null : (
 					<div
 						key={board + "_" + category.key + "_" + valName}
-						className={`list ${view}-view`}>
+						className={`list ${view}-view`}
+					>
 						<DropSlot
-							accept={sortBy === "Custom" && edit ? ItemTypes.CARD : "N/A"}
+							accept={
+								sortBy === "Custom" && edit
+									? ItemTypes.CARD
+									: "N/A"
+							}
 							field={val}
-							callBack={c => changeCustom(c.name, {category: val})}>
+							callBack={c =>
+								changeCustom(c.name, {category: val})
+							}
+						>
 							<h2 className="label mini-spaced-bar">
 								<span
 									className={`icon ms ms-${
-										category.icon && val.toString().toLowerCase()
+										category.icon &&
+										val.toString().toLowerCase()
 									}`}
 								/>
 								<span>
-									{titleCaps(valName)} ({filteredCards.length})
+									{titleCaps(valName)} ({filteredCards.length}
+									)
 								</span>
 							</h2>
 							<div className={`${view}-inner thinner-pad`}>
@@ -185,13 +213,21 @@ export default connect(
 
 		const renderCardStack = (cards = [], noQuant) => {
 			if (!cards.length) return null
-			const legal = isLegal(cards[0], format)
+			const legal = isLegal(
+				cards[0],
+				format,
+				commanders
+					.map(co => co.color_identity)
+					.flat()
+					.unique()
+			)
 
 			const renderedCard = ({card, cardInd}) => {
 				const imageStyle = {
 					position: !!cardInd && "absolute",
 					marginTop: !!cardInd && cardInd - cards.length - 10 + "rem",
-					marginBottom: cards.length > 1 && !cardInd && cards.length + "rem",
+					marginBottom:
+						cards.length > 1 && !cardInd && cards.length + "rem",
 				}
 				return (
 					<div className="flex-row mini-spaced-bar board-card">
@@ -207,48 +243,62 @@ export default connect(
 								/>
 							</div>
 						)}
-						<span onClick={_ => changeFilters("tune", card)} key={card.key}>
+						<span
+							onClick={_ => changeFilters("tune", card)}
+							key={card.key}
+						>
 							<ContextMenu
 								options={[
 									{
 										label: "View Card Page",
 										callBack: _ =>
 											setContextLink(
-												`${HOME_DIR}/card/${createSlug(card.name)}/info`
+												`${HOME_DIR}/card/${createSlug(
+													card.name
+												)}/info`
 											),
 									},
-									...BOARDS.filter(B => B !== board).map(B => {
-										return {
-											label: `Move to ${B}board`,
-											callBack: _ => changeCard(card, {board: B}),
+									...BOARDS.filter(B => B !== board).map(
+										B => {
+											return {
+												label: `Move to ${B}board`,
+												callBack: _ =>
+													changeCard(card, {
+														board: B,
+													}),
+											}
 										}
-									}),
+									),
 									{
 										label: "Add a Copy",
 										callBack: _ => addCard(card, board),
 									},
 									{
 										label: "Remove a Copy",
-										callBack: _ => addCard(card, null, true),
+										callBack: _ =>
+											addCard(card, null, true),
 									},
 									{
 										label: "Remove All",
 										color: "red",
 										callBack: _ =>
 											addCard(
-												list.filter(l => l.name === card.name),
+												list.filter(
+													l => l.name === card.name
+												),
 												null,
 												true
 											),
 									},
-								]}>
+								]}
+							>
 								<CardControls
 									card={card}
 									quant={noQuant ? null : cards.length}
 									itemType={ItemTypes.CARD}
 									imgSize="small"
 									classes={`
-										${cards.length > legal && cardInd >= legal && "illegal "} 
+										${edit && cards.length > legal && cardInd >= legal && "illegal "} 
 										${(Q(card, focus.key, focus.val) || tune.name === card.name) && "selected"}
 									`}
 									cardHeadOnly={view === "list"}
@@ -268,7 +318,9 @@ export default connect(
 								card: cards[0],
 								cardInd: 0,
 						  })
-						: cards.map((card, cardInd) => renderedCard({card, cardInd}))}
+						: cards.map((card, cardInd) =>
+								renderedCard({card, cardInd})
+						  )}
 				</div>
 			)
 		}
@@ -277,7 +329,10 @@ export default connect(
 			<DropSlot
 				accept={edit ? ItemTypes.CARD : "N/A"}
 				field={board}
-				callBack={c => (c.key ? changeCard(c, {board}) : addCard(c, board))}>
+				callBack={c =>
+					c.key ? changeCard(c, {board}) : addCard(c, board)
+				}
+			>
 				<div className={`board ${board}-board flex-row`}>
 					{loading ? (
 						<Loading message={"Fetching Decklist"} />

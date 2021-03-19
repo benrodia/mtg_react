@@ -25,14 +25,18 @@ const {
 } = utilities
 
 export default connect(
-	({deck: {format, desc, list}, main: {cardData, sets}}) => {
-		return {format, desc, list, cardData, sets}
+	({
+		deck: {format, desc, list, allow_suggestions},
+		main: {cardData, sets},
+	}) => {
+		return {format, desc, list, allow_suggestions, cardData, sets}
 	},
 	actions
 )(
 	({
 		showDiffs,
 		list,
+		allow_suggestions,
 		format,
 		desc,
 		sets,
@@ -43,106 +47,202 @@ export default connect(
 	}) => {
 		const changeInit = {
 			id: uuidv4(),
-			added: null,
-			removed: null,
+			added: [],
+			removed: [],
 			reason: "",
 		}
 
-		const [changes, setChanges] = useState([changeInit])
+		const [changes, setChanges] = useState(changeInit)
+		const {id, author, date, added, removed, reason} = changes
 
-		const updateChanges = (key, id, val) =>
-			setChanges(changes.map(c => (c.id !== id ? c : {...c, [key]: val})))
-		const addChange = _ => setChanges([...changes, changeInit])
-		const removeChange = id => setChanges(changes.filter(c => c.id !== id))
+		const updateChanges = (key, val, concat) =>
+			setChanges({
+				...changes,
+				[key]:
+					concat === true
+						? [...changes[key], val]
+						: concat === false
+						? changes[key].filter(ck => ck.name !== val.name)
+						: val,
+			})
+		// const addChange = _ => setChanges([...changes, changeInit])
+		const removeChange = _ => setChanges(changeInit)
 
-		const allLinesGood = !changes.filter(
-			c => !c.added || !c.removed || c.reason.length < 8 || c.reason.length > 48
-		).length
-		const removable = list.filter(
-			l => !changes.filter(c => c.removed && c.removed.key === l.key).length
-		)
+		const goodLine = c =>
+			(c.added.length || c.removed.length) &&
+			(allow_suggestions > 1 ||
+				(c.added.length === c.removed.length &&
+					c.reason.length >= 16)) &&
+			c.reason.length <= 160
+
+		// const allLinesGood = changes.every(c => goodLine(c))
+
 		return (
 			<div className="changes big-block col spaced-col">
-				{changes.map(({id, added, removed, reason}) => {
-					const goodLine =
-						added && removed && reason.length >= 8 && reason.length <= 49
-					return (
-						<div
-							key={id}
-							className={`section change flex-row spaced-bar ${
-								goodLine && "icon-ok"
-							}`}>
-							<div className="add mini-block col even">
-								<div className="bar start">
-									<div className="icon-plus" />
-									<BasicSearch
-										self={added || "Card to Add"}
-										searchable
-										limit={10}
-										options={cardData}
-										renderAs={c => (
-											<ToolTip card={c}>
-												<span className="thin-pad">{c.name}</span>
-											</ToolTip>
-										)}
-										callBack={c => updateChanges("added", id, c)}
-									/>
-								</div>
-								{!added ? null : <CardControls card={added} />}
-							</div>
-							<div className="remove mini-block col even">
-								<div className="flex-row even">
-									<div className="icon-minus" />
-									<BasicSearch
-										self={removed || "Card to Remove"}
-										options={removable}
-										searchable
-										preview
-										sortBy={"name"}
-										renderAs={c => (
-											<ToolTip card={c}>
-												<span className="thin-pad">{c.name}</span>
-											</ToolTip>
-										)}
-										callBack={c => updateChanges("removed", id, c)}
-									/>
-								</div>
-								{!removed ? null : <CardControls card={removed} />}
-							</div>
-							<div className="reason bar even">
-								<div className="">Why?</div>
-								<input
-									type="text"
-									value={reason}
-									onChange={e => updateChanges("reason", id, e.target.value)}
-								/>
-							</div>
+				<div key={id} className={`section change`}>
+					<div className="block flex-row even spread">
+						<h1>New Suggestion</h1>
+						<div className="bar mini-spaced-bar">
+							<button
+								className={`icon-ok
+										${
+											goodLine({
+												added,
+												removed,
+												reason,
+											}) || "disabled"
+										}
+										`}
+								onClick={_ => {
+									openModal(null)
+									submitSuggestion(changes)
+								}}
+							/>
+
 							<button
 								className="warning-button icon-trash"
-								onClick={_ => removeChange(id)}
+								onClick={removeChange}
 							/>
 						</div>
-					)
-				})}
-				<div className="newChange">
-					{!allLinesGood ? null : (
-						<div className="block bar even mini-spaced-bar">
-							<button onClick={addChange}>
-								Add {changes.length ? "Another" : "Suggestion"}
-							</button>
-							{changes.length ? (
-								<button
-									onClick={_ => {
-										openModal(null)
-										submitSuggestion(changes)
-									}}>
-									Submit {pluralize("Suggestion", changes.length)}
-								</button>
-							) : null}
+					</div>
+					<div key={id} className={`flex-row spaced-bar`}>
+						<div className="add">
+							<div className="flex-row even icon-plus">
+								<BasicSearch
+									placeholder={"Card to Add"}
+									searchable
+									limit={10}
+									options={cardData}
+									renderAs={c => (
+										<ToolTip card={c}>
+											<span className="thin-pad">
+												{c.name}
+											</span>
+										</ToolTip>
+									)}
+									callBack={c =>
+										updateChanges("added", c, true)
+									}
+								/>
+							</div>
+							<div className="bar">
+								{added.map((add, i) => (
+									<div key={add.name + i}>
+										<CardControls card={add} />
+										<button
+											className="smaller-button icon-cancel"
+											onClick={_ =>
+												updateChanges(
+													"added",
+
+													add,
+													false
+												)
+											}
+										>
+											Nevermind
+										</button>
+									</div>
+								))}
+							</div>
 						</div>
-					)}
+						<div className="remove">
+							<div className="flex-row even icon-minus">
+								<BasicSearch
+									placeholder={"Card to Remove"}
+									options={list.filter(
+										l =>
+											!(
+												changes.removed &&
+												changes.removed.key === l.key
+											)
+									)}
+									searchable
+									preview
+									sortBy={"name"}
+									renderAs={c => (
+										<ToolTip card={c}>
+											<span className="thin-pad">
+												{c.name}
+											</span>
+										</ToolTip>
+									)}
+									callBack={c =>
+										updateChanges("removed", c, true)
+									}
+								/>
+							</div>
+							<div className="bar">
+								{removed.map((remove, i) => (
+									<div key={remove.name + i}>
+										<CardControls card={remove} />
+										<button
+											className="smaller-button icon-cancel"
+											onClick={_ =>
+												updateChanges(
+													"removed",
+
+													remove,
+													false
+												)
+											}
+										>
+											Nevermind
+										</button>
+									</div>
+								))}
+							</div>
+						</div>
+						<div className="reason ">
+							<h4>
+								Reason{" "}
+								<span className="asterisk">
+									(
+									{allow_suggestions > 1
+										? "Optional"
+										: "Required"}
+									)
+								</span>
+							</h4>
+							<textarea
+								value={reason}
+								placeholder="A persuasive reason for you to make this change."
+								rows={10}
+								onChange={e =>
+									e.target.value.length <= 160 &&
+									updateChanges("reason", e.target.value)
+								}
+							/>
+							<p
+								className={`asterisk icon-{reason.length >= 16 &&
+						reason.length <= 160?'ok':'cancel disabled'}`}
+							>
+								({reason.length}/160)
+							</p>
+						</div>
+					</div>
 				</div>
 			</div>
 		)
 	}
 )
+// <div className="newChange">
+// 	{!allLinesGood ? null : (
+// 		<div className="block bar even mini-spaced-bar">
+// 			<button onClick={addChange}>
+// 				Add {changes.length ? "Another" : "Suggestion"}
+// 			</button>
+// 			{changes.length ? (
+// 				<button
+// 					onClick={_ => {
+// 						openModal(null)
+// 						submitSuggestion(changes)
+// 					}}
+// 				>
+// 					Submit{" "}
+// 					{pluralize("Suggestion", changes.length)}
+// 				</button>
+// 			) : null}
+// 		</div>
+// 	)}
+// </div>

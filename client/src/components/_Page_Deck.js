@@ -65,11 +65,11 @@ export default connect(
 			{edit ? <DeckInfoEdit /> : <DeckInfo />}
 			<div className="deck-details">
 				<div className="flex-row full-width spread mini-spaced-bar">
-					<div>
+					<div className="side-bar">
 						<CardTuner />
 						<DeckStats />
 					</div>
-					<div className="max">
+					<div className="main-bar max">
 						{edit ? (
 							<span className="quick-search">
 								<BasicSearch
@@ -77,7 +77,9 @@ export default connect(
 									searchable
 									limit={5}
 									placeholder={"Enter card names"}
-									renderAs={c => <CardControls card={c} cardHeadOnly />}
+									renderAs={c => (
+										<CardControls card={c} cardHeadOnly />
+									)}
 									callBack={c => addCard(c, board)}
 								/>
 							</span>
@@ -88,7 +90,9 @@ export default connect(
 						<div className="bar mini-spaced-bar">
 							<div className="section fill">
 								<Markdown>
-									{desc.length ? desc : "No description given. How Sad."}
+									{desc.length
+										? desc
+										: "No description given. How Sad."}
 								</Markdown>
 							</div>
 						</div>

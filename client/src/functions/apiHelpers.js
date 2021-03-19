@@ -38,7 +38,9 @@ export const areFriends = _id => {
 		auth: {user},
 	} = store.getState()
 
-	return user.followed.includes(_id) && creator(_id).followed.includes(user._id)
+	return (
+		user.followed.includes(_id) && creator(_id).followed.includes(user._id)
+	)
 }
 
 export const creator = _id => {
@@ -126,7 +128,11 @@ export const completeness = ({list, format, name, desc}) => {
 	console.log("iden", iden)
 	const legalled = itemizeDeckList(list)
 		.map(it => {
-			const num = isLegal(it[0], format, iden && !iden.length ? ["C"] : iden)
+			const num = isLegal(
+				it[0],
+				format,
+				iden && !iden.length ? ["C"] : iden
+			)
 			if (num < it.length) return `${it.length - num} ${it[0].name}`
 			return null
 		})
@@ -145,7 +151,7 @@ export const completeness = ({list, format, name, desc}) => {
 			s: !SINGLETON(format),
 		},
 		{
-			l: "Legal number of cards",
+			l: SINGLETON(format) ? "Exactly 100 cards" : "At least 60 cards",
 			v:
 				main.length >= (SINGLETON(format) ? 100 : 60) &&
 				main.length <= (SINGLETON(format) ? 100 : 999),
@@ -154,7 +160,7 @@ export const completeness = ({list, format, name, desc}) => {
 			} ${SINGLETON(format) ? 100 : 60} cards, you have ${main.length}`,
 		},
 		{
-			l: "All cards legal",
+			l: `All cards legal in ${titleCaps(format)}`,
 			v: !legalled.length,
 			f: `Contains illegal cards/quantities, remove:
           ${legalled}`,
