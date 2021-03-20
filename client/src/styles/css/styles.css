@@ -458,6 +458,9 @@
 .mini-spaced-grid > *:last-child {
   margin-bottom: 0;
 }
+.gap {
+  margin-bottom: 2rem;
+}
 .pad {
   padding: 1rem;
 }
@@ -1503,7 +1506,6 @@ html {
 .deck-nav {
   background: #020817;
   height: 8rem;
-  margin-bottom: 2rem;
   box-shadow: 1rem solid #020817;
   padding-left: 0.5rem;
 }
@@ -1765,10 +1767,15 @@ html {
 }
 .card-page .result-card .add-button {
   margin-top: -10rem;
+  width: 7.14rem;
+  height: auto;
   position: absolute;
   z-index: 20;
   opacity: 0;
   transition: opacity 0.2s;
+}
+.card-page .result-card .add-button button {
+  position: relative;
 }
 .card-page .result-card:hover .add-button {
   opacity: 1;
@@ -1778,12 +1785,14 @@ html {
   margin-right: 0.25rem;
 }
 .card-page .result-card.big .add-button {
+  margin-top: -20rem;
+  width: 14.28rem;
+}
+.card-page .result-card.big .add-button button {
   height: auto;
   max-height: auto;
-  font-size: 2rem;
   padding: 0.5rem;
-  margin-top: -20rem;
-  margin-left: 10rem;
+  margin-bottom: 1rem;
 }
 .card-page .advanced-search .refine {
   width: 100%;
@@ -1860,8 +1869,12 @@ html {
   background: #4e4352;
 }
 .cart.open .sub-cart-head {
-  margin-top: 10rem;
-  height: calc(100vh - 2.5rem - 10rem);
+  margin-top: 8rem;
+  height: calc(100vh - 2.5rem - 8rem);
+}
+.cart.open .sub-cart-head.deck {
+  margin-top: 15rem;
+  height: calc(100vh - 2.5rem - 15rem);
 }
 .more-less {
   background: linear-gradient(transparent, #4e4352);

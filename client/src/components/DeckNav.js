@@ -82,7 +82,8 @@ export default connect(({main: {sets}, deck, filters: {board, basic}}) => {
 							style={{
 								background: `url(${feature}) no-repeat center center`,
 								backgroundSize: "cover",
-							}}>
+							}}
+						>
 							<span className="grad" />
 						</div>
 						<div className=" icon flex-row even mini-spaced-bar">
@@ -93,14 +94,19 @@ export default connect(({main: {sets}, deck, filters: {board, basic}}) => {
 								startAngle={270}
 							/>
 							<span>
-								<h1 className="sub-title ">{name || "Untitled"}</h1>
+								<h1 className="sub-title ">
+									{name || "Untitled"}
+								</h1>
 								<h4>{titleCaps(format)}</h4>
 							</span>
 						</div>
 					</div>
 					<div className="play-button">
 						<Link to={`${HOME_DIR}/playtest/lobby`}>
-							<button className="icon-play" title="Playtest Deck" />
+							<button
+								className="icon-play"
+								title="Playtest Deck"
+							/>
 						</Link>
 					</div>
 					<DeckInfo />
@@ -109,17 +115,23 @@ export default connect(({main: {sets}, deck, filters: {board, basic}}) => {
 					{canEdit() && !editing ? (
 						<button
 							className="icon-pencil"
-							onClick={_ => changeFilters("editing", true)}></button>
+							onClick={_ => changeFilters("editing", true)}
+						></button>
 					) : null}
 					<button
 						className="icon-download"
 						onClick={_ =>
-							openModal({title: "Download File", content: <DownloadFile />})
-						}></button>
+							openModal({
+								title: "Download File",
+								content: <DownloadFile />,
+							})
+						}
+					></button>
 					{canEdit() ? (
 						<button
 							className="inverse-button warning-button icon-trash"
-							onClick={_ => deleteDeck(_id)}></button>
+							onClick={_ => deleteDeck(_id)}
+						></button>
 					) : null}
 				</div>
 			</div>

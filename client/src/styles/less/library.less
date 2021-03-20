@@ -493,6 +493,10 @@
 	.mini-spaced-bar();
 	.mini-spaced-col();
 }
+
+.gap {
+	margin-bottom: @thin*4;
+}
 .pad {
 	padding: @thin*2;
 }
@@ -611,7 +615,8 @@ button {
 
 @keyframes flip-in {
 	from {
-		transform: perspective(20rem) rotateY(85deg) translateX(@cardW) scale(1.5);
+		transform: perspective(20rem) rotateY(85deg) translateX(@cardW)
+			scale(1.5);
 	}
 	to {
 		transform: none;

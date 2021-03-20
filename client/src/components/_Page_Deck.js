@@ -43,7 +43,10 @@ export default connect(
 
 	useEffect(
 		_ => {
-			if (decks.length && slug !== param) openDeck(param)
+			if (decks.length && slug !== param) {
+				console.log("opening", param, "current", slug)
+				openDeck(param)
+			}
 		},
 		[param, slug, decks]
 	)

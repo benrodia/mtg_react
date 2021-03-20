@@ -8,10 +8,16 @@
 	.result-card {
 		.add-button {
 			margin-top: -@cardH;
+			width: @cardW;
+			height: auto;
 			position: absolute;
 			z-index: 20;
 			opacity: 0;
 			transition: opacity 0.2s;
+			button {
+				// margin: 0;
+				position: relative;
+			}
 		}
 		&:hover {
 			.add-button {
@@ -22,12 +28,15 @@
 			max-width: 15rem;
 			margin-right: @thinner;
 			.add-button {
-				height: auto;
-				max-height: auto;
-				font-size: 2rem;
-				padding: @thin;
 				margin-top: -@cardH*2;
-				margin-left: 10rem;
+				width: @cardW*2;
+				button {
+					height: auto;
+					max-height: auto;
+					// font-size: 2rem;
+					padding: @thin;
+					margin-bottom: 1rem;
+				}
 			}
 		}
 	}
@@ -114,8 +123,12 @@
 			background: @dark;
 		}
 		.sub-cart-head {
-			margin-top: 10rem;
-			height: calc(100vh - @headerH - 10rem);
+			margin-top: 8rem;
+			height: calc(100vh - @headerH - 8rem);
+		}
+		.sub-cart-head.deck {
+			margin-top: 15rem;
+			height: calc(100vh - @headerH - 15rem);
 		}
 	}
 }
