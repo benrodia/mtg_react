@@ -31,6 +31,7 @@ const {
 	listDiffs,
 	canEdit,
 	helpTiers,
+	helpDescs,
 	titleCaps,
 	itemizeDeckList,
 	isLegal,
@@ -223,6 +224,15 @@ export default connect(
 											helpTiers.indexOf(p)
 										)
 									}
+									renderAs={p => (
+										<ToolTip
+											message={[
+												helpDescs[helpTiers.indexOf(p)],
+											]}
+										>
+											{p}
+										</ToolTip>
+									)}
 								/>
 								<button
 									className={`${

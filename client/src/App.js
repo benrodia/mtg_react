@@ -123,7 +123,6 @@ export default connect(
           <Route exact path={`${HOME_DIR}/user/:slug`} component={User} />
           <Route path={`${HOME_DIR}/card/:slug`} component={CardSearch} />
           <Route exact path={`${HOME_DIR}/login`} component={Login} />
-          <Route exact path={`${HOME_DIR}/settings`} component={Settings} />
           <Route exact path={`${HOME_DIR}/combos`} component={Combos} />
           <Route>
             <Redirect to={`${HOME_DIR}/dash`} />
@@ -144,4 +143,5 @@ export default connect(
     )
   }
 )
+// <Route exact path={`${HOME_DIR}/settings`} component={Settings} />
 // <AdvancedCart />

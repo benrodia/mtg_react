@@ -6,18 +6,20 @@ import actions from "../actions"
 import {COLORS} from "../constants/definitions"
 import GameLog from "./GameLog"
 import CounterInput from "./CounterInput"
+import BasicSearch from "./BasicSearch"
 
 export default connect(({playtest, settings: {game_log}}) => {
   return {...playtest, game_log}
 }, actions)(
   ({
     game_log,
+    players,
     deck,
     turn,
-    life,
-    eLife,
     mana,
     active,
+    first_seat,
+    second_seat,
     phase,
     handleCost,
     handleCombat,
@@ -33,7 +35,7 @@ export default connect(({playtest, settings: {game_log}}) => {
     cardState,
   }) => {
     return (
-      <div className="test-controls">
+      <div className="test-controls spread even flex-row">
         <div className="mini-spaced-bar bar">
           <p className="thin-block turn">
             T{turn} | P{active + 1} | {phase}
@@ -46,11 +48,12 @@ export default connect(({playtest, settings: {game_log}}) => {
           </button>
           <button
             className="smaller-button warning-button"
-            onClick={_ => startTest()}>
+            onClick={_ => startTest()}
+          >
             Restart
           </button>
-          {!game_log ? null : <GameLog />}
         </div>
+        {!game_log ? null : <GameLog />}
       </div>
     )
   }

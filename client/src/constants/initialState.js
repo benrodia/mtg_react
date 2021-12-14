@@ -28,9 +28,17 @@ export const INIT_SETTINGS_STATE = {
 	game_log: true,
 	playmat: Object.values(PLAYMATS)[0],
 	random_playmat: true,
-	use_stack: ["Action", "Spell", "Activated Ability", "Triggered Ability"],
+	use_stack: ["Action", "Spell"],
 	mana_tolerance: 3,
-	players: [{type: "HMN", id: uuidv4(), deck: {}, hand: []}],
+	players: [...Array(4)].map((_, i) => {
+		return {
+			type: i > 0 ? "---" : "HMN",
+			id: uuidv4(),
+			deck: {},
+			hand: [],
+		}
+	}),
+
 	player: 0,
 }
 

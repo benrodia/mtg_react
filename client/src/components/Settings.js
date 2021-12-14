@@ -49,19 +49,34 @@ export default connect(({main: {cardData}, settings}) => {
 								<span className="bar even mini-spaced-bar">
 									<CounterInput
 										value={scale}
-										callBack={n => changeSettings("scale", n)}
+										callBack={n =>
+											changeSettings("scale", n)
+										}
 										upper={125}
-										lower={75}>
+										lower={75}
+									>
 										<span
-											className={`icon-minus ${scale <= 75 && "disabled"}`}
+											className={`icon-minus ${
+												scale <= 75 && "disabled"
+											}`}
 											onClick={_ =>
-												changeSettings("scale", Math.max(75, scale - 5))
-											}></span>
+												changeSettings(
+													"scale",
+													Math.max(75, scale - 5)
+												)
+											}
+										></span>
 										<span
-											className={`icon-plus ${scale >= 125 && "disabled"}`}
+											className={`icon-plus ${
+												scale >= 125 && "disabled"
+											}`}
 											onClick={_ =>
-												changeSettings("scale", Math.min(125, scale + 5))
-											}></span>
+												changeSettings(
+													"scale",
+													Math.min(125, scale + 5)
+												)
+											}
+										></span>
 									</CounterInput>
 									%
 								</span>
@@ -72,70 +87,42 @@ export default connect(({main: {cardData}, settings}) => {
 									<span className="bar even mini-spaced-bar">
 										<CounterInput
 											value={darken}
-											callBack={n => changeSettings("darken", n)}
+											callBack={n =>
+												changeSettings("darken", n)
+											}
 											upper={100}
-											lower={0}>
+											lower={0}
+										>
 											<span
-												className={`icon-minus ${darken <= 0 && "disabled"}`}
+												className={`icon-minus ${
+													darken <= 0 && "disabled"
+												}`}
 												onClick={_ =>
-													changeSettings("darken", Math.max(0, darken - 5))
-												}></span>
+													changeSettings(
+														"darken",
+														Math.max(0, darken - 5)
+													)
+												}
+											></span>
 											<span
-												className={`icon-plus ${darken >= 100 && "disabled"}`}
+												className={`icon-plus ${
+													darken >= 100 && "disabled"
+												}`}
 												onClick={_ =>
-													changeSettings("darken", Math.min(100, darken + 5))
-												}></span>
+													changeSettings(
+														"darken",
+														Math.min(
+															100,
+															darken + 5
+														)
+													)
+												}
+											></span>
 										</CounterInput>
 										%
 									</span>
 								</div>
 							</div>
-						</div>
-					</div>
-					<div className="game-settings block">
-						<h2>Playtester Settings</h2>
-						<span className="bar even mini-block mini-spaced-bar thin-indent">
-							<span
-								className={`icon-toggle${game_log ? "-on attention " : "-off"}`}
-								onClick={_ => changeSettings("game_log", !game_log)}></span>
-							<span>Display Game Log</span>
-						</span>
-						<h4 className="block ">Effects Allowed On The Stack </h4>
-						<div className="col thin-indent">
-							{STACKTIONS.map((st, i) => (
-								<span
-									className={`bar even mini-spaced-bar ${
-										use_stack.includes(st) && " alert"
-									}`}>
-									<span
-										key={st}
-										className={`icon-toggle${
-											use_stack.includes(st) ? "-on attention alert" : "-off"
-										}`}
-										onClick={_ =>
-											changeSettings(
-												"use_stack",
-												use_stack.includes(st)
-													? use_stack.filter(s => s !== st)
-													: [...use_stack, st]
-											)
-										}
-									/>
-									<span>{pluralize(st)}</span>
-								</span>
-							))}
-						</div>
-						<h4 className="block">Auto Spend Mana</h4>
-						<div className="col thin-indent">
-							{manaT.map((msg, i) => (
-								<span className="bar even mini-spaced-bar">
-									<span
-										key={manaT[i]}
-										className={`icon${mana_tolerance === i ? "-ok" : "-empty"}`}
-										onClick={_ => changeSettings("mana_tolerance", i)}></span>
-									<span>{msg}</span>
-								</span>
-							))}
 						</div>
 					</div>
 
@@ -146,23 +133,38 @@ export default connect(({main: {cardData}, settings}) => {
 								<button
 									title="If unlocked, this image will be shuffled everytime you open the app."
 									className={`small-button icon-lock${
-										random_playmat ? "-open-alt" : " selected"
+										random_playmat
+											? "-open-alt"
+											: " selected"
 									}`}
 									onClick={_ =>
-										changeSettings(`random_playmat`, !random_playmat)
-									}>
-									{random_playmat ? "Surprise Me" : "Locked Image"}
+										changeSettings(
+											`random_playmat`,
+											!random_playmat
+										)
+									}
+								>
+									{random_playmat
+										? "Surprise Me"
+										: "Locked Image"}
 								</button>
 								<button
 									className={`small-button icon-loop`}
 									onClick={_ =>
-										getArt().then(art => changeSettings("playmat", art))
-									}>
+										getArt().then(art =>
+											changeSettings("playmat", art)
+										)
+									}
+								>
 									Shuffle
 								</button>
 							</div>
 							<div className="inner">
-								<img className={"playmat"} src={playmat} alt={playmat} />
+								<img
+									className={"playmat"}
+									src={playmat}
+									alt={playmat}
+								/>
 							</div>
 						</div>
 					</div>
@@ -174,7 +176,8 @@ export default connect(({main: {cardData}, settings}) => {
 								updateUser({settings})
 								openModal(null)
 								newMsg("Updated Settings!", "success")
-							}}>
+							}}
+						>
 							Save Changes
 						</button>
 						<button
@@ -183,7 +186,8 @@ export default connect(({main: {cardData}, settings}) => {
 								changeSettings("clear")
 								updateUser({settings: INIT_SETTINGS_STATE})
 								openModal(null)
-							}}>
+							}}
+						>
 							Reset to Default
 						</button>
 					</div>

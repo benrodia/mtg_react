@@ -11,21 +11,23 @@ import TestControls from "./TestControls"
 import TesterShortcuts from "./TesterShortcuts"
 import TheStack from "./TheStack"
 import BasicSearch from "./BasicSearch"
+import Loading from "./Loading"
 
 import utilities from "../utilities"
 const {TOKEN_NAME, NUMBER_WORDS} = utilities
 
 export default connect(
-  ({main: {tokens, decks}, settings: {players}, deck: {list}}) => {
-    return {tokens, players, list, decks}
+  ({main: {tokens, decks}, playtest: {players, first_seat, second_seat}}) => {
+    return {tokens, players, first_seat, second_seat}
   },
   actions
 )(
   ({
-    list,
     tokens,
     decks,
     players,
+    first_seat,
+    second_seat,
     startTest,
     spawnToken,
     handleShuffle,
@@ -33,36 +35,36 @@ export default connect(
     setPage,
     openDeck,
   }) => {
-    useEffect(
-      _ => {
-        players.length && startTest()
-      },
-      [players]
-    )
+    useEffect(_ => {
+      startTest()
+    }, [])
 
-    const PlayerRow = ({seat}) => (
-      <div className={`player-row col player-${NUMBER_WORDS[seat + 1]}-row`}>
-        <Zone P2={seat > 0} zone={"Battlefield"} context={"grid"} />
-        <TestCounters P2={seat > 0} />
-        <div className="zones flex-row ">
-          {!list.filter(c => c.commander).length ? null : (
-            <Zone P2={seat > 0} zone={"Command"} context="single" />
-          )}
-          <Zone P2={seat > 0} zone={"Exile"} context="single" header />
-          <Zone P2={seat > 0} zone={"Graveyard"} context="single" header />
-          <Zone P2={seat > 0} zone={"Library"} context="single" header={true} />
-          <Zone P2={seat > 0} zone={"Hand"} context="list" header />
+    const PlayerRow = ({seat}) => {
+      const P2 = seat === second_seat
+      return (
+        <div className={`player-row col player-${P2 ? "two" : "one"}-row`}>
+          <Zone P2={P2} zone={"Battlefield"} context={"grid"} />
+          <TestCounters P2={P2} />
+          <div className="zones flex-row ">
+            {!players[seat].deck.filter(c => c.commander).length ? null : (
+              <Zone P2={P2} zone={"Command"} context="single" />
+            )}
+            <Zone P2={P2} zone={"Exile"} context="single" header />
+            <Zone P2={P2} zone={"Graveyard"} context="single" header />
+            <Zone P2={P2} zone={"Library"} context="single" header={true} />
+            <Zone P2={P2} zone={"Hand"} context="list" header />
+          </div>
         </div>
-      </div>
-    )
+      )
+    }
 
     return (
       <div className="tester ">
         <TesterShortcuts />
         <TestControls />
         <TheStack />
-        {players.length > 1 ? <PlayerRow seat={1} /> : null}
-        <PlayerRow seat={0} />
+        {players.length > 1 ? <PlayerRow seat={second_seat} /> : null}
+        {players.length ? <PlayerRow seat={first_seat} /> : <Loading />}
       </div>
     )
   }

@@ -80,7 +80,12 @@ export default connect(
 						[...Array(7)]
 							.map((_, i) => {
 								if (!i) return "ex."
-								return rnd(3) + 1 + " " + rnd(cardData.map(c => c.name))
+								return (
+									rnd(3) +
+									1 +
+									" " +
+									rnd(cardData.map(c => c.name))
+								)
 							})
 							.join("\n")
 					)
@@ -97,8 +102,12 @@ export default connect(
 		useEffect(
 			_ => {
 				if (list.length) {
-					const feat = list.find(li => getCardFace(li).image_uris.art_crop)
-					setFeature(feat ? getCardFace(feat).image_uris.art_crop : "")
+					const feat = list.find(
+						li => getCardFace(li).image_uris.art_crop
+					)
+					setFeature(
+						feat ? getCardFace(feat).image_uris.art_crop : ""
+					)
 				}
 			},
 			[list]
@@ -108,22 +117,29 @@ export default connect(
 		return (
 			<div className="new-deck-page section">
 				<h1 className="block">New Deck</h1>
-				<div className="block flex-row mini-spaced-bar">
+				<div className="block flex-row mini-spaced-bar fill">
 					<div>
 						<h2>Create From File</h2>
 						<p className="asterisk mini-block">
-							Import a .txt, .dek, or .mwDeck file. Please remember to credit
-							the creator in the description below.
+							Import a .txt, .dek, or .mwDeck file. Please
+							remember to credit the creator in the description
+							below.
 						</p>
 						<ImportFile
 							accept=".txt,.dek,.mwDeck"
-							callBack={({meta: {name, format, creator}, cards, text, err}) => {
+							callBack={({
+								meta: {name, format, creator},
+								cards,
+								text,
+								err,
+							}) => {
 								if (!err) {
 									setList(cards)
 									setListForm(text)
 									if (name) setName(name)
 									if (format) setFormat(format)
-									if (creator) setDesc(`Original Creator: ${creator}`)
+									if (creator)
+										setDesc(`Original Creator: ${creator}`)
 								}
 							}}
 						/>
@@ -165,7 +181,8 @@ export default connect(
 						<ToolTip
 							message={
 								"You can add cards later if you want. Check out the card search to find and add a variety of cards easily."
-							}>
+							}
+						>
 							<span className="asterisk icon-help-circled" />
 						</ToolTip>
 					</span>
@@ -175,7 +192,9 @@ export default connect(
 							searchable
 							limit={10}
 							placeholder={"Enter card names"}
-							renderAs={c => <CardControls card={c} cardHeadOnly />}
+							renderAs={c => (
+								<CardControls card={c} cardHeadOnly />
+							)}
 							callBack={c => {
 								const newD = [...list, c]
 								setList(newD)
@@ -191,7 +210,10 @@ export default connect(
 							// cols={"50"}
 							onChange={e => {
 								const val = e.target.value
-								const {found, notFound} = interpretForm(val, cardData)
+								const {found, notFound} = interpretForm(
+									val,
+									cardData
+								)
 								setListForm(val)
 								setList(found)
 								setUnknown(notFound)
@@ -204,12 +226,16 @@ export default connect(
 								{itemizeDeckList(list).map(cards => (
 									<div
 										key={cards.length + cards[0].id}
-										className="flex-row mini-spaced-bar">
+										className="flex-row mini-spaced-bar"
+									>
 										<div className="col quant-tickers">
 											<div
 												className="button icon-plus"
 												onClick={_ => {
-													const newD = [...list, cards[0]]
+													const newD = [
+														...list,
+														cards[0],
+													]
 													setList(newD)
 													setListForm(textList(newD))
 												}}
@@ -218,9 +244,13 @@ export default connect(
 												className="button icon-minus"
 												onClick={_ => {
 													const removed = list.findIndex(
-														li => li.name === cards[0].name
+														li =>
+															li.name ===
+															cards[0].name
 													)
-													const newD = list.filter((c, i) => i !== removed)
+													const newD = list.filter(
+														(c, i) => i !== removed
+													)
 													setList(newD)
 													setListForm(textList(newD))
 												}}
@@ -259,21 +289,32 @@ export default connect(
 											<span
 												key={c.id}
 												onClick={_ => {
-													setFeature(getCardFace(c).image_uris.art_crop)
+													setFeature(
+														getCardFace(c)
+															.image_uris.art_crop
+													)
 													openModal(null)
-												}}>
+												}}
+											>
 												<CardControls card={c} />
 											</span>
 										))}
 									</div>
 								),
 							})
-						}>
-						<img src={feature} alt={"featured image"} className="icon" />
+						}
+					>
+						<img
+							src={feature}
+							alt={"featured image"}
+							className="icon"
+						/>
 					</div>
 				</div>
 				<button
-					className={`success-button block ${name.length || "disabled"}`}
+					className={`success-button block ${
+						name.length || "disabled"
+					}`}
 					onClick={_ => {
 						if (isAuthenticated) {
 							newDeck(_id, {
@@ -288,7 +329,8 @@ export default connect(
 							openDeck(slug)
 							pageHistory.push(`${HOME_DIR}/deck/${slug}`)
 						}
-					}}>
+					}}
+				>
 					CREATE!
 				</button>
 			</div>

@@ -64,30 +64,41 @@ export default connect(({main: {cardData, fieldData}, filters: {advanced}}) => {
 			<div className="mini-spaced-col">
 				<h2>Generate EDH Deck</h2>
 				<p className="asterisk mini-block">
-					Try this experimental new feature to instantly create a basic
-					Commander deck.
+					Try this experimental new feature to instantly create a
+					basic Commander deck.
 				</p>
-				<div className="bar spaced-bar ">
+				<div className="flex-row spaced-bar ">
 					<div>
-						<h4>1: Choose a Commander</h4>
+						<h4>Choose Commander(s)</h4>
 						<div>
 							<BasicSearch
 								searchable
 								limit={20}
 								options={legalCommanders("commander", cardData)}
-								renderAs={c => <CardControls card={c} cardHeadOnly />}
+								renderAs={c => (
+									<CardControls card={c} cardHeadOnly />
+								)}
 								callBack={c => {
 									if (c.name) {
-										const newd = chooseCommander(c, seedDeck)
-										const commanders = newd.filter(_ => !!_.commander)
+										const newd = chooseCommander(
+											c,
+											seedDeck
+										)
+										const commanders = newd.filter(
+											_ => !!_.commander
+										)
 										setName(
-											commanders.map(co => legendName(co.name)).join(" & ")
+											commanders
+												.map(co => legendName(co.name))
+												.join(" & ")
 										)
 										setSeedTags(
 											commanders
 												.map(c => getTags(c))
 												.flat()
-												.filter(t => t.type !== "faction")
+												.filter(
+													t => t.type !== "faction"
+												)
 										)
 
 										setSeedDeck(newd)
@@ -102,11 +113,12 @@ export default connect(({main: {cardData, fieldData}, filters: {advanced}}) => {
 					</div>
 					<div className={seedCommanders.length || "disabled"}>
 						<span className="bar">
-							<h4>2: Choose Tags to Include</h4>
+							<h4>Choose Tags</h4>
 							<ToolTip
 								message={
 									"Pick around 3-5 tags relevant to your gameplan. Some deck slots are already dedicated to the manabase, ramp, removal, and draw/tutor effects."
-								}>
+								}
+							>
 								<p className="asterisk icon-help-circled" />
 							</ToolTip>
 						</span>
@@ -114,9 +126,9 @@ export default connect(({main: {cardData, fieldData}, filters: {advanced}}) => {
 							searchable
 							preview
 							placeholder={`Card Tags`}
-							options={ADVANCED_GREPS.filter(t => t.type !== "faction").orderBy(
-								"type"
-							)}
+							options={ADVANCED_GREPS.filter(
+								t => t.type !== "faction"
+							).orderBy("type")}
 							labelBy={t => (t ? `${t.type}: ${t.name} ` : "")}
 							callBack={t =>
 								convertTag(t).failed ||
@@ -131,33 +143,36 @@ export default connect(({main: {cardData, fieldData}, filters: {advanced}}) => {
 									<button
 										className="warning-button inverse-button smaller-button icon-cancel"
 										onClick={_ =>
-											setSeedTags(seedTags.filter(({name}) => name !== t.name))
+											setSeedTags(
+												seedTags.filter(
+													({name}) => name !== t.name
+												)
+											)
 										}
 									/>
 								</div>
 							))}
 						</div>
 					</div>
-					<div className={seedTags.length || "disabled"}>
-						<h4>Generate List</h4>
-						<button
-							onClick={_ => {
-								if (seedCommanders.length) {
-									setLoading(true)
-									generateRandomDeck({
-										seedCommanders,
-										seedTags,
-										cardData,
-									}).then(d => {
-										callBack(d)
-										setLoading(false)
-									})
-								}
-							}}>
-							Go!
-						</button>
-					</div>
 				</div>
+				<button
+					className={`full-width ${seedTags.length || "disabled"}`}
+					onClick={_ => {
+						if (seedCommanders.length) {
+							setLoading(true)
+							generateRandomDeck({
+								seedCommanders,
+								seedTags,
+								cardData,
+							}).then(d => {
+								callBack(d)
+								setLoading(false)
+							})
+						}
+					}}
+				>
+					Go!
+				</button>
 				{loading ? <Loading message="Making a deck..." /> : null}
 			</div>
 		)

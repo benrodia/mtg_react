@@ -73,14 +73,13 @@ export default connect(
       <div className="playtest-lobby section spaced-col">
         <h1 className="block">Mtg Grip Playtester</h1>
         <div className="dash-buttons bar mini-spaced-bar">
-          {players.map(
-            (
-              {type, id, deck: {_id, name, feature, list, loading}, hand},
-              i
-            ) => (
+          {players.map(({type, id, deck, hand}, i) => {
+            const {_id, name, feature, list, loading} = deck || {}
+
+            return (
               <div className="mini-spaced-col">
                 <div className="flex-row mini-spaced-bar even">
-                  <h2>P{i + 1}</h2>
+                  <h2 className={type === "---" && "disabled"}>P{i + 1}</h2>
                   <button
                     className="small-button"
                     style={{fontFamily: "monospace"}}
@@ -89,20 +88,10 @@ export default connect(
                         type:
                           types[wrapNum(types.indexOf(type) + 1, types.length)],
                       })
-                    }>
+                    }
+                  >
                     {type}
                   </button>
-                  <button
-                    className={`small-button warning-button icon-cancel ${
-                      players.length > 1 || "disabled"
-                    }`}
-                    onClick={_ =>
-                      changeSettings(
-                        "players",
-                        players.filter(p => p.id !== id)
-                      )
-                    }
-                  />
                 </div>
                 <Tilt>
                   <div
@@ -118,7 +107,8 @@ export default connect(
                         title: "Choose deck to play",
                         content: <DeckSearch noLink />,
                       })
-                    }}>
+                    }}
+                  >
                     {_id ? (
                       <div className="text-shadow">
                         <span>{name}</span>
@@ -130,7 +120,7 @@ export default connect(
                   </div>
                 </Tilt>
                 {_id && !loading ? (
-                  <div className="block">
+                  <div className={`block ${type === "---" && "disabled"}`}>
                     <BasicSearch
                       className={hand.length < 7 || "disabled"}
                       searchable
@@ -158,7 +148,7 @@ export default connect(
                 ) : null}
               </div>
             )
-          )}
+          })}
           {players.length < 4 ? (
             <button
               onClick={_ =>
@@ -166,7 +156,8 @@ export default connect(
                   ...players,
                   {type: "HMN", id: uuid(), deck: {}, hand: []},
                 ])
-              }>
+              }
+            >
               Add Player
             </button>
           ) : null}
@@ -182,10 +173,21 @@ export default connect(
               ? "disabled"
               : ""
           }
-          to={`${HOME_DIR}/playtest/single`}>
+          to={`${HOME_DIR}/playtest/single`}
+        >
           <button>Begin Playtest</button>
         </NavLink>
       </div>
     )
   }
 )
+
+// <button
+//   className={`small-button warning-button icon-cancel`}
+//   onClick={_ =>
+//     changeSettings(
+//       "players",
+//       players.filter(p => p.id !== id)
+//     )
+//   }
+// />

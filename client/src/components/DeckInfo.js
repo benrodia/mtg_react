@@ -30,6 +30,7 @@ const {
 	canSuggest,
 	creator,
 	helpTiers,
+	helpDescs,
 	listDiffs,
 } = utilities
 
@@ -147,17 +148,29 @@ export default connect(
 									>
 										{privacy}
 									</div>
+									<ToolTip
+										message={`Suggestions are ${helpTiers[
+											allow_suggestions
+										].toLowerCase()} on this decklist. ${
+											suggestions.filter(s => !s.resolved)
+												.length
+										} are pending.`}
+									>
+										<div className="icon-comment">
+											{helpTiers[allow_suggestions]} (
+											{
+												suggestions.filter(
+													s => !s.resolved
+												).length
+											}
+											)
+										</div>
+									</ToolTip>
 									<div className="even bar icon-eye views">
 										{views}
 									</div>
 									<div className="icon-thumbs-up">
 										{likes}
-									</div>
-									<div className="icon-comment">
-										{
-											suggestions.filter(s => !s.resolved)
-												.length
-										}
 									</div>
 								</div>
 							</div>

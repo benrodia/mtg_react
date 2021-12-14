@@ -77,23 +77,41 @@ export default connect(({playtest, settings: {game_log}}) => {
         <div className="library-controls bar">
           <button
             className={"smaller-button"}
-            onClick={_ => handleShuffle(false)}>
+            onClick={_ => handleShuffle(false)}
+          >
             Shuffle
           </button>
           <div className="lookBtn">
             <button
               className={"smaller-button warning-button"}
               onClick={_ => gameState("look", 0)}
-              style={{display: look || "none"}}>
+              style={{display: look || "none"}}
+            >
               X
             </button>
             <button
               className={"smaller-button"}
-              onClick={_ => gameState("look", 1, true)}>
+              onClick={_ => gameState("look", 1, true)}
+            >
               Top {look ? look : ""}
             </button>
           </div>
         </div>
+        <BasicSearch
+          self={players[P2 ? second_seat : first_seat]}
+          labelBy={p => `P${p.id + 1}: ${p.name}`}
+          options={players.filter(
+            p => p.id !== (P2 ? second_seat : first_seat)
+          )}
+          callBack={p => {
+            gameState(P2 ? "second_seat" : "first_seat", p.id)
+            if (p.id === (P2 ? first_seat : second_seat))
+              gameState(
+                P2 ? "first_seat" : "second_seat",
+                players.find(pl => pl.id !== p.id).id
+              )
+          }}
+        />
       </div>
     )
   }

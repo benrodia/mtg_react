@@ -96,6 +96,7 @@ const drawHands = player => (dispatch, getState) => {
 
   let kept = 0
   const deal = (num = 7, to = player) => {
+    console.log("deal", to, getState().playtest.players)
     const {deck} = getState().playtest.players[to]
     const rand = [...deck]
       .filter(c => !c.commander)

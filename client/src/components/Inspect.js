@@ -120,7 +120,9 @@ export default connect(({// auth: {
 					fetch(rulings_uri)
 						.then(response => {
 							if (!response.ok)
-								throw new Error("HTTP status " + response.status)
+								throw new Error(
+									"HTTP status " + response.status
+								)
 							return response.json()
 						})
 						.then(data => setRulings(data.data))
@@ -146,7 +148,9 @@ export default connect(({// auth: {
 
 				{type_line.includes("Land") ? null : (
 					<span className={"bar even"}>
-						<h3 className="mini-spaced-bar">{formatManaSymbols(mana_cost)}</h3>
+						<h3 className="mini-spaced-bar">
+							{formatManaSymbols(mana_cost)}
+						</h3>
 						<span className="cmc">({cmc})</span>
 					</span>
 				)}
@@ -168,7 +172,11 @@ export default connect(({// auth: {
 						src={
 							!sets.length
 								? null
-								: (sets.filter(s => s.name === set_name)[0] || {}).icon_svg_uri
+								: (
+										sets.filter(
+											s => s.name === set_name
+										)[0] || {}
+								  ).icon_svg_uri
 						}
 					/>{" "}
 					<span>{set_name} — </span>
@@ -179,7 +187,10 @@ export default connect(({// auth: {
 					<div className="col-2 mini-spaced-col">
 						{Object.entries(legalities).map(([n, l]) => (
 							<ToolTip
-								message={titleCaps(`${l.replace("not_", "il")} in ${n}`)}>
+								message={titleCaps(
+									`${l.replace("not_", "il")} in ${n}`
+								)}
+							>
 								<div
 									className={`icon-${
 										l === "legal"
@@ -191,7 +202,8 @@ export default connect(({// auth: {
 											: l === "restricted"
 											? "attention yellow"
 											: null
-									}`}>
+									}`}
+								>
 									{titleCaps(n)}
 								</div>
 							</ToolTip>
@@ -203,14 +215,22 @@ export default connect(({// auth: {
 		const Rulings = _ => (
 			<div className="rulings">
 				{!rulings.length ? (
-					<Loading anim=" " spinner=" " subMessage="No Rulings Found" />
+					<Loading
+						anim=" "
+						spinner=" "
+						subMessage="No Rulings Found"
+					/>
 				) : (
 					<>
 						<h3 className="big-block">
-							{rulings.length} {pluralize("Ruling", rulings.length)}
+							{rulings.length}{" "}
+							{pluralize("Ruling", rulings.length)}
 						</h3>
 						{rulings.map(r => (
-							<div key={r.comment} className="ruling mini-spaced-col">
+							<div
+								key={r.comment}
+								className="ruling mini-spaced-col"
+							>
 								{formatText(r.comment)}
 								<p className="asterisk thin-indent">
 									— {r.source} {reorderDate(r.published_at)}
@@ -234,15 +254,21 @@ export default connect(({// auth: {
 						{cardData.length ? (
 							similar.length ? (
 								similar.map(({card, weight}) => {
-									const added = Q(cart, "name", card.name).length
+									const added = Q(cart, "name", card.name)
+										.length
 									return (
 										<div className="result-card">
-											<CardControls key={id} card={card} param={param} />
+											<CardControls
+												key={id}
+												card={card}
+												param={param}
+											/>
 											<button
 												className={`add-button icon-plus ${
 													added && "icon-ok selected"
 												}`}
-												onClick={_ => addCart(card)}>
+												onClick={_ => addCart(card)}
+											>
 												{added ? added : ""}
 											</button>
 										</div>
@@ -265,30 +291,54 @@ export default connect(({// auth: {
 					<div className="col">
 						<div
 							onClick={_ =>
-								openModal({title: name, content: <img src={img} />})
-							}>
+								openModal({
+									title: name,
+									content: <img src={img} />,
+								})
+							}
+						>
 							<Card card={{...target, flipped}} imgSize={"png"} />
 						</div>
 						{!card_faces ? null : (
-							<button className="small-button" onClick={_ => flip(!flipped)}>
+							<button
+								className="small-button"
+								onClick={_ => flip(!flipped)}
+							>
 								Flip
 							</button>
 						)}
 						<button
 							className="add-button icon-plus"
-							onClick={_ => addCart(target)}>
+							onClick={_ => addCart(target)}
+						>
 							Add
 						</button>
 						<div className="links bar  mini-spaced-bar">
 							<a target="_blank" href={links.gatherer}>
-								<button className="inverse-small-button">Gatherer</button>
+								<button className="inverse-small-button">
+									Gatherer
+								</button>
 							</a>
 							<a target="_blank" href={links.mtgtop8}>
-								<button className="inverse-small-button">MTGtop8</button>
+								<button className="inverse-small-button">
+									MTGtop8
+								</button>
 							</a>
 							<a target="_blank" href={links.tcgplayer_decks}>
 								<button className="inverse-small-button">
 									TCGplayer Decks
+								</button>
+							</a>
+							<a
+								target="_blank"
+								href={`http://www.mythicspoiler.com/${set}/cards/${name
+									.toLowerCase()
+									.replace(", ", "")
+									.replace(" ", "")
+									.replace("'", "")}.html`}
+							>
+								<button className="inverse-small-button">
+									Mythicspoiler
 								</button>
 							</a>
 						</div>
@@ -301,8 +351,11 @@ export default connect(({// auth: {
 									src={
 										!sets.length
 											? null
-											: (sets.filter(s => s.name === set_name)[0] || {})
-													.icon_svg_uri
+											: (
+													sets.filter(
+														s => s.name === set_name
+													)[0] || {}
+											  ).icon_svg_uri
 									}
 								/>
 								<h4>{set.toUpperCase()}</h4>
@@ -327,8 +380,13 @@ export default connect(({// auth: {
 												src={
 													!sets.length
 														? null
-														: (sets.filter(s => s.name === p.set_name)[0] || {})
-																.icon_svg_uri
+														: (
+																sets.filter(
+																	s =>
+																		s.name ===
+																		p.set_name
+																)[0] || {}
+														  ).icon_svg_uri
 												}
 											/>
 											<span>{p.set_name}</span>
@@ -339,7 +397,8 @@ export default connect(({// auth: {
 								prints.map(p => (
 									<button
 										className={id === p.id && "selected"}
-										onClick={_ => setTarget(p)}>
+										onClick={_ => setTarget(p)}
+									>
 										<Icon
 											key={p.id}
 											name={p.set_name}
@@ -348,8 +407,13 @@ export default connect(({// auth: {
 											src={
 												!sets.length
 													? null
-													: (sets.filter(s => s.name === p.set_name)[0] || {})
-															.icon_svg_uri
+													: (
+															sets.filter(
+																s =>
+																	s.name ===
+																	p.set_name
+															)[0] || {}
+													  ).icon_svg_uri
 											}
 										/>
 									</button>
@@ -362,19 +426,22 @@ export default connect(({// auth: {
 							<NavLink
 								className="tab"
 								activeClassName="selected"
-								to={`${HOME_DIR}/card/${slug}/info`}>
+								to={`${HOME_DIR}/card/${slug}/info`}
+							>
 								Info
 							</NavLink>
 							<NavLink
 								className="tab"
 								activeClassName="selected"
-								to={`${HOME_DIR}/card/${slug}/rulings`}>
+								to={`${HOME_DIR}/card/${slug}/rulings`}
+							>
 								Rulings
 							</NavLink>
 							<NavLink
 								className="tab"
 								activeClassName="selected"
-								to={`${HOME_DIR}/card/${slug}/related`}>
+								to={`${HOME_DIR}/card/${slug}/related`}
+							>
 								Related
 							</NavLink>
 						</div>

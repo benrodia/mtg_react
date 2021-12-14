@@ -67,7 +67,13 @@ export const illegalLayouts = [
 	"art_series",
 ]
 
-export const helpTiers = ["No", "Strict", "Yes", "Wanted"]
+export const helpTiers = ["Disabled", "Strict", "Allowed", "Wanted"]
+export const helpDescs = [
+	"Don't allow suggestions.",
+	"Any input must have a cut for every suggested addition, as well as a reason for the change.",
+	"Allow any type of suggestion: Cuts, additions, just comments, anything.",
+	'Advertise that you want input on your list. (Users can filter "Help Wanted" in the deck search to quickly find you.)',
+]
 
 export const STACKTIONS = [
 	"Action",
@@ -548,7 +554,9 @@ export const FILTER_TERMS = [
 		name: "Rarity",
 		key: "rarity",
 		vals: ["mythic", "rare", "uncommon", "common"],
-		fill: ["mythic", "rare", "uncommon", "common"].map(r => RARITY_COLOR[r]),
+		fill: ["mythic", "rare", "uncommon", "common"].map(
+			r => RARITY_COLOR[r]
+		),
 	},
 ]
 export const THEN_FILTERS = [

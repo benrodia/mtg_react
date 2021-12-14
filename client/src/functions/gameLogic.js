@@ -138,7 +138,12 @@ export function tutorableCards(card, deck) {
 
 export function clickPlace(card, inZone, toDest, dblclick) {
   let dest = card.zone
-  let col, row
+  let col,
+    row = 0
+
+  // const slot = r => {
+
+  // }
 
   if (card.zone === "Library") dest = "Hand"
   else if (dblclick && card.zone === "Battlefield") dest = "Graveyard"
@@ -149,15 +154,17 @@ export function clickPlace(card, inZone, toDest, dblclick) {
   dest = toDest || dest
   if (dest == card.zone) return {card: null}
   else {
+    col = col || inZone.filter(c => c.row === row).length % 8 // REPLACE 8 with dynamic cols
     if (Q(card, "type_line", "Creature")) row = 1
     else if (MANA.source(card)) row = 0
-    else if (Q(card, "type_line", "Artifact")) row = 2
-    else if (Q(card, "type_line", ["Enchantment", "Planeswalker"])) row = 2
-    else if (Q(card, "type_line", "Land")) row = 0
+    else if (
+      Q(card, "type_line", ["Artifact", "Enchantment", "Planeswalker"])
+    ) {
+      row = 1
+      col = 8 - (inZone.filter(c => c.row === row).length % 8)
+    }
 
-    col = col || inZone.filter(c => c.row === row).length % 8 // REPLACE 8 with dynamic cols
-
-    return {card: card, dest: dest, col: col, row: row}
+    return {card, dest, col, row}
   }
 }
 

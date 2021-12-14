@@ -38,7 +38,6 @@ export default connect(
     players,
     first_seat,
     second_seat,
-
     cols,
     hideHand,
     context,
@@ -135,7 +134,8 @@ export default connect(
               : [ItemTypes.CARD, ItemTypes.COMMANDER]
           }
           callBack={card => moveCard({card, dest: zone, col, row})}
-          className={""}>
+          className={""}
+        >
           {cardStack[0] && cardStack.map((c, i) => renderCard(c, i))}
         </DropSlot>
       )
@@ -153,19 +153,22 @@ export default connect(
       <div className="library-controls bar">
         <button
           className={"smaller-button"}
-          onClick={_ => handleShuffle(false)}>
+          onClick={_ => handleShuffle(false)}
+        >
           Shuffle
         </button>
         <div className="lookBtn">
           <button
             className={"smaller-button warning-button"}
             onClick={_ => gameState("look", 0, null, p)}
-            style={{display: look || "none"}}>
+            style={{display: look || "none"}}
+          >
             X
           </button>
           <button
             className={"smaller-button"}
-            onClick={_ => gameState("look", 1, true, p)}>
+            onClick={_ => gameState("look", 1, true, p)}
+          >
             Top {look ? look : ""}
           </button>
         </div>
@@ -191,7 +194,6 @@ export default connect(
             />
           )}
         </div>
-        {zone === "Library" ? <LibCont /> : null}
         {context !== "grid" ? (
           inner
         ) : (
@@ -204,6 +206,7 @@ export default connect(
     )
   }
 )
+// {zone === "Library" ? <LibCont /> : null}
 
 // {tutorable.from !== zone ? null : (
 //   <BasicSearch

@@ -74,7 +74,8 @@ export default connect(
               <NavLink
                 to={`${HOME_DIR}/dash`}
                 className={"title light-text tab bar pad"}
-                activeClassName={"selected"}>
+                activeClassName={"selected"}
+              >
                 <Icon src={logo} className="logo" />
               </NavLink>
             </ToolTip>
@@ -87,7 +88,8 @@ export default connect(
               <NavLink
                 className="tab"
                 to={`${HOME_DIR}/${link}`}
-                activeClassName={"selected"}>
+                activeClassName={"selected"}
+              >
                 {label}
               </NavLink>
             </ToolTip>
@@ -107,19 +109,19 @@ export default connect(
               <button className={`inver-button smaller-button`}>Log In</button>
             </Link>
           )}
-          <ToolTip message={`Display and Playtester settings`}>
-            <NavLink
-              to={`${HOME_DIR}/settings`}
-              className={"icon-cog light-text  tab"}
-              activeClassName={"selected"}
-            />
-          </ToolTip>
         </div>
       </nav>
     )
   }
 )
 
+// <ToolTip message={`Display and Playtester settings`}>
+//   <NavLink
+//     to={`${HOME_DIR}/settings`}
+//     className={"icon-cog light-text  tab"}
+//     activeClassName={"selected"}
+//   />
+// </ToolTip>
 // {_id ? (
 //   <>
 //     <NavLink
