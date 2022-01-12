@@ -9,7 +9,7 @@
     "@testing-library/user-event": "^7.1.2",
     "axios": "^0.19.2",
     "bootstrap": "^4.5.0",
-    "markdown-it": "^11.0.0",
+    "markdown-it": "^12.3.2",
     "markdown-to-jsx": "^6.11.4",
     "match-sorter": "^4.1.0",
     "prop-types": "^15.7.2",
